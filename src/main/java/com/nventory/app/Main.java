@@ -1,5 +1,7 @@
 package com.nventory.app;
+import com.nventory.userInterfaces.MainViewPanel;
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -7,10 +9,22 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
+        MainViewPanel root = new MainViewPanel();
+
+        //Tamaño de la pantalla inicial
+        Scene scene = new Scene(root, 854, 480);
+        scene.getStylesheets().add(getClass().getResource("/styles/estilosMainView.css").toExternalForm());
+
+        //Título de la pantalla
+        primaryStage.setTitle("Menú Principal");
+
+        //Mostrar pantalla
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
-        //launch(args);
-        System.out.println("andando");
+        launch(args);
+        //System.out.println("andando");
     }
 }

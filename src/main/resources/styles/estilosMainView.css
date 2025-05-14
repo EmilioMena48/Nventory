@@ -1,0 +1,65 @@
+.root {
+    -fx-padding: 15;
+    -fx-background-color: #f4f6f7;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+/* Header */
+.cajaHeaderEstilo {
+    -fx-padding: 10;
+}
+
+.textoHeaderEstilo {
+    -fx-spacing: 1.5;
+}
+
+.tituloHeader {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-font-family: "Bernard MT Condensed";
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.5, 0, 2);
+}
+
+.subtituloHeader {
+    -fx-font-size: 20px;
+    -fx-text-fill: #2c3e50;
+    -fx-font-family: "Bodoni MT";
+}
+
+.sombreadoHeader {
+    -fx-background-color: white;
+    -fx-border-color: #ccc;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.5, 0, 2);
+}
+
+/* Body */
+.botonModulo {
+    /*-fx-background-color: #3498db;*/
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+    -fx-pref-width: 160;
+    -fx-pref-height: 140;
+}
+
+.cajaPrincipal {
+    -fx-alignment: center;
+    -fx-padding: 10;
+}
+
+.cajaModulo{
+    -fx-alignment: center;
+    -fx-padding: 2;
+}
+
+.textoModulo {
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-font-size: 16px;
+    -fx-font-family: "Arial";
+}
+
