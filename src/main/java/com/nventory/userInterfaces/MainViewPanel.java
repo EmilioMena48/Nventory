@@ -1,24 +1,30 @@
 package com.nventory.userInterfaces;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-public class MainViewPanel  extends VBox {
+public class MainViewPanel  extends BorderPane {
 
-    //Controles Header
+    //Elementos Header
     Label titulo = new Label("Nventory");
     Label subtitulo = new Label("Prototipo");
 
     Image imagenTienda = new Image(getClass().getResource("/images/icono-principal.png").toExternalForm());
     ImageView imagenTiendaView = new ImageView(imagenTienda);
 
-    //Controles Body
+    HBox cajaHeader = new HBox(10);
+    VBox textoHeader = new VBox(10);
+
+    //Elementos Menú
     Label textoArticulo = new Label("Maestro de Artículos");
     Label textoProveedor = new Label("Proveedores");
     Label textoOrdenCompra = new Label("Orden de Compra");
@@ -41,22 +47,29 @@ public class MainViewPanel  extends VBox {
     private final Button botonOrdenCompra= new Button();
     private final Button botonVentas = new Button();
 
+    VBox cajaArticulo = new VBox(5);
+    VBox cajaProveedor = new VBox(5);
+    VBox cajaOrdenCompra = new VBox(5);
+    VBox cajaVenta = new VBox(5);
+    HBox cajaMenu = new HBox(10);
+
+    //Elementos body
+    VBox contenidoBody = new VBox();
+
+    Image imagenVolver = new Image(getClass().getResource("/images/icono-volver.png").toExternalForm());
+    ImageView imagenVolverView = new ImageView(imagenVolver);
+
+    Label textoVolver = new Label("Volver");
+
+    HBox cajaVolver = new HBox(2);
+
+    private final Button botonVolver= new Button();
 
     public MainViewPanel() {
 
-        //----------Espaciado y relleno de la pantalla-----------------------------------------------------------------------
-        setSpacing(20);
-        setPadding(new Insets(20));
-
-
-        //----------Header-----------------------------------------------------------------------
-        HBox cajaHeader = new HBox(10);
-
-        VBox textoHeader = new VBox(10);
+        //----------Header-------------------------------------------------------------
         textoHeader.getChildren().addAll(titulo, subtitulo);
-
         cajaHeader.getChildren().addAll(imagenTiendaView, textoHeader);
-
 
         //----------Estilos Header-----------------------------------------------------------------------
         titulo.getStyleClass().add("tituloHeader");
@@ -65,31 +78,18 @@ public class MainViewPanel  extends VBox {
         cajaHeader.getStyleClass().add("sombreadoHeader");
         cajaHeader.getStyleClass().add("cajaHeaderEstilo");
 
-
-        //----------Body-----------------------------------------------------------------------
-        VBox cajaArticulo = new VBox(5);
+        //----------Menú-----------------------------------------------------------------------
         cajaArticulo.getChildren().addAll(imagenArticuloView, textoArticulo);
-
-        VBox cajaProveedor = new VBox(5);
         cajaProveedor.getChildren().addAll(imagenProveedorView, textoProveedor);
-
-        VBox cajaOrdenCompra = new VBox(5);
         cajaOrdenCompra.getChildren().addAll(imagenOrdenCompraView, textoOrdenCompra);
-
-        VBox cajaVenta = new VBox(5);
         cajaVenta.getChildren().addAll(imagenVentaView, textoVenta);
-
         botonArticulo.setGraphic(cajaArticulo);
         botonProveedor.setGraphic(cajaProveedor);
         botonOrdenCompra.setGraphic(cajaOrdenCompra);
         botonVentas.setGraphic(cajaVenta);
+        cajaMenu.getChildren().addAll(botonArticulo, botonProveedor, botonOrdenCompra, botonVentas);
 
-        HBox cajaBody = new HBox(10);
-        cajaBody.getChildren().addAll(botonArticulo, botonProveedor, botonOrdenCompra, botonVentas);
-
-
-
-        //----------Estilos Body-----------------------------------------------------------------------
+        //----------Estilos Menú-----------------------------------------------------------------------
         textoArticulo.getStyleClass().add("textoModulo");
         textoProveedor.getStyleClass().add("textoModulo");
         textoOrdenCompra.getStyleClass().add("textoModulo");
@@ -110,9 +110,9 @@ public class MainViewPanel  extends VBox {
         cajaOrdenCompra.getStyleClass().add("cajaModulo");
         cajaVenta.getStyleClass().add("cajaModulo");
 
-        cajaBody.getStyleClass().add("cajaPrincipal");
+        cajaMenu.getStyleClass().add("cajaMenu");
 
-        //----------Poner funcionalidad de los botones-----------------------------------------------------------------------
+        //----------Poner funcionalidad de los botones del menu-----------------------------------------------------------------------
         botonArticulo.setOnAction(e -> {
             mostrarAlerta("hola");
         });
@@ -123,23 +123,49 @@ public class MainViewPanel  extends VBox {
             mostrarAlerta("hola");
         });
         botonVentas.setOnAction(e -> {
-            mostrarAlerta("hola");
+            mostrarVentas();
         });
 
+        //----------Botón volver-------------------------------------------------------------
+        textoVolver.getStyleClass().add("textoVolverEstilo");
+        cajaVolver.getStyleClass().add("cajaVolverEstilo");
+        imagenVolverView.setFitWidth(20);
+        imagenVolverView.setFitHeight(20);
+        cajaVolver.getChildren().addAll(imagenVolverView, textoVolver);
+        botonVolver.setGraphic(cajaVolver);
+        botonVolver.getStyleClass().add("botonVolverEstilo");
 
-        //----------Integrar las dos cajas a la pantalla-----------------------------------------------------------------------
-        getChildren().addAll(cajaHeader, cajaBody);
+        botonVolver.setOnAction(e -> {
+            mostrarMenu();
+        });
+
+        //----------Header y body-------------------------------------------------------------
+        contenidoBody.setStyle("-fx-padding: 10px 0 10px 0;");
+
+        setTop(cajaHeader);
+        setCenter(contenidoBody);
+
+        //----------Se muestra el menú en el body por defecto-------------------------------------------------------------
+        mostrarMenu();
     }
 
+    private void mostrarMenu() {
+        contenidoBody.getChildren().setAll(cajaMenu);
+    }
 
+    private void mostrarVentas() {
+        contenidoBody.getChildren().setAll(botonVolver, new VentaPanel());
+        botonVolver.setAlignment(Pos.TOP_LEFT);
+    }
 
     //----------Método para probar los botones-----------------------------------------------------------------------
-    private void mostrarAlerta(String mensaje) {
+    private void mostrarAlerta (String mensaje){
         Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
         alerta.setTitle("Advertencia");
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
+
 
 }
