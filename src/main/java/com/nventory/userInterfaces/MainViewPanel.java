@@ -117,7 +117,7 @@ public class MainViewPanel  extends BorderPane {
             mostrarAlerta("hola");
         });
         botonProveedor.setOnAction(e -> {
-            mostrarAlerta("hola");
+            mostrarProveedores();
         });
         botonOrdenCompra.setOnAction(e -> {
             mostrarAlerta("hola");
@@ -155,6 +155,11 @@ public class MainViewPanel  extends BorderPane {
 
     private void mostrarVentas() {
         contenidoBody.getChildren().setAll(botonVolver, new VentaPanel());
+        botonVolver.setAlignment(Pos.TOP_LEFT);
+    }
+
+    private void mostrarProveedores() {
+        contenidoBody.getChildren().setAll(botonVolver, new ProveedorPanel());
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 
