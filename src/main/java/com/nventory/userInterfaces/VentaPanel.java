@@ -1,7 +1,6 @@
 package com.nventory.userInterfaces;
 
-import com.nventory.pruebasEmilio.DetallePrueba;
-import com.nventory.pruebasEmilio.VentaPrueba;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
