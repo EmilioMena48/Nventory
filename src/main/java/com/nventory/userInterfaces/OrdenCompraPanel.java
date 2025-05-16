@@ -3,10 +3,15 @@ package com.nventory.userInterfaces;
 import com.nventory.controller.OrdenDeCompraController;
 import com.nventory.DTO.OrdenDeCompraDTO;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 
 public class OrdenCompraPanel extends BorderPane {
@@ -23,17 +28,23 @@ public class OrdenCompraPanel extends BorderPane {
     private void inicializarUI() {
         tablaOrdenes = new TableView<>();
 
-        TableColumn<OrdenDeCompraDTO, Long> colId = new TableColumn<>("ID");
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        TableColumn<OrdenDeCompraDTO, Long> colId = new TableColumn<>("Código");
+        colId.setCellValueFactory(new PropertyValueFactory<>("codigo"));
 
         TableColumn<OrdenDeCompraDTO, String> colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
+        TableColumn<OrdenDeCompraDTO, String> colProveedor = new TableColumn<>("Proveedor");
+        colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
+
+        TableColumn<OrdenDeCompraDTO, String> colTotal = new TableColumn<>("Total");
+        colTotal.setCellValueFactory(new PropertyValueFactory<>("totalOrden"));
+
         TableColumn<OrdenDeCompraDTO, Void> colAcciones = new TableColumn<>("Acciones");
         colAcciones.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEnviar = new Button("Enviar");
+            private final Button btnEnviar = new Button("Enviar al Proveedor");
             private final Button btnCancelar = new Button("Cancelar");
-            private final Button btnRecibir = new Button("Recibir");
+            private final Button btnRecibir = new Button("Recibir Mercadería");
             private final HBox container = new HBox(5, btnEnviar, btnCancelar, btnRecibir);
 
             {
@@ -65,11 +76,13 @@ public class OrdenCompraPanel extends BorderPane {
             }
         });
 
-        tablaOrdenes.getColumns().addAll(colId, colEstado, colAcciones);
+        tablaOrdenes.getColumns().addAll(colId, colEstado, colProveedor, colTotal, colAcciones);
         setCenter(tablaOrdenes);
     }
 
     private void cargarDatos() {
-        //Llamar al controller para traer los DTOs de OrdenesDeCompra
+        List<OrdenDeCompraDTO> ordenes = controller.obtenerTodasOrdenesDeCompra();
+        ObservableList<OrdenDeCompraDTO> observableList = FXCollections.observableArrayList(ordenes);
+        tablaOrdenes.setItems(observableList);
     }
 }
