@@ -1,5 +1,6 @@
 package com.nventory.userInterfaces;
 
+import com.nventory.controller.OrdenDeCompraController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -164,7 +165,8 @@ public class MainViewPanel  extends BorderPane {
     }
 
     private void mostrarOrdenCompra() {
-        contenidoBody.getChildren().setAll(botonVolver, new OrdenCompraPanel());
+        OrdenDeCompraController controller = new OrdenDeCompraController();
+        contenidoBody.getChildren().setAll(botonVolver, new OrdenCompraPanel(controller));
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 
