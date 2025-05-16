@@ -120,7 +120,7 @@ public class MainViewPanel  extends BorderPane {
             mostrarProveedores();
         });
         botonOrdenCompra.setOnAction(e -> {
-            mostrarAlerta("hola");
+            mostrarOrdenCompra();
         });
         botonVentas.setOnAction(e -> {
             mostrarVentas();
@@ -160,6 +160,11 @@ public class MainViewPanel  extends BorderPane {
 
     private void mostrarProveedores() {
         contenidoBody.getChildren().setAll(botonVolver, new ProveedorPanel());
+        botonVolver.setAlignment(Pos.TOP_LEFT);
+    }
+
+    private void mostrarOrdenCompra() {
+        contenidoBody.getChildren().setAll(botonVolver, new OrdenCompraPanel());
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 
