@@ -1,6 +1,19 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence"
              version="3.0">
     <persistence-unit name="InventarioPU">
+        <class>com.nventory.model.Articulo</class>
+        <class>com.nventory.model.ArticuloProveedor</class>
+        <class>com.nventory.model.Proveedor</class>
+        <class>com.nventory.model.ConfiguracionInventario</class>
+        <class>com.nventory.model.EstadoOrdenDeCompra</class>
+        <class>com.nventory.model.OrdenDeCompra</class>
+        <class>com.nventory.model.OrdenDeCompraArticulo</class>
+        <class>com.nventory.model.StockMovimiento</class>
+        <class>com.nventory.model.TipoModeloInventario</class>
+        <class>com.nventory.model.TipoStockMovimiento</class>
+        <class>com.nventory.model.Venta</class>
+        <class>com.nventory.model.VentaArticulo</class>
+        
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3307/inventario"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
