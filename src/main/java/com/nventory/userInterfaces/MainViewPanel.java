@@ -1,5 +1,6 @@
 package com.nventory.userInterfaces;
 
+import com.nventory.controller.MaestroArticuloController;
 import com.nventory.controller.OrdenDeCompraController;
 import com.nventory.controller.ProveedorController;
 import javafx.geometry.Pos;
@@ -114,7 +115,7 @@ public class MainViewPanel  extends BorderPane {
 
         //----------Poner funcionalidad de los botones del menu-----------------------------------------------------------------------
         botonArticulo.setOnAction(e -> {
-            mostrarAlerta("hola");
+            mostrarArticulos();
         });
         botonProveedor.setOnAction(e -> {
             mostrarProveedores();
@@ -153,6 +154,11 @@ public class MainViewPanel  extends BorderPane {
         contenidoBody.getChildren().setAll(cajaMenu);
     }
 
+    private void mostrarArticulos(){
+        MaestroArticuloController maestroArticuloController = new MaestroArticuloController();
+        contenidoBody.getChildren().setAll(botonVolver, new MaestroArticuloPanel(maestroArticuloController));
+        botonVolver.setAlignment(Pos.TOP_LEFT);
+    }
     private void mostrarVentas() {
         contenidoBody.getChildren().setAll(botonVolver, new VentaPanel());
         botonVolver.setAlignment(Pos.TOP_LEFT);

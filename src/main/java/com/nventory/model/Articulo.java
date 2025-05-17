@@ -22,6 +22,7 @@ public class Articulo {
     private BigDecimal costoCapitalInmovilizado;
     private BigDecimal costoCompra;
     private int demandaArt;
+    private String nombreArticulo;
     private String descripcionArticulo;
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
