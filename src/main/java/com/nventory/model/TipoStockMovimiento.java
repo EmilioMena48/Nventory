@@ -19,7 +19,7 @@ public class TipoStockMovimiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codTipoStockMov;
-    private LocalDateTime fechaHoraBajaTSM;
+    private LocalDateTime fechaHoraBajaTipoStockMovimiento;
     private String nombreTipoStockMovimiento;
 
 }
