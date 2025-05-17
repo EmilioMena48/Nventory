@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrdenDeCompraArticuloDTO {
 
-    private Long id;
+    private Long codOrdenCompraA;
     private String nombreArticulo;
-    private int cantidad;
-    private String precioUnitario;
-    private String precioTotal;
+    private int cantidadSolicitadaOCA;
+    private String precioUnitarioOCA;
+    private String subTotalOCA;
 
 }

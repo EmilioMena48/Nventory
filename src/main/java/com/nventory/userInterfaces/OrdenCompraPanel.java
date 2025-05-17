@@ -36,10 +36,10 @@ public class OrdenCompraPanel extends BorderPane {
         tablaOrdenes = new TableView<>();
 
         TableColumn<OrdenDeCompraDTO, Long> colId = new TableColumn<>("Código");
-        colId.setCellValueFactory(new PropertyValueFactory<>("codigo"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("codOrdenDeCompra"));
 
         TableColumn<OrdenDeCompraDTO, String> colEstado = new TableColumn<>("Estado");
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        colEstado.setCellValueFactory(new PropertyValueFactory<>("estadoOrdenDeCompra"));
 
         TableColumn<OrdenDeCompraDTO, String> colProveedor = new TableColumn<>("Proveedor");
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
@@ -59,7 +59,7 @@ public class OrdenCompraPanel extends BorderPane {
             {
                 btnEditar.setOnAction(e -> {
                     OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                    abrirVentanaEditarArticulos(dto.getCodigo(), btnEditar);
+                    abrirVentanaEditarArticulos(dto.getCodOrdenDeCompra(), btnEditar);
                 });
 
                 btnEnviar.setOnAction(e -> {
@@ -76,7 +76,7 @@ public class OrdenCompraPanel extends BorderPane {
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                            controller.enviarOrdenDeCompra(dto.getCodigo());
+                            controller.enviarOrdenDeCompra(dto.getCodOrdenDeCompra());
                             cargarDatos();
                         }
                     });
@@ -97,7 +97,7 @@ public class OrdenCompraPanel extends BorderPane {
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                            controller.cancelarOrdenDeCompra(dto.getCodigo());
+                            controller.cancelarOrdenDeCompra(dto.getCodOrdenDeCompra());
                             cargarDatos();
 
                         }
@@ -118,7 +118,7 @@ public class OrdenCompraPanel extends BorderPane {
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                            controller.recibirOrdenDeCompra(dto.getCodigo());
+                            controller.recibirOrdenDeCompra(dto.getCodOrdenDeCompra());
                             cargarDatos();
                         }
                     });
@@ -132,10 +132,10 @@ public class OrdenCompraPanel extends BorderPane {
                     setGraphic(null);
                 } else {
                     OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                    btnEnviar.setVisible("Pendiente".equals(dto.getEstado()));
-                    btnCancelar.setVisible("Pendiente".equals(dto.getEstado()));
-                    btnEditar.setVisible("Pendiente".equals(dto.getEstado()));
-                    btnRecibir.setVisible("Enviada".equals(dto.getEstado()));
+                    btnEnviar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
+                    btnCancelar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
+                    btnEditar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
+                    btnRecibir.setVisible("Enviada".equals(dto.getEstadoOrdenDeCompra()));
                     setGraphic(container);
                 }
             }
@@ -149,7 +149,7 @@ public class OrdenCompraPanel extends BorderPane {
 
         // Barra superior con botón
         HBox barraSuperior = new HBox(10, btnNuevaOrden);
-        barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;"); // opcional: estilo CSS
+        barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;");
         setTop(barraSuperior);
     }
 
@@ -161,7 +161,7 @@ public class OrdenCompraPanel extends BorderPane {
         ventana.setTitle("Editar Artículos de la Orden de Compra");
 
         ventana.initModality(Modality.APPLICATION_MODAL);
-        ventana.initOwner(((Stage) origen.getScene().getWindow())); // obtenemos el owner desde el botón u otro nodo
+        ventana.initOwner(((Stage) origen.getScene().getWindow())); // obtenemos el owner desde el botón
 
         ventana.showAndWait();
         cargarDatos();
@@ -184,7 +184,7 @@ public class OrdenCompraPanel extends BorderPane {
             nombresProveedores.add(nombre);
         }
 
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(nombresProveedores.get(0), nombresProveedores);
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(nombresProveedores.getFirst(), nombresProveedores);
         dialog.setTitle("Nueva Orden de Compra");
         dialog.setHeaderText("Seleccionar un Proveedor");
         dialog.setContentText("Proveedor:");

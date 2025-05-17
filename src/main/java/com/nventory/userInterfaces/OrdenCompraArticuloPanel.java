@@ -38,10 +38,13 @@ public class OrdenCompraArticuloPanel extends BorderPane {
         colArticulo.setCellValueFactory(new PropertyValueFactory<>("nombreArticulo"));
 
         TableColumn<OrdenDeCompraArticuloDTO, BigDecimal> colPrecio = new TableColumn<>("Precio");
-        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioUnitarioOCA"));
 
         TableColumn<OrdenDeCompraArticuloDTO, Integer> colCantidad = new TableColumn<>("Cantidad");
-        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadSolicitadaOCA"));
+
+        TableColumn<OrdenDeCompraArticuloDTO, String> colSubtotal = new TableColumn<>("Subtotal");
+        colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subTotalOCA"));
 
         TableColumn<OrdenDeCompraArticuloDTO, Void> colAcciones = new TableColumn<>("Acciones");
         colAcciones.setCellFactory(param -> new TableCell<>(){
@@ -51,7 +54,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
             {
                 btnModificar.setOnAction(e -> {
                     OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
-                    TextInputDialog dialog = new TextInputDialog(String.valueOf(dto.getCantidad()));
+                    TextInputDialog dialog = new TextInputDialog(String.valueOf(dto.getCantidadSolicitadaOCA()));
                     dialog.setTitle("Modificar Cantidad");
                     dialog.setHeaderText("Modificar cantidad a pedir del articulo");
                     dialog.setContentText("Ingrese nueva cantidad del articulo:");
@@ -63,7 +66,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                                 mostrarError("La cantidad debe ser mayor a 0.");
                                 return;
                             }
-                            controller.modificarCantidadArticulo(idOrdenDeCompra, dto.getId(), nuevoCantidad);
+                            controller.modificarCantidadArticulo(idOrdenDeCompra, dto.getCodOrdenCompraA(), nuevoCantidad);
                             cargarArticulos();
                         } catch (NumberFormatException exception) {
                             mostrarError("Cantidad inválida. Ingrese un número entero.");
@@ -71,9 +74,23 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                     });
                 });
                 btnEliminar.setOnAction(e -> {
-                    OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
-                    controller.eliminarArticuloDeOrden(idOrdenDeCompra, dto.getId());
-                    cargarArticulos();
+                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmacion.setTitle("Confirmacion");
+                    confirmacion.setHeaderText(null);
+                    confirmacion.setContentText("¿Esta seguro que desea eliminar el árticulo de la orden de compra?");
+
+                    ButtonType btnSi = new ButtonType("Si");
+                    ButtonType btnNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                    confirmacion.getButtonTypes().setAll(btnSi, btnNo);
+                    confirmacion.showAndWait().ifPresent(respuesta -> {
+                        if (respuesta.equals(btnSi)) {
+                            OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
+                            controller.eliminarArticuloDeOrden(idOrdenDeCompra, dto.getCodOrdenCompraA());
+                            cargarArticulos();
+                        }
+                    });
+
                 });
             }
             @Override
@@ -87,7 +104,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
             }
         });
 
-        tablaArticulos.getColumns().addAll(colArticulo, colPrecio, colCantidad, colAcciones);
+        tablaArticulos.getColumns().addAll(colArticulo, colPrecio, colCantidad, colSubtotal,colAcciones);
 
         // Formulario
         comboArticulo = new ComboBox<>();
@@ -118,6 +135,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
         txtCantidad = new TextField();
         txtCantidad.setPromptText("Cantidad");
 
+
         btnAgregar = new Button("Agregar");
 
 
@@ -126,8 +144,22 @@ public class OrdenCompraArticuloPanel extends BorderPane {
         setCenter(vbox);
 
         // Acciones de botones
-        btnAgregar.setOnAction(e -> agregarArticulo());
-
+        btnAgregar.setOnAction(e -> {
+            String textoCantidad = txtCantidad.getText();
+            try {
+                int cantidad = Integer.parseInt(textoCantidad);
+                if (cantidad <= 0) {
+                    throw new NumberFormatException();
+                }
+                agregarArticulo(); // Llama a tu lógica original
+            } catch (NumberFormatException ex) {
+                Alert alerta = new Alert(Alert.AlertType.ERROR);
+                alerta.setTitle("Error de Validación");
+                alerta.setHeaderText("Cantidad inválida");
+                alerta.setContentText("Debe ingresar un número mayor a 0.");
+                alerta.showAndWait();
+            }
+        });
     }
 
     private void mostrarError(String cantidadInvalida) {
