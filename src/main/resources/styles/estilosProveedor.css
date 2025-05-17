@@ -1,0 +1,139 @@
+.root {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-background-color: linear-gradient(to bottom, #f4f4f4, #eaeaea);
+}
+
+.label-titulo {
+    -fx-font-size: 22px;
+    -fx-text-fill: #106ecd;
+    -fx-font-weight: bold;
+    -fx-translate-y: -10;
+    -fx-opacity: 0;
+    -fx-animation: fadeIn 1s ease forwards;
+}
+
+.sombreadoMenu {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.5, 0, 2);
+}
+
+.formulario {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);
+    -fx-spacing: 10;
+    -fx-opacity: 0;
+    -fx-animation: fadeIn 1s ease forwards;
+}
+
+.text-field {
+    -fx-background-color: #ecf0f1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+}
+
+.text-area {
+    -fx-background-color: #ecf0f1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 10px;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+}
+
+.tablaProveedor {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0.5, 0, 2);
+}
+.tablaProveedor .column-header-background {
+    -fx-text-fill: white;
+}
+.tablaProveedor .column-header {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.tablaProveedor .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+}
+.tablaProveedor .table-row-cell:hover {
+    -fx-background-color: #ecf0f1;
+}
+.tablaProveedor .table-row-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+.tablaProveedor .table-row-cell:selected:hover {
+    -fx-background-color: #2980b9;
+}
+
+.text-field:focused {
+    -fx-border-color: #3498db;
+    -fx-background-color: #ffffff;
+}
+
+.button-menu {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.button-menu:hover {
+    -fx-background-color: #2980b9;
+}
+
+.button-guardar {
+    -fx-min-width: 90px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.button-guardar:hover {
+    -fx-background-color: #2980b9;
+}
+.button-cancelar {
+    -fx-min-width: 90px;
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+.button-cancelar:hover {
+    -fx-background-color: #c0392b;
+}
+
+@keyframes fadeIn {
+    from {
+        -fx-opacity: 0;
+        -fx-translate-y: 10;
+    }
+    to {
+        -fx-opacity: 1;
+        -fx-translate-y: 0;
+    }
+}

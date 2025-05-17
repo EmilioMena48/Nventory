@@ -9,7 +9,6 @@ public interface ModuloVenta {
      * @author Emilio Mena
      * @version 1.0
      */
-    void UIVenta();
     void AltaVenta();
     void ListarVentas();
     void BuscarVenta();

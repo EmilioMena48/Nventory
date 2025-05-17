@@ -1,7 +1,7 @@
 package com.nventory.userInterfaces;
 
 import com.nventory.controller.OrdenDeCompraController;
-import javafx.geometry.Insets;
+import com.nventory.controller.ProveedorController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -10,7 +10,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class MainViewPanel  extends BorderPane {
@@ -160,7 +159,8 @@ public class MainViewPanel  extends BorderPane {
     }
 
     private void mostrarProveedores() {
-        contenidoBody.getChildren().setAll(botonVolver, new ProveedorPanel());
+        ProveedorController proveedorController = new ProveedorController();
+        contenidoBody.getChildren().setAll(botonVolver, new ProveedorPanel(proveedorController));
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 

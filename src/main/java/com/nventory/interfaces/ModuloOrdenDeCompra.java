@@ -8,8 +8,7 @@ public interface ModuloOrdenDeCompra {
      *
      * @author Ignacio Canzio
      * @version 1.0
-     */
-    void UIOrdenDeCompra();
+     */;
     void AltaOrdenDeCompra();
     void ModificarOrdenDeCompra();
     void EliminarOrdenDeCompra();

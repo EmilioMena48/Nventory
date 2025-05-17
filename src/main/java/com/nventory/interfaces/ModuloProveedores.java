@@ -1,5 +1,10 @@
 package com.nventory.interfaces;
 
+import com.nventory.DTO.ProveedorDTO;
+import lombok.NonNull;
+
+import java.util.List;
+
 public interface ModuloProveedores  {
     /*
      * Modulo Proveedores
@@ -9,12 +14,10 @@ public interface ModuloProveedores  {
      * @author Juan Pablo
      * @version 1.0
      */
-    void UIProveedores();
-    void AltaProveedor();
-    void ModificarProveedor();
-    void EliminarProveedor();
-    void ListarProveedores();
-    void BuscarProveedor();
+    public void GuardarProveedor(@NonNull ProveedorDTO proveedor);
+    public void EliminarProveedor(@NonNull Long codProveedor);
+    public List<ProveedorDTO> ListarProveedores();
+    public ProveedorDTO BuscarProveedor(@NonNull Long codProveedor);
     void ListarArticulosxProveedor();
     void AsociarArticuloProveedor();
 }

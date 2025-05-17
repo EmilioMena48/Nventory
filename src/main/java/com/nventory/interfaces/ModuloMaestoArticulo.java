@@ -10,7 +10,6 @@ public interface ModuloMaestoArticulo {
      * @author Juan Cruz Yanardi
      * @version 1.0
      */
-    void UIMaestroArticulo();
     void AltaArticulo();
     void ModificarArticulo();
     void EliminarArticulo();
