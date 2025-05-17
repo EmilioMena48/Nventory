@@ -16,7 +16,7 @@ public class ConfiguracionInventario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codConfiguracionInventario;
-    private LocalDateTime fechaHoraBajaConfigInv;
+    private LocalDateTime fechaHoraBajaConfiguracionInventario;
     private int inventarioMaximoIF;
     private int loteOptimoLF;
     private String nombreConfiguracionInventario;

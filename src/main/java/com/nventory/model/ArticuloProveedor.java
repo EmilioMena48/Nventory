@@ -20,7 +20,7 @@ public class ArticuloProveedor {
     private BigDecimal costoEnvio;
     private BigDecimal costoPedido;
     private int demoraEntregaDias;
-    private LocalDateTime fechaHoraBajaAP;
+    private LocalDateTime fechaHoraBajaArticuloProveedor;
     private BigDecimal precioUnitario;
 
     //Relacion ArticuloProveedor - Articulo

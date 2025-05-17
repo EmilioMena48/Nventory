@@ -19,7 +19,7 @@ public class EstadoOrdenDeCompra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codEstadoOC;
-    private LocalDateTime fechaHoraBajaEstadoOC;
+    private LocalDateTime fechaHoraBajaEstadoOrdenDeCompra;
     private String nombreEstadoOC;
 
 }

@@ -38,5 +38,4 @@ public class Articulo {
     private ArticuloProveedor articuloProveedor;
 
 
-
 }
