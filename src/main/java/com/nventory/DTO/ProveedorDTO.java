@@ -14,4 +14,9 @@ public class ProveedorDTO {
     private String descripcionProveedor;
     private LocalDateTime fechaHoraBajaProveedor;
     private String nombreProveedor;
+
+    public ProveedorDTO(long codProveedor, String nombreProveedor) {
+        this.codProveedor = codProveedor;
+        this.nombreProveedor = nombreProveedor;
+    }
 }

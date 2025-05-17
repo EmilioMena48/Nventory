@@ -5,16 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-
-@AllArgsConstructor
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class OrdenDeCompraArticuloDTO {
-
-    private Long id;
-    private String nombreArticulo;
-    private int cantidad;
+public class ArticuloProveedorDTO {
+    private int id;
+    private String nombre;
     private String precioUnitario;
-    private String precioTotal;
-
 }
