@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 public class ProveedorDTO {
     private Long codProveedor;
     private String descripcionProveedor;
-    private LocalDateTime fechaHoraBajaProveedor;
     private String nombreProveedor;
 
     public ProveedorDTO(long codProveedor, String nombreProveedor) {

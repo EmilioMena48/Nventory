@@ -2,63 +2,42 @@ package com.nventory.controller;
 
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.interfaces.ModuloProveedores;
-import lombok.NonNull;
+import com.nventory.repository.ProveedorRepository;
+import com.nventory.service.ProveedorService;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProveedorController implements ModuloProveedores {
-    private List<ProveedorDTO> proveedores = new ArrayList<ProveedorDTO>()
-            {{
-                add(new ProveedorDTO(1L, "10% Desc.", LocalDateTime.now(), "Meli"));
-                add(new ProveedorDTO(2L, "Oferta Oferta", LocalDateTime.now(), "ElBananero.com"));
-            }};
-    private Long codProveedor = 2L;
+
+    ProveedorService proveedorService;
+
+    public ProveedorController() {
+        this.proveedorService = new ProveedorService(new ProveedorRepository());
+    }
 
     @Override
-    public void GuardarProveedor(@NonNull ProveedorDTO proveedor) {
-        if (proveedor.getCodProveedor() == 0L) {
-            proveedor.setCodProveedor(++codProveedor);
-            proveedores.add(proveedor);
-        } else {
-            proveedores.stream()
-                    .filter(p -> p.getCodProveedor().equals(proveedor.getCodProveedor()))
-                    .findFirst()
-                    .ifPresentOrElse(
-                            existente -> {
-                                int index = proveedores.indexOf(existente);
-                                proveedores.set(index, proveedor);
-                            },
-                            () -> proveedores.add(proveedor)
-                    );
-        }
+    public void GuardarProveedor(ProveedorDTO proveedorDto) {
+        proveedorService.guardarProveedor(proveedorDto);
     }
 
     @Override
     public void EliminarProveedor(Long codProveedor) {
-        for (int i = 0; i < proveedores.size(); i++) {
-            if (proveedores.get(i).getCodProveedor().equals(codProveedor)) {
-                proveedores.remove(i);
-                return;
-            }
-        }
-        throw new IllegalArgumentException("El proveedor no existe");
+        proveedorService.EliminarProveedor(codProveedor);
     }
 
     @Override
     public List<ProveedorDTO> ListarProveedores() {
-        return proveedores;
+        return proveedorService.listarProveedores(true);
+    }
+
+    @Override
+    public List<ProveedorDTO> ListarProveedoresEliminados() {
+        return proveedorService.listarProveedores(false);
     }
 
     @Override
     public ProveedorDTO BuscarProveedor(Long codProveedor) {
-        for (ProveedorDTO proveedor : proveedores) {
-            if (proveedor.getCodProveedor().equals(codProveedor)) {
-                return proveedor;
-            }
-        }
-        throw new IllegalArgumentException("El proveedor no existe");
+        return null;
     }
 
     @Override

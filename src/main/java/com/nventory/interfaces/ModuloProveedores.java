@@ -17,6 +17,7 @@ public interface ModuloProveedores  {
     public void GuardarProveedor(@NonNull ProveedorDTO proveedor);
     public void EliminarProveedor(@NonNull Long codProveedor);
     public List<ProveedorDTO> ListarProveedores();
+    public List<ProveedorDTO> ListarProveedoresEliminados();
     public ProveedorDTO BuscarProveedor(@NonNull Long codProveedor);
     void ListarArticulosxProveedor();
     void AsociarArticuloProveedor();

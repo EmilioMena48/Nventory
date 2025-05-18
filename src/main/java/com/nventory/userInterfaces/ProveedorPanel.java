@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ProveedorPanel extends BorderPane {
@@ -36,7 +37,7 @@ public class ProveedorPanel extends BorderPane {
         this.controller = controller;
         this.getStylesheets().add(Objects.requireNonNull(getClass().getResource(CSS)).toExternalForm());
         inicializarInterfaz();
-        cargarTablaProveedores();
+        cargarTablaProveedores(true);
     }
 
     private void inicializarInterfaz() {
@@ -58,7 +59,8 @@ public class ProveedorPanel extends BorderPane {
         menu.getChildren().addAll(
                 crearBoton("Alta Proveedor", this::mostrarFormularioAlta),
                 crearBoton("Listar Artículos por Proveedor", this::listarArticulosPorProveedor),
-                crearBoton("Asociar Artículo a Proveedor", this::asociarArticuloAProveedor)
+                crearBoton("Asociar Artículo a Proveedor", this::asociarArticuloAProveedor),
+                crearBoton("Restaurar Proveedor", this::restaurarProveedor)
         );
         menu.getStyleClass().add("sombreadoMenu");
         setLeft(menu);
@@ -116,7 +118,7 @@ public class ProveedorPanel extends BorderPane {
     private Button crearBotonCancelar() {
         Button btnCancelar = new Button("Cancelar");
         btnCancelar.getStyleClass().add("button-cancelar");
-        btnCancelar.setOnAction(e -> cargarTablaProveedores());
+        btnCancelar.setOnAction(e -> cargarTablaProveedores(true));
         return btnCancelar;
     }
 
@@ -149,38 +151,44 @@ public class ProveedorPanel extends BorderPane {
                 proveedorDTO.setNombreProveedor(txtNombre.getText());
                 proveedorDTO.setDescripcionProveedor(txtDescripcion.getText());
 
-                if (controller != null) {
-                    controller.GuardarProveedor(proveedorDTO);
-                    mostrarAlerta(PROVEEDOR_GUARDADO, 4, () -> {
-                        txtNombre.clear();
-                        txtDescripcion.clear();
-                        proveedorDTO = null;
-                        cargarTablaProveedores();
-                    });
-                } else {
-                    mostrarAlerta("Error: El controlador no está inicializado.", 2, null);
-                }
+                controller.GuardarProveedor(proveedorDTO);
+                mostrarAlerta(PROVEEDOR_GUARDADO, 4, () -> {
+                    txtNombre.clear();
+                    txtDescripcion.clear();
+                    proveedorDTO = null;
+                    cargarTablaProveedores(true);
+                });
             } catch (Exception ex) {
                 mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage(), 2, null);
             }
         }
     }
 
-    private void cargarTablaProveedores() {
+    private void cargarTablaProveedores(boolean activos) {
         areaContenido.getChildren().clear();
 
         tablaProveedores = new TableView<>();
         tablaProveedores.getStyleClass().add("tablaProveedor");
+        tablaProveedores.setPlaceholder(new Label("No hay proveedores disponibles."));
 
         tablaProveedores.getColumns().addAll(
                 crearColumna("Código", "codProveedor"),
                 crearColumna("Nombre", "nombreProveedor"),
                 crearColumna("Descripción", "descripcionProveedor"),
-                crearColumnaAcciones()
+                activos ? crearColumnaAcciones() : crearColumnaAccionesRestaurar()
         );
-
+        tablaProveedores.setFixedCellSize(25);
         try {
-            tablaProveedores.getItems().setAll(controller.ListarProveedores());
+            List<ProveedorDTO> proveedores;
+            if (activos) {
+                proveedores = controller.ListarProveedores();
+            } else {
+                proveedores = controller.ListarProveedoresEliminados();
+            }
+
+            tablaProveedores.getItems().setAll(proveedores);
+            tablaProveedores.prefHeightProperty().bind(
+                    tablaProveedores.fixedCellSizeProperty().multiply(proveedores.size() + 1));
             areaContenido.getChildren().add(tablaProveedores);
         } catch (Exception e) {
             mostrarAlerta(ERROR_CARGAR_PROVEEDORES + e.getMessage(), 2, null);
@@ -212,12 +220,36 @@ public class ProveedorPanel extends BorderPane {
                     mostrarAlerta("¿Está seguro de eliminar este proveedor?", 3, () -> {
                         try {
                             controller.EliminarProveedor(proveedorDTO.getCodProveedor());
-                            cargarTablaProveedores();
+                            cargarTablaProveedores(true);
                         } catch (Exception ex) {
                             mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage());
                         }
+                        proveedorDTO = null;
                     });
 
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : container);
+            }
+        });
+        return colAcciones;
+    }
+
+    private TableColumn<ProveedorDTO, Void> crearColumnaAccionesRestaurar() {
+        TableColumn<ProveedorDTO, Void> colAcciones = new TableColumn<>("Acciones");
+        colAcciones.setCellFactory(param -> new TableCell<>() {
+            private final Button btnRestaurar = new Button("Restaurar");
+            private final HBox container = new HBox(5, btnRestaurar);
+
+            {
+                btnRestaurar.setOnAction(e -> {
+                    proveedorDTO = getTableView().getItems().get(getIndex());
+                    modificar = true;
+                    mostrarFormularioAlta();
                 });
             }
 
@@ -240,8 +272,13 @@ public class ProveedorPanel extends BorderPane {
         // Implementar lógica
     }
 
+    private void restaurarProveedor() {
+        areaContenido.getChildren().clear();
+        cargarTablaProveedores(false);
+    }
+
     private void mostrarAlerta(String mensaje) {
-        PopupMensaje.mostrarPopup(mensaje,1, null);
+        PopupMensaje.mostrarPopup(mensaje, 1, null);
     }
 
     private void mostrarAlerta(String mensaje, int tipo, Runnable accion) {
@@ -277,14 +314,12 @@ class PopupMensaje {
         popup.centerOnScreen();
 
         switch (tipo) {
-            // solo para mostrar el mensaje y luego cerrar 2 segundos
             case 1 -> {
-                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                PauseTransition pause = new PauseTransition(Duration.seconds(1));
                 pause.setOnFinished(e -> popup.close());
                 popup.show();
                 pause.play();
             }
-            // para mostrar el mensaje y mostrar un botón de aceptar, solo cerrar si se hace clic
             case 2 -> {
                 Button btnAceptar = new Button("Aceptar");
                 btnAceptar.setOnAction(e -> popup.close());
@@ -295,7 +330,6 @@ class PopupMensaje {
                 btnAceptar.getStyleClass().add("button-aceptar");
                 popup.show();
             }
-            // para mostrar el mensaje y dos botones de aceptar y cancelar
             case 3 -> {
                 Button btnAceptar = new Button("Aceptar");
                 Button btnCancelar = new Button("Cancelar");
@@ -311,9 +345,8 @@ class PopupMensaje {
                 root.getChildren().add(hbox);
                 popup.show();
             }
-            // solo para mostrar el mensaje y luego cerrar 2 segundos y ejecutar una acción
             case 4 -> {
-                PauseTransition pause = new PauseTransition(Duration.seconds(2));
+                PauseTransition pause = new PauseTransition(Duration.seconds(1));
                 pause.setOnFinished(e -> {
                     popup.close();
                     if (accion != null) {
@@ -325,6 +358,4 @@ class PopupMensaje {
             }
         }
     }
-
-
 }

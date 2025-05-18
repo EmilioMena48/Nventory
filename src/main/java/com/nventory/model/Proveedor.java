@@ -22,5 +22,5 @@ public class Proveedor {
     private String descripcionProveedor;
     private LocalDateTime fechaHoraBajaProveedor;
     private String nombreProveedor;
-
+    boolean activo = true;
 }

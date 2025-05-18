@@ -3,6 +3,7 @@ package com.nventory.userInterfaces;
 import com.nventory.controller.MaestroArticuloController;
 import com.nventory.controller.OrdenDeCompraController;
 import com.nventory.controller.ProveedorController;
+import com.nventory.repository.ProveedorRepository;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -14,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class MainViewPanel  extends BorderPane {
+    //Instancia de Repositorios
+    ProveedorController proveedorController = new ProveedorController();
 
     //Elementos Header
     Label titulo = new Label("Nventory");
@@ -148,6 +151,9 @@ public class MainViewPanel  extends BorderPane {
 
         //----------Se muestra el menú en el body por defecto-------------------------------------------------------------
         mostrarMenu();
+
+        //----------Precarga la tabla de proveedores------------------------------------------
+        proveedorController.ListarProveedores();
     }
 
     private void mostrarMenu() {
@@ -165,7 +171,6 @@ public class MainViewPanel  extends BorderPane {
     }
 
     private void mostrarProveedores() {
-        ProveedorController proveedorController = new ProveedorController();
         contenidoBody.getChildren().setAll(botonVolver, new ProveedorPanel(proveedorController));
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
@@ -184,6 +189,4 @@ public class MainViewPanel  extends BorderPane {
         alerta.setContentText(mensaje);
         alerta.showAndWait();
     }
-
-
 }
