@@ -1,4 +1,5 @@
 package com.nventory.app;
+import com.nventory.service.DatosEstadosTiposScript;
 import com.nventory.userInterfaces.MainViewPanel;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -24,6 +25,10 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+
+        DatosEstadosTiposScript datosIniciales = new DatosEstadosTiposScript();
+        datosIniciales.ejecutar();
+
         launch(args);
         //System.out.println("andando");
     }

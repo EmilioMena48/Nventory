@@ -20,5 +20,6 @@ public class TipoModeloInventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codTipoModeloI;
     private String nombreModeloInventario;
+    private LocalDateTime fechaHoraBajaTMI;
 
 }

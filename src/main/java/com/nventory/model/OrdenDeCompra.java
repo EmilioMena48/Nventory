@@ -3,6 +3,7 @@ package com.nventory.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,8 @@ public class OrdenDeCompra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codOrdenDeCompra;
-    private LocalDateTime fechaHoraCreacionOC;
+    private LocalDateTime fechaHoraEnvioProv;
+    private BigDecimal totalOrdenDeCompra;
 
     //Relacion Orden Compra - Proveedor
     @ManyToOne(fetch = FetchType.EAGER)
