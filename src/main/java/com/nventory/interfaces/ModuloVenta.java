@@ -1,5 +1,9 @@
 package com.nventory.interfaces;
 
+import com.nventory.DTO.VentaDTO;
+
+import java.util.List;
+
 public interface ModuloVenta {
     /*
      * Modulo Venta
@@ -9,7 +13,7 @@ public interface ModuloVenta {
      * @author Emilio Mena
      * @version 1.0
      */
-    void AltaVenta();
-    void ListarVentas();
+    void AltaVenta(VentaDTO ventaDTO);
+    List<VentaDTO> ListarVentas();
     void BuscarVenta();
 }
