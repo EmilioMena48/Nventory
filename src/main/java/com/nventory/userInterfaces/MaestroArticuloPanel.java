@@ -14,6 +14,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class MaestroArticuloPanel extends BorderPane {
 
@@ -22,6 +24,7 @@ public class MaestroArticuloPanel extends BorderPane {
     private Button btnListarReponer;
     private Button btnProductosFaltantes;
     private Button btnProveedoresPorArticulo;
+    private Button btnAjusteInventario;
     private final MaestroArticuloController controller;
 
     public MaestroArticuloPanel(MaestroArticuloController controller) {
@@ -59,7 +62,6 @@ public class MaestroArticuloPanel extends BorderPane {
             TextField txtCostoCompra = new TextField();
             TextField txtCostoCapital = new TextField();
             TextField txtDemanda = new TextField();
-            DatePicker fechaBaja = new DatePicker();
 
             // Botones
             Button btnGuardar = new Button("Guardar");
@@ -76,7 +78,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     new Label("Costo de compra:"), txtCostoCompra,
                     new Label("Costo de capital inmovilizado:"), txtCostoCapital,
                     new Label("Demanda del artículo:"), txtDemanda,
-                    new Label("Fecha de baja:"), fechaBaja,
                     botones
             );
 
@@ -94,11 +95,8 @@ public class MaestroArticuloPanel extends BorderPane {
                     articuloDTO.setCostoCompra(new BigDecimal(txtCostoCompra.getText()));
                     articuloDTO.setCostoCapitalInmovilizado(new BigDecimal(txtCostoCapital.getText()));
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
-                    articuloDTO.setFechaHoraBajaArticulo(
-                            fechaBaja.getValue() != null ? fechaBaja.getValue().atStartOfDay() : null
-                    );
 
-                    // Acá llamás a tu controller para guardar el nuevo artículo
+                    // Acá llamás al controller para guardar el nuevo artículo
                     controller.darDeAltaArticulo(articuloDTO);
                     ventanaAlta.close();
 
@@ -130,11 +128,17 @@ public class MaestroArticuloPanel extends BorderPane {
             //llamar al metodo del controler
         });
 
-        btnListarReponer.setStyle("-fx-background-color: #5cb85c; -fx-text-fill: white;");
-        btnProductosFaltantes.setStyle("-fx-background-color: #f0ad4e; -fx-text-fill: white;");
-        btnProveedoresPorArticulo.setStyle("-fx-background-color: #5bc0de; -fx-text-fill: white;");
+        btnAjusteInventario = new Button("Ajuste inventario");
+        btnAjusteInventario.setOnAction(e ->{
+            //llamar al metodo del controller
+        });
 
-        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnProveedoresPorArticulo);
+        btnListarReponer.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+        btnProductosFaltantes.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+        btnProveedoresPorArticulo.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+        btnAjusteInventario.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+
+        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnProveedoresPorArticulo, btnAjusteInventario);
         contenedorFiltros.setPadding(new Insets(10));
 
         HBox contenedorBoton = new HBox(btnAgregar);
@@ -195,10 +199,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     TextField txtCostoCompra = new TextField(String.valueOf(articulo.getCostoCompra()));
                     TextField txtCostoCapital = new TextField(String.valueOf(articulo.getCostoCapitalInmovilizado()));
                     TextField txtDemanda = new TextField(String.valueOf(articulo.getDemandaArt()));
-                    DatePicker fechaBaja = new DatePicker(
-                            articulo.getFechaHoraBajaArticulo() != null ?
-                                    articulo.getFechaHoraBajaArticulo().toLocalDate() : null
-                    );
 
                     // Botones
                     Button btnGuardar = new Button("Guardar");
@@ -215,7 +215,6 @@ public class MaestroArticuloPanel extends BorderPane {
                             new Label("Costo de compra:"), txtCostoCompra,
                             new Label("Costo de capital inmovilizado:"), txtCostoCapital,
                             new Label("Demanda del artículo:"), txtDemanda,
-                            new Label("Fecha de baja:"), fechaBaja,
                             botones
                     );
 
@@ -234,9 +233,7 @@ public class MaestroArticuloPanel extends BorderPane {
                             articuloDTO.setCostoCompra(new BigDecimal(txtCostoCompra.getText()));
                             articuloDTO.setCostoCapitalInmovilizado(new BigDecimal(txtCostoCapital.getText()));
                             articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
-                            articuloDTO.setFechaHoraBajaArticulo(
-                                    fechaBaja.getValue() != null ? fechaBaja.getValue().atStartOfDay() : null
-                            );
+
 
                             ventanaEdicion.close();
                             //Llama al controller para que actualice los datos
@@ -258,13 +255,25 @@ public class MaestroArticuloPanel extends BorderPane {
                 //BOTON DE DAR DE BAJA
                 btnBorrar.setOnAction(e -> {
                     Articulo articulo = getTableView().getItems().get(getIndex());
-                    // Acción borrar
+
+                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmacion.setTitle("Confirmar baja");
+                    confirmacion.setHeaderText("¿Seguro que querés dar de baja este artículo?");
+                    confirmacion.setContentText("Esta acción marcará el artículo como dado de baja.");
+
+                    Optional<ButtonType> resultado = confirmacion.showAndWait();
+                    if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+                        ArticuloDTO articuloDTO = new ArticuloDTO();
+                        articuloDTO.setCodArticulo(articulo.getCodArticulo());
+                        articuloDTO.setFechaHoraBajaArticulo(LocalDateTime.now()); //Se setea la fecha actual para la baja
+
+                        //Llamamos al controller pasandole el dto que contiene la fecha de baja
+                        controller.darDeBajaArticulo(articuloDTO);
+                    }
                 });
 
-                btnProveedor.setOnAction(e -> {
-                    Articulo articulo = getTableView().getItems().get(getIndex());
-                    // Acción seleccionar proveedor
-                });
+                //BOTON DE SELECCIONAR PROVEEDOR PREDETERMINADO
+
             }
 
             @Override

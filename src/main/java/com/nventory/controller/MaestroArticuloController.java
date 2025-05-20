@@ -31,6 +31,11 @@ public class MaestroArticuloController {
 
     }
 
+    //----------Baja de articulos------------------------
+    public void darDeBajaArticulo(ArticuloDTO articuloDTO){
+
+    }
+
 
     private void cargarArticulosDummy() {
         listaArticulos.addAll(
