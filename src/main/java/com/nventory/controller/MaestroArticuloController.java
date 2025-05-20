@@ -1,8 +1,10 @@
 package com.nventory.controller;
 
+import com.nventory.DTO.ArticuloDTO;
 import com.nventory.model.Articulo;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 
 public class MaestroArticuloController {
@@ -19,10 +21,21 @@ public class MaestroArticuloController {
         this.tablaArticulos.setItems(listaArticulos);
     }
 
+    //----------Edicion de campos de articulos---------------------
+    public void actualizarArticulo(ArticuloDTO articuloDTO){
+
+    }
+
+    //----------Alta de articulos---------------------
+    public void darDeAltaArticulo(ArticuloDTO articuloDTO){
+
+    }
+
+
     private void cargarArticulosDummy() {
         listaArticulos.addAll(
-               // new Articulo(1L, null, null, null, 100, "Articulo A", null, 120, null, null),
-             //   new Articulo(2L, null, null, null, 50, "Articulo B", null, 50, null, null)
+                new Articulo(1L, null, null, null, 100, "Articulo A", "-", null, 120, null, null),
+                new Articulo(2L, null, null, null, 50, "Articulo B", "-", null, 50, null, null)
         );
     }
 

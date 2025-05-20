@@ -1,0 +1,25 @@
+package com.nventory.DTO;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@AllArgsConstructor
+@Data
+@NoArgsConstructor
+public class ArticuloDTO {
+
+    private Long codArticulo;
+    private BigDecimal costoAlmacenamiento;
+    private BigDecimal costoCapitalInmovilizado;
+    private BigDecimal costoCompra;
+    private int demandaArt;
+    private String nombreArticulo;
+    private String descripcionArticulo;
+    private LocalDateTime fechaHoraBajaArticulo;
+    private Integer stockActual;
+}
