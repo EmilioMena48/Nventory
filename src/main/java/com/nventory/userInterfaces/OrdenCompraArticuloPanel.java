@@ -188,7 +188,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
         }
         try {
             int cantidad = Integer.parseInt(txtCantidad.getText());
-            controller.agregarArticuloAOrden(idOrdenDeCompra, seleccionado.getId(), cantidad);
+            controller.agregarArticuloAOrden(idOrdenDeCompra, Long.valueOf(seleccionado.getId()), cantidad);
             cargarArticulos();
         } catch (NumberFormatException ex) {
             mostrarError("Cantidad inválida. Ingrese un número entero.");

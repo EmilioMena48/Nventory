@@ -2,6 +2,7 @@ package com.nventory.repository;
 
 import com.nventory.model.EstadoOrdenDeCompra;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 public class EstadoOrdenDeCompraRepository extends SoftDeletableRepositoryImpl<EstadoOrdenDeCompra, Long> {
@@ -21,4 +22,17 @@ public class EstadoOrdenDeCompraRepository extends SoftDeletableRepositoryImpl<E
         }
 
     }
+
+    public EstadoOrdenDeCompra buscarEstadoPorNombre(String nombreEstado){
+        EntityManager em = IndireccionJPA.getEntityManager();
+        try {
+            return em.createQuery(
+                    "SELECT t FROM EstadoOrdenDeCompra t WHERE t.nombreEstadoOC= :nombre", EstadoOrdenDeCompra.class)
+                    .setParameter("nombre", nombreEstado)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 }
