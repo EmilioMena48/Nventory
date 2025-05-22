@@ -23,6 +23,8 @@ public class VentaController implements ModuloVenta {
     @Override
     public List<VentaDTO> ListarVentas() { return ventaService.mostrarVentas();};
 
+    public List<VentaArticuloDTO> ListarVentasArticulo(Long id) { return ventaService.mostrarVentasArticulo(id);};
+
     @Override
     public void BuscarVenta() {
 

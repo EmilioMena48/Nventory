@@ -6,4 +6,5 @@ public class VentaRepository extends BaseRepositoryImpl <Venta, Long> {
     public VentaRepository() {
         super(Venta.class);
     }
+
 }

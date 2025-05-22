@@ -26,4 +26,9 @@ public class VentaArticulo {
     @JoinColumn(name = "codArticulo")
     private Articulo articulo;
 
+
+    //private Venta venta;
+
+
+
 }

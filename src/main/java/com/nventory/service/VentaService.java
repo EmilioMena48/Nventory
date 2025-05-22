@@ -8,6 +8,7 @@ import com.nventory.model.Proveedor;
 import com.nventory.model.Venta;
 import com.nventory.model.VentaArticulo;
 import com.nventory.repository.ArticuloRepository;
+import com.nventory.repository.VentaArticuloRepositori;
 import com.nventory.repository.VentaRepository;
 
 import java.math.BigDecimal;
@@ -18,36 +19,42 @@ public class VentaService {
 
     private ArticuloRepository articuloRepository;
     private VentaRepository ventaRepository;
+    private VentaArticuloRepositori ventaArticuloRepositori;
 
     public VentaService(VentaRepository ventaRepository) {
         this.ventaRepository = ventaRepository;
     }
 
     public List<VentaDTO> mostrarVentas() {
-        List<Venta> ventas = ventaRepository.buscarTodos();
         List<VentaDTO> ventasDto = new ArrayList<>();
+        List<Venta> ventas = ventaRepository.buscarTodos();
+        ventaArticuloRepositori = new VentaArticuloRepositori();
         for (Venta venta : ventas) {
             VentaDTO ventaDTO = new VentaDTO(
                     venta.getNumeroVenta(),
                     venta.getFechaHoraVenta(),
                     venta.getMontoTotalVenta()
             );
-            List<VentaArticulo> ventasArticulo = venta.getVentaArticulo();
-            for (VentaArticulo ventaArticulo : ventasArticulo) {
-                VentaArticuloDTO ventaArticuloDTO = new VentaArticuloDTO(
-                        ventaArticulo.getOrdenVentaArticulo(),
-                        ventaArticulo.getCantidadVendida(),
-                        ventaArticulo.getPrecioVenta(),
-                        ventaArticulo.getSubTotalVenta(),
-                        ventaArticulo.getArticulo().getNombreArticulo(),
-                        ventaArticulo.getArticulo().getCodArticulo()
-                );
-                ventaDTO.addVentaArticuloDTO(ventaArticuloDTO);
-            }
-            ;
             ventasDto.add(ventaDTO);
         }
         return ventasDto;
+    }
+
+    public List<VentaArticuloDTO> mostrarVentasArticulo(Long idVenta) {
+        List<VentaArticuloDTO> ventaArticuloDTOList = new ArrayList<>();
+        List<VentaArticulo> ventasArticulo = ventaArticuloRepositori.buscarVentasArticuloPorId(idVenta);
+        for (VentaArticulo ventaArticulo : ventasArticulo) {
+            VentaArticuloDTO ventaArticuloDTO = new VentaArticuloDTO(
+                    ventaArticulo.getOrdenVentaArticulo(),
+                    ventaArticulo.getCantidadVendida(),
+                    ventaArticulo.getPrecioVenta(),
+                    ventaArticulo.getSubTotalVenta(),
+                    ventaArticulo.getArticulo().getNombreArticulo(),
+                    ventaArticulo.getArticulo().getCodArticulo()
+            );
+            ventaArticuloDTOList.add(ventaArticuloDTO);
+        }
+        return ventaArticuloDTOList;
     }
 
     public void registrarVenta(VentaDTO ventaDTO) {
@@ -67,6 +74,16 @@ public class VentaService {
         }
         venta.setMontoTotalVenta(calcularTotalVenta(ventasArticuloDTO));
         ventaRepository.guardar(venta);
+    }
+
+    public boolean comprobarStockArticulo(int cantidadVenta, Long idArticulo) {
+        articuloRepository = new ArticuloRepository();
+        Articulo articulo = articuloRepository.buscarPorId(idArticulo);
+        if (cantidadVenta > articulo.getStockActual()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public BigDecimal calcularSubtotalVenta(VentaArticuloDTO ventaArticuloDTO) {

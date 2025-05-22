@@ -8,10 +8,12 @@ import com.nventory.controller.ProveedorController;
 import com.nventory.controller.VentaController;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -102,16 +104,17 @@ public class VentaPanel extends BorderPane {
         contenidoBtn.setSpacing(10);
 
         TextField fecha = new TextField();
+        Label total = new Label("0");
+        total.setId("total");
         List<LineaVentaFormulario > lineaVentaList = new ArrayList<>();
 
         fecha.getStyleClass().add("text-field");
-        //txtDescripcion.getStyleClass().add("text-area");
         Button btnGuardar = crearBotonGuardar(fecha, lineaVentaList);
         Button btnCancelar = crearBotonCancelar();
 
         contenidoBtn.getChildren().addAll(btnGuardar, btnCancelar);
 
-        GridPane formularioVenta = crearFormulario(fecha);
+        GridPane formularioVenta = crearFormulario(fecha, total);
         Button btnAgregarLinea = crearBotonAgregarLineaVenta(formularioVenta, lineaVentaList);
         Button btnQuitarLinea = crearBotonQuitarLineaVenta(formularioVenta, lineaVentaList);
         agregarLineaVenta(formularioVenta, lineaVentaList);
@@ -142,10 +145,19 @@ public class VentaPanel extends BorderPane {
         Button btnGuardar = new Button("Guardar");
         btnGuardar.getStyleClass().add("button-guardar");
         btnGuardar.setOnAction(e -> {
-            for (LineaVentaFormulario lv : lineaVentaList) {
-                registrarVentaArticulo(lv.getCantidadVendida(), lv.getPrecioVenta(), lv.getCodArt());
+            if (!lineaVentaList.isEmpty()) {
+                LineaVentaFormulario primera = lineaVentaList.get(0);
+                System.out.println(primera.getCodArt().getText());
+                if (primera != null &&
+                        !primera.getCantidadVendida().getText().trim().isEmpty() &&
+                        primera.getPrecioVenta().getText() != null &&
+                        primera.getCodArt().getText() != null) {
+                    for (LineaVentaFormulario lv : lineaVentaList) {
+                        registrarVentaArticulo(lv.getCantidadVendida(), lv.getPrecioVenta(), lv.getCodArt());
+                    }
+                    registrarVenta(fecha);
+                }
             }
-            registrarVenta(fecha);
         });
         return btnGuardar;
     }
@@ -157,15 +169,19 @@ public class VentaPanel extends BorderPane {
         return btnCancelar;
     }
 
-    private GridPane crearFormulario(TextField fecha) {
+    private GridPane crearFormulario(TextField fecha, Label total) {
         GridPane formularioVenta = new GridPane();
         formularioVenta.getStyleClass().add("formulario");
 
         formularioVenta.setVgap(10);
         formularioVenta.setHgap(10);
 
+        int filaUltima = formularioVenta.getRowCount();
+
         formularioVenta.add(new Label("Fecha:"), 0, 0);
         formularioVenta.add(fecha, 0, 1);
+        //formularioVenta.add(new Label("Total:"), 4, (filaUltima-1));
+        formularioVenta.add(total, 4, filaUltima);
 
         return formularioVenta;
     }
@@ -180,24 +196,23 @@ public class VentaPanel extends BorderPane {
         TextField codArt = new TextField();
 
         VBox lineaVentaBox = new VBox(10);
-
         HBox lineaLabel = new HBox(10);
         HBox lineaField = new HBox(10);
+        lineaField.setId("lineaField");
         lineaLabel.getChildren().addAll(cantVendida, precioV, codArticulo);
         lineaField.getChildren().addAll(cantidadVendida, precioVenta, codArt);
 
         lineaVentaBox.getChildren().addAll(lineaLabel, lineaField);
 
-        int filaFinal = formularioVenta.getRowCount();
+        int filaUltima = formularioVenta.getRowCount();
+        System.out.println(filaUltima);
 
-      /*  formularioVenta.add(new Label("cantidadVendida:"), 0, filaFinal);
-        formularioVenta.add(cantidadVendida, 0, filaFinal+1);
-        formularioVenta.add(new Label("precioVenta:"), 1, filaFinal);
-        formularioVenta.add(precioVenta, 1, filaFinal+1);
-        formularioVenta.add(new Label("codArt:"), 2, filaFinal);
-        formularioVenta.add(codArt, 2, filaFinal+1); */
+        formularioVenta.add(lineaVentaBox, 0, filaUltima);
+        Integer rowIndex = GridPane.getRowIndex(lineaVentaBox);
 
-        formularioVenta.add(lineaVentaBox, 0, filaFinal);
+        aplicarSubtotalLinea(cantidadVendida, precioVenta, codArt, lineaField, formularioVenta, rowIndex);
+
+        GridPane.setRowIndex(formularioVenta.lookup("#total"), formularioVenta.getRowCount());
 
         LineaVentaFormulario lineaVenta = new LineaVentaFormulario();
         lineaVenta.setCodArt(codArt);
@@ -206,21 +221,120 @@ public class VentaPanel extends BorderPane {
         lineaVentaList.add(lineaVenta);
     }
 
+    private BigDecimal aplicarSubtotalLinea(TextField cantidadVendida, TextField precioVenta, TextField codArt, HBox lineaField, GridPane formularioVenta, int rowIndex) {
+        ventaArticuloDTO = new VentaArticuloDTO();
+        Runnable accion = () -> {
+            if (!cantidadVendida.getText().trim().isEmpty() &&
+                    !precioVenta.getText().trim().isEmpty() &&
+                    !codArt.getText().trim().isEmpty()) {
+                ventaArticuloDTO.setCantidadVendida(Integer.parseInt(cantidadVendida.getText()));
+                ventaArticuloDTO.setPrecioVenta(new BigDecimal(precioVenta.getText()));
+                ventaArticuloDTO.setCodArticulo(Long.parseLong(codArt.getText()));
+                ventaArticuloDTO.setSubTotalVenta(controller.calcularSubTotalVenta(ventaArticuloDTO));
+                mostrarSubTotalLinea(ventaArticuloDTO.getSubTotalVenta(), lineaField, formularioVenta, rowIndex);
+                mostrarTotalLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
+                //ventaArticuloDTO = null;
+            }
+        };
+
+
+        ChangeListener<String> listener = (obs, oldVal, newVal) -> accion.run();
+
+        cantidadVendida.textProperty().addListener(listener);
+        precioVenta.textProperty().addListener(listener);
+        codArt.textProperty().addListener(listener);
+
+        cantidadVendida.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.isEmpty() && newValue.isEmpty()) {
+                quitarSubTotalLinea(formularioVenta, rowIndex);
+                mostrarTotalMenosLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
+            }
+        });
+
+        precioVenta.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.isEmpty() && newValue.isEmpty()) {
+                quitarSubTotalLinea(formularioVenta, rowIndex);
+                mostrarTotalMenosLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
+            }
+        });
+
+        codArt.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!oldValue.isEmpty() && newValue.isEmpty()) {
+                quitarSubTotalLinea(formularioVenta, rowIndex);
+                mostrarTotalMenosLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
+            }
+        });
+
+        return ventaArticuloDTO.getSubTotalVenta();
+    }
+
+    private void mostrarSubTotalLinea(BigDecimal subTotal, HBox lineaField, GridPane formularioVenta, int rowIndex) {
+
+        Label subTotalLabel = new Label(subTotal.toString());
+        formularioVenta.add(subTotalLabel, 4, rowIndex);
+        GridPane.setValignment(subTotalLabel, VPos.BOTTOM);
+    }
+
+    private void quitarSubTotalLinea(GridPane formularioVenta, int rowIndex) {
+        int filaObjetivo = rowIndex;
+        int columnaObjetivo = 4;
+        Node nodoAEliminar = null;
+
+        for (Node node : formularioVenta.getChildren()) {
+            Integer fila = GridPane.getRowIndex(node);
+            Integer columna = GridPane.getColumnIndex(node);
+
+            if ((fila == null ? 0 : fila) == filaObjetivo &&
+                    (columna == null ? 0 : columna) == columnaObjetivo) {
+                nodoAEliminar = node;
+                break;
+            }
+        }
+        System.out.println(nodoAEliminar);
+        if (nodoAEliminar != null) {
+            formularioVenta.getChildren().remove(nodoAEliminar);
+        }
+    }
+
+    private void mostrarTotalLinea(BigDecimal subtotal, GridPane formularioVenta) {
+        Label campoTotal = (Label) formularioVenta.lookup("#total");
+        BigDecimal nuevoValor = new BigDecimal(campoTotal.getText()).add(subtotal);
+        campoTotal.setText(nuevoValor.toString());
+    }
+
+    private void mostrarTotalMenosLinea(BigDecimal subtotal, GridPane formularioVenta) {
+        Label campoTotal = (Label) formularioVenta.lookup("#total");
+        BigDecimal nuevoValor = new BigDecimal(campoTotal.getText()).subtract(subtotal);
+        campoTotal.setText(nuevoValor.toString());
+    }
+
+
     private void quitarLineaVenta(GridPane formularioVenta, List<LineaVentaFormulario> lineaVentaList) {
 
         ObservableList<Node> hijos = formularioVenta.getChildren();
-
+        System.out.println(hijos);
+        int indiceSubtotal = 0;
+        int indiceFilaSubtotal = 0;
         for (int i = hijos.size() - 1; i >= 3; i--) {
             Node node = hijos.get(i);
+            indiceSubtotal = i;
+            indiceFilaSubtotal = GridPane.getRowIndex(node);
             if (node instanceof VBox) {
                 hijos.remove(i);
                 break;
             }
         }
+        System.out.println(indiceSubtotal);
+        Label label = (Label) formularioVenta.getChildren().get(indiceSubtotal);
+        BigDecimal subtotal = new BigDecimal(label.getText());
+        quitarSubTotalLinea(formularioVenta, indiceFilaSubtotal);
+        mostrarTotalMenosLinea(subtotal, formularioVenta);
+        System.out.println(hijos);
 
         if (lineaVentaList.size() > 2) {
             lineaVentaList.remove(lineaVentaList.size() - 1);
         }
+
     }
 
     private void registrarVenta(TextField fecha) {
@@ -228,6 +342,7 @@ public class VentaPanel extends BorderPane {
             mostrarAlerta(CAMPOS_VACIOS, 2, null);
         } else {
             try {
+                ventaDTO = null;
                 ventaDTO = new VentaDTO();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
                 LocalDateTime fechaHora = LocalDateTime.parse(fecha.getText().trim(), formatter);
@@ -351,7 +466,7 @@ public class VentaPanel extends BorderPane {
         vbox.setAlignment(Pos.CENTER);
         vbox.setPadding(new Insets(10));
 
-        ventaArticuloDTOList = ventaDTO.getVentaArticuloDTO();
+        ventaArticuloDTOList = controller.ListarVentasArticulo(ventaDTO.getNumeroVenta());
         for (VentaArticuloDTO ventaArticuloDTO : ventaArticuloDTOList) {
             Label lblMensaje = new Label(ventaArticuloDTO.getCodArticulo().toString());
             Label lb2Mensaje = new Label(ventaArticuloDTO.getNombreArticulo().toString());
