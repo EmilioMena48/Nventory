@@ -1,6 +1,7 @@
 package com.nventory.service;
 
 import com.nventory.DTO.ProveedorDTO;
+import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.DTO.VentaArticuloDTO;
 import com.nventory.DTO.VentaDTO;
 import com.nventory.model.Articulo;
@@ -20,6 +21,7 @@ public class VentaService {
     private ArticuloRepository articuloRepository;
     private VentaRepository ventaRepository;
     private VentaArticuloRepositori ventaArticuloRepositori;
+    private StockMovimientoService stockMovimientoService;
 
     public VentaService(VentaRepository ventaRepository) {
         this.ventaRepository = ventaRepository;
@@ -60,6 +62,8 @@ public class VentaService {
     public void registrarVenta(VentaDTO ventaDTO) {
         Venta venta = new Venta();
         articuloRepository = new ArticuloRepository();
+        stockMovimientoService = new StockMovimientoService();
+
         venta.setFechaHoraVenta(ventaDTO.getFechaHoraVenta());
 
         List<VentaArticuloDTO> ventasArticuloDTO = ventaDTO.getVentaArticuloDTO();
@@ -69,17 +73,34 @@ public class VentaService {
             ventaArticulo.setPrecioVenta(ventaArticuloDTO.getPrecioVenta());
             ventaArticulo.setSubTotalVenta(calcularSubtotalVenta(ventaArticuloDTO));
             Articulo articulo = articuloRepository.buscarPorId(ventaArticuloDTO.getCodArticulo());
+            if (!comprobarStockArticulo(ventaArticulo.getCantidadVendida(), articulo.getStockActual())) {
+                throw new IllegalArgumentException("No hay stock suficiente para el artículo con ID: " + articulo.getCodArticulo());
+            }
             ventaArticulo.setArticulo(articulo);
             venta.addVentaArticulo(ventaArticulo);
         }
         venta.setMontoTotalVenta(calcularTotalVenta(ventasArticuloDTO));
-        ventaRepository.guardar(venta);
+
+        // Revisar
+        Venta ventaGuardada = ventaRepository.guardarNuevaVenta(venta);
+
+        List<VentaArticulo> ventaArticuloList = ventaGuardada.getVentaArticulo();
+        for(VentaArticulo vA : ventaArticuloList) {
+            System.out.println("orden ventaArt"+vA.getOrdenVentaArticulo());
+            StockMovimientoDTO smDTO = new StockMovimientoDTO();
+            smDTO.setCantidad(vA.getCantidadVendida());
+            smDTO.setComentario(null);
+            smDTO.setFechaHoraMovimiento(venta.getFechaHoraVenta());
+            smDTO.setOrdenDeCompraArticuloID(null);
+            smDTO.setTipoStockMovimientoID(2L);
+            smDTO.setArticuloID(vA.getArticulo().getCodArticulo());
+            smDTO.setVentaArticuloID(vA.getOrdenVentaArticulo());
+            stockMovimientoService.generarStockMovimiento(smDTO);
+        }
     }
 
-    public boolean comprobarStockArticulo(int cantidadVenta, Long idArticulo) {
-        articuloRepository = new ArticuloRepository();
-        Articulo articulo = articuloRepository.buscarPorId(idArticulo);
-        if (cantidadVenta > articulo.getStockActual()) {
+    public boolean comprobarStockArticulo(int cantidadVenta, Integer stockArticulo) {
+        if (cantidadVenta > stockArticulo) {
             return false;
         } else {
             return true;

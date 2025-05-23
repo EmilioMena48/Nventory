@@ -32,4 +32,7 @@ public class Venta {
         this.ventaArticulo.add(ventaArticulo);
     }
 
+    public List<VentaArticulo> getVentaArticulo() {
+        return ventaArticulo;
+    }
 }

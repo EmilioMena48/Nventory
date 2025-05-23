@@ -155,6 +155,7 @@ public class VentaPanel extends BorderPane {
                     for (LineaVentaFormulario lv : lineaVentaList) {
                         registrarVentaArticulo(lv.getCantidadVendida(), lv.getPrecioVenta(), lv.getCodArt());
                     }
+                    lineaVentaList.clear();
                     registrarVenta(fecha);
                 }
             }
@@ -227,16 +228,21 @@ public class VentaPanel extends BorderPane {
             if (!cantidadVendida.getText().trim().isEmpty() &&
                     !precioVenta.getText().trim().isEmpty() &&
                     !codArt.getText().trim().isEmpty()) {
+                if(rowIndex > 3) {
+                    quitarSubTotalLinea(formularioVenta, rowIndex);
+                }
+                //mostrarTotalMenosLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
                 ventaArticuloDTO.setCantidadVendida(Integer.parseInt(cantidadVendida.getText()));
                 ventaArticuloDTO.setPrecioVenta(new BigDecimal(precioVenta.getText()));
                 ventaArticuloDTO.setCodArticulo(Long.parseLong(codArt.getText()));
                 ventaArticuloDTO.setSubTotalVenta(controller.calcularSubTotalVenta(ventaArticuloDTO));
+                ventaArticuloDTOList.add(ventaArticuloDTO);
                 mostrarSubTotalLinea(ventaArticuloDTO.getSubTotalVenta(), lineaField, formularioVenta, rowIndex);
                 mostrarTotalLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
+                ventaArticuloDTOList.remove(ventaArticuloDTO);
                 //ventaArticuloDTO = null;
             }
         };
-
 
         ChangeListener<String> listener = (obs, oldVal, newVal) -> accion.run();
 
@@ -264,7 +270,6 @@ public class VentaPanel extends BorderPane {
                 mostrarTotalMenosLinea(ventaArticuloDTO.getSubTotalVenta(),formularioVenta);
             }
         });
-
         return ventaArticuloDTO.getSubTotalVenta();
     }
 
@@ -290,15 +295,16 @@ public class VentaPanel extends BorderPane {
                 break;
             }
         }
-        System.out.println(nodoAEliminar);
         if (nodoAEliminar != null) {
             formularioVenta.getChildren().remove(nodoAEliminar);
         }
+        System.out.println("acaaa");
     }
 
     private void mostrarTotalLinea(BigDecimal subtotal, GridPane formularioVenta) {
         Label campoTotal = (Label) formularioVenta.lookup("#total");
-        BigDecimal nuevoValor = new BigDecimal(campoTotal.getText()).add(subtotal);
+        BigDecimal nuevoValor = controller.calcularTotalVenta(ventaArticuloDTOList);
+        //BigDecimal nuevoValor = new BigDecimal(campoTotal.getText()).add(subtotal);
         campoTotal.setText(nuevoValor.toString());
     }
 
@@ -313,26 +319,31 @@ public class VentaPanel extends BorderPane {
 
         ObservableList<Node> hijos = formularioVenta.getChildren();
         System.out.println(hijos);
+        boolean fila1=false;
         int indiceSubtotal = 0;
         int indiceFilaSubtotal = 0;
-        for (int i = hijos.size() - 1; i >= 3; i--) {
+        for (int i = hijos.size() - 1; i > 3; i--) {
             Node node = hijos.get(i);
             indiceSubtotal = i;
             indiceFilaSubtotal = GridPane.getRowIndex(node);
             if (node instanceof VBox) {
                 hijos.remove(i);
+                fila1 = true;
                 break;
             }
         }
-        System.out.println(indiceSubtotal);
-        Label label = (Label) formularioVenta.getChildren().get(indiceSubtotal);
-        BigDecimal subtotal = new BigDecimal(label.getText());
-        quitarSubTotalLinea(formularioVenta, indiceFilaSubtotal);
-        mostrarTotalMenosLinea(subtotal, formularioVenta);
-        System.out.println(hijos);
-
         if (lineaVentaList.size() > 2) {
             lineaVentaList.remove(lineaVentaList.size() - 1);
+            for(LineaVentaFormulario linea : lineaVentaList) {
+                System.out.println(linea);
+            }
+        }
+
+        if(fila1) {
+            Label label = (Label) formularioVenta.getChildren().get(indiceSubtotal);
+            BigDecimal subtotal = new BigDecimal(label.getText());
+            quitarSubTotalLinea(formularioVenta, indiceFilaSubtotal);
+            mostrarTotalMenosLinea(subtotal, formularioVenta);
         }
 
     }
@@ -372,12 +383,12 @@ public class VentaPanel extends BorderPane {
         if (cantidad.getText().isEmpty() || precio.getText().isEmpty() || codArt.getText().isEmpty()) {
             mostrarAlerta(CAMPOS_VACIOS, 2, null);
         } else {
-                ventaArticuloDTO = new VentaArticuloDTO();
-                ventaArticuloDTO.setCantidadVendida(Integer.parseInt(cantidad.getText()));
-                ventaArticuloDTO.setPrecioVenta(new BigDecimal(precio.getText()));
-                ventaArticuloDTO.setCodArticulo(Long.parseLong(codArt.getText()));
-                ventaArticuloDTOList.add(ventaArticuloDTO);
-            System.out.println(ventaArticuloDTO.getPrecioVenta());
+            ventaArticuloDTO = new VentaArticuloDTO();
+            ventaArticuloDTO.setCantidadVendida(Integer.parseInt(cantidad.getText()));
+            ventaArticuloDTO.setPrecioVenta(new BigDecimal(precio.getText()));
+            ventaArticuloDTO.setCodArticulo(Long.parseLong(codArt.getText()));
+            ventaArticuloDTOList.add(ventaArticuloDTO);
+            //System.out.println(ventaArticuloDTO.getPrecioVenta());
         }
     }
 
@@ -505,6 +516,8 @@ public class VentaPanel extends BorderPane {
 
             Label lblMensaje = new Label(mensaje);
             lblMensaje.setStyle("-fx-background-color: #6dbef1; -fx-text-fill: white; -fx-padding: 5px; -fx-font-size: 14px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+            lblMensaje.setWrapText(true);
+            lblMensaje.setAlignment(Pos.CENTER);
 
             StackPane root = new StackPane(lblMensaje);
             root.setStyle("-fx-background-color: transparent; -fx-border-color: #bdc3c7; -fx-border-width: 1px; -fx-border-radius: 5px;");
@@ -513,7 +526,6 @@ public class VentaPanel extends BorderPane {
             Scene scene = new Scene(root, 350, 150);
             scene.setFill(null);
             popup.setScene(scene);
-
             popup.centerOnScreen();
 
             switch (tipo) {
