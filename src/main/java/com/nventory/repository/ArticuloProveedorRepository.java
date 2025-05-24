@@ -22,4 +22,17 @@ public class ArticuloProveedorRepository extends SoftDeletableRepositoryImpl<Art
         List<ArticuloProveedor> resultados = query.getResultList();
         return resultados.isEmpty() ? null : resultados.getFirst();
     }
+
+    //-------------------Metodo del repository para obtener Proveedores del articulo seleccionado---------------------
+    public List<ArticuloProveedor> buscarTodosArticuloProveedor(Long codArticulo){
+        EntityManager em = IndireccionJPA.getEntityManager();
+
+        String sql = "SELECT * FROM articuloproveedor WHERE codArticulo = :codArticulo AND fechaHoraBajaArticuloProveedor IS NULL";
+        TypedQuery<ArticuloProveedor> query = (TypedQuery<ArticuloProveedor>) em.createNativeQuery(sql, ArticuloProveedor.class);
+        query.setParameter("codArticulo", codArticulo);
+        return query.getResultList();
+
+    }
+
+
 }

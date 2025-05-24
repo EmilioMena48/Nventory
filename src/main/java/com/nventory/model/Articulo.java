@@ -35,7 +35,7 @@ public class Articulo {
     //Relacion entre Articulo - ArticuloProveedor
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "codArticuloProveedor")
+    @JoinColumn(name = "ProveedorPredeterminado")
     private ArticuloProveedor articuloProveedor;
 
 

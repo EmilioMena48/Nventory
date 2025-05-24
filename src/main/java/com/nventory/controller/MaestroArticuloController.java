@@ -1,14 +1,19 @@
 package com.nventory.controller;
 
 import com.nventory.DTO.ArticuloDTO;
+import com.nventory.DTO.ArticuloProveedorDTO;
 import com.nventory.model.Articulo;
+import com.nventory.service.ArticuloService;
+import com.nventory.service.OrdenCompraService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 
-public class MaestroArticuloController {
+import java.util.List;
 
+public class MaestroArticuloController {
+    private final ArticuloService articuloService = new ArticuloService();
     private TableView<Articulo> tablaArticulos;
     private final ObservableList<Articulo> listaArticulos = FXCollections.observableArrayList();
 
@@ -36,6 +41,14 @@ public class MaestroArticuloController {
 
     }
 
+    //---------Metodo del controller para obtener todos los Proveedores de un articulo
+    public List<ArticuloProveedorDTO> obtenerProveedoresDeEseArticulo (Long codArticulo){
+        return articuloService.obtenerProveedoresDeEseArticulo(codArticulo);
+    }
+    //--------Metodo del controller que asigna un proveedor predeterminado de una articulo
+    public void asignarProveedorPredeterminado (Long codArticuloProveedor){
+        articuloService.asignarProveedorPredeterminado(codArticuloProveedor);
+    }
 
     private void cargarArticulosDummy() {
         listaArticulos.addAll(

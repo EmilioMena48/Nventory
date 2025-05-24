@@ -2,8 +2,12 @@ package com.nventory.userInterfaces;
 
 
 import com.nventory.DTO.ArticuloDTO;
+import com.nventory.DTO.ArticuloProveedorDTO;
 import com.nventory.controller.MaestroArticuloController;
 import com.nventory.model.Articulo;
+import com.nventory.model.ArticuloProveedor;
+import com.nventory.model.Proveedor;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,6 +19,8 @@ import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class MaestroArticuloPanel extends BorderPane {
@@ -23,7 +29,6 @@ public class MaestroArticuloPanel extends BorderPane {
     private Button btnAgregar;
     private Button btnListarReponer;
     private Button btnProductosFaltantes;
-    private Button btnProveedoresPorArticulo;
     private Button btnAjusteInventario;
     private final MaestroArticuloController controller;
 
@@ -122,11 +127,6 @@ public class MaestroArticuloPanel extends BorderPane {
         btnProductosFaltantes.setOnAction(e ->{
             //llamar al metodo del controller
         });
-        //Boton de proveedores por articulo
-        btnProveedoresPorArticulo = new Button("Proveedores por Artículo");
-        btnProveedoresPorArticulo.setOnAction(e ->{
-            //llamar al metodo del controler
-        });
 
         btnAjusteInventario = new Button("Ajuste inventario");
         btnAjusteInventario.setOnAction(e ->{
@@ -135,10 +135,9 @@ public class MaestroArticuloPanel extends BorderPane {
 
         btnListarReponer.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
         btnProductosFaltantes.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
-        btnProveedoresPorArticulo.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
         btnAjusteInventario.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
 
-        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnProveedoresPorArticulo, btnAjusteInventario);
+        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnAjusteInventario);
         contenedorFiltros.setPadding(new Insets(10));
 
         HBox contenedorBoton = new HBox(btnAgregar);
@@ -272,8 +271,48 @@ public class MaestroArticuloPanel extends BorderPane {
                     }
                 });
 
-                //BOTON DE SELECCIONAR PROVEEDOR PREDETERMINADO
+                //BOTON DE MOSTRAR TODOS LOS PROVEEDORES DEL ARTICULO SELECCIONADO
+                btnProveedor.setOnAction(e ->{
+                    Articulo articulo = getTableView().getItems().get(getIndex());
+                    //Obtener el código del artículo
+                    Long codArticulo = articulo.getCodArticulo();
 
+                    //Obtener los proveedores desde el controller
+                    List<ArticuloProveedorDTO> proveedoresDisponiblesDTO = controller.obtenerProveedoresDeEseArticulo(codArticulo);
+
+                    Stage stage = new Stage();
+                    stage.setTitle("Seleccionar proveedor para " + articulo.getNombreArticulo());
+                    stage.initModality(Modality.APPLICATION_MODAL);
+
+                    ListView<ArticuloProveedorDTO> listView = new ListView<>(FXCollections.observableArrayList(proveedoresDisponiblesDTO));
+                    listView.setCellFactory(lv -> new ListCell<>() {
+                        @Override
+                        protected void updateItem(ArticuloProveedorDTO item, boolean empty) {
+                            super.updateItem(item, empty);
+                            setText(empty || item == null ? null : item.getNombre());
+                        }
+                    });
+                    //UNA VEZ QUE ME TRAJE LOS PROVEEDORES, SELECCIONAR UNO
+                    Button btnSeleccionar = new Button("Asignar como predeterminado");
+                    btnSeleccionar.setOnAction(ev -> {
+                        ArticuloProveedorDTO Proveedorseleccionado = listView.getSelectionModel().getSelectedItem();
+                        if (Proveedorseleccionado != null) {
+                            //se captura el codigo del articuloProveedor seleccionado
+                            Long codArticuloProveedor = Proveedorseleccionado.getId();
+
+                            // Acá se actualiza el proveedor predeterminado
+                            controller.asignarProveedorPredeterminado(codArticuloProveedor);
+                            stage.close(); // Cierra la ventana
+                        }
+                    });
+
+                    VBox layout = new VBox(10, listView, btnSeleccionar);
+                    layout.setPadding(new Insets(15));
+                    layout.setAlignment(Pos.CENTER);
+                    stage.setScene(new Scene(layout, 300, 400));
+                    stage.showAndWait();
+
+                });
             }
 
             @Override
