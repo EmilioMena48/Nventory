@@ -10,25 +10,29 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
-
 
 public class OrdenCompraArticuloPanel extends BorderPane {
 
     private final OrdenDeCompraController controller;
     private final Long idOrdenDeCompra;
+    private final String estadoOrden;
 
     private TableView<OrdenDeCompraArticuloDTO> tablaArticulos;
     private ComboBox<ArticuloProveedorDTO> comboArticulo;
     private TextField txtCantidad;
-    private Button btnAgregar;
+    private HBox form;
 
-    public OrdenCompraArticuloPanel(OrdenDeCompraController controller, Long idOrdenDeCompra) {
+    public OrdenCompraArticuloPanel(OrdenDeCompraController controller, Long idOrdenDeCompra, String estadoOrden) {
         this.controller = controller;
         this.idOrdenDeCompra = idOrdenDeCompra;
+        this.estadoOrden = estadoOrden;
         inicializarUI();
         cargarArticulos();
-        cargarArticulosProveedor();
+        if ("Pendiente".equals(estadoOrden)) {
+            cargarArticulosProveedor();
+        }
     }
 
     private void inicializarUI() {
@@ -51,6 +55,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
             private final Button btnModificar = new Button("Modificar");
             private final Button btnEliminar = new Button("Eliminar");
             private final HBox hbox = new HBox(5, btnModificar, btnEliminar);
+
             {
                 btnModificar.setOnAction(e -> {
                     OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
@@ -73,6 +78,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                         }
                     });
                 });
+
                 btnEliminar.setOnAction(e -> {
                     Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
                     confirmacion.setTitle("Confirmacion");
@@ -90,76 +96,79 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                             cargarArticulos();
                         }
                     });
-
                 });
             }
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(hbox);
+                    setGraphic("Pendiente".equals(estadoOrden) ? hbox : null);
                 }
             }
         });
 
-        tablaArticulos.getColumns().addAll(colArticulo, colPrecio, colCantidad, colSubtotal,colAcciones);
+        tablaArticulos.getColumns().addAll(colArticulo, colPrecio, colCantidad, colSubtotal, colAcciones);
 
-        // Formulario
-        comboArticulo = new ComboBox<>();
-        comboArticulo.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(ArticuloProveedorDTO item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u" );
+        // Formulario - solo visible si estado es Pendiente
+        if ("Pendiente".equals(estadoOrden)) {
+            comboArticulo = new ComboBox<>();
+            comboArticulo.setCellFactory(listView -> new ListCell<>() {
+                @Override
+                protected void updateItem(ArticuloProveedorDTO item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u");
+                    }
                 }
-            }
-        });
+            });
 
-        comboArticulo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(ArticuloProveedorDTO item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u");
+            comboArticulo.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(ArticuloProveedorDTO item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u");
+                    }
                 }
-            }
-        });
+            });
 
-        txtCantidad = new TextField();
-        txtCantidad.setPromptText("Cantidad");
+            txtCantidad = new TextField();
+            txtCantidad.setPromptText("Cantidad");
 
+            Button btnAgregar = new Button("Agregar");
 
-        btnAgregar = new Button("Agregar");
+            form = new HBox(10, comboArticulo, txtCantidad, btnAgregar);
 
+            btnAgregar.setOnAction(e -> {
+                String textoCantidad = txtCantidad.getText();
+                try {
+                    int cantidad = Integer.parseInt(textoCantidad);
+                    if (cantidad <= 0) {
+                        throw new NumberFormatException();
+                    }
+                    agregarArticulo();
+                } catch (NumberFormatException ex) {
+                    Alert alerta = new Alert(Alert.AlertType.ERROR);
+                    alerta.setTitle("Error de Validación");
+                    alerta.setHeaderText("Cantidad inválida");
+                    alerta.setContentText("Debe ingresar un número mayor a 0.");
+                    alerta.showAndWait();
+                }
+            });
+        }
 
-        HBox form = new HBox(10, comboArticulo, txtCantidad, btnAgregar);
-        VBox vbox = new VBox(10, tablaArticulos, form);
+        VBox vbox = new VBox(10, tablaArticulos);
+        if ("Pendiente".equals(estadoOrden)) {
+            vbox.getChildren().add(form);
+        }
         setCenter(vbox);
-
-        // Acciones de botones
-        btnAgregar.setOnAction(e -> {
-            String textoCantidad = txtCantidad.getText();
-            try {
-                int cantidad = Integer.parseInt(textoCantidad);
-                if (cantidad <= 0) {
-                    throw new NumberFormatException();
-                }
-                agregarArticulo(); // Llama a tu lógica original
-            } catch (NumberFormatException ex) {
-                Alert alerta = new Alert(Alert.AlertType.ERROR);
-                alerta.setTitle("Error de Validación");
-                alerta.setHeaderText("Cantidad inválida");
-                alerta.setContentText("Debe ingresar un número mayor a 0.");
-                alerta.showAndWait();
-            }
-        });
     }
 
     private void mostrarError(String cantidadInvalida) {
@@ -172,11 +181,17 @@ public class OrdenCompraArticuloPanel extends BorderPane {
 
     private void cargarArticulos() {
         List<OrdenDeCompraArticuloDTO> articulos = controller.obtenerArticulosDeOrden(idOrdenDeCompra);
+        if (articulos == null) {
+            articulos = new ArrayList<>();
+        }
         tablaArticulos.setItems(FXCollections.observableArrayList(articulos));
     }
 
     private void cargarArticulosProveedor() {
         List<ArticuloProveedorDTO> disponibles = controller.obtenerArticulosProveedorDisponibles(idOrdenDeCompra);
+        if (disponibles == null) {
+            disponibles = new ArrayList<>();
+        }
         comboArticulo.setItems(FXCollections.observableArrayList(disponibles));
     }
 
@@ -188,13 +203,11 @@ public class OrdenCompraArticuloPanel extends BorderPane {
         }
         try {
             int cantidad = Integer.parseInt(txtCantidad.getText());
-            controller.agregarArticuloAOrden(idOrdenDeCompra, Long.valueOf(seleccionado.getId()), cantidad);
+            controller.agregarArticuloAOrden(idOrdenDeCompra, (long) seleccionado.getId(), cantidad);
             cargarArticulos();
         } catch (NumberFormatException ex) {
             mostrarError("Cantidad inválida. Ingrese un número entero.");
         }
     }
 
-
 }
-

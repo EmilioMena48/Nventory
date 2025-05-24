@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class OrdenCompraService {
 
@@ -46,25 +47,25 @@ public class OrdenCompraService {
         return ordenesDto;
     }
 
-    @Transactional
+
     public void enviarOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
 
         if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente")) ) {
-            EstadoOrdenDeCompra estadoEnviada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada");
-            ordenCompra.setEstadoOrdenDeCompra(estadoEnviada);
+            ordenCompra.setEstadoOrdenDeCompra(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada"));
             ordenCompra.setFechaHoraEnvioProv(LocalDateTime.now());
+            ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
-    @Transactional
+
     public void cancelarOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
 
         if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente")) ) {
             EstadoOrdenDeCompra estadoCancelada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Cancelada");
             ordenCompra.setEstadoOrdenDeCompra(estadoCancelada);
-            //Actualizar orden de compra
+            ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
@@ -232,5 +233,36 @@ public class OrdenCompraService {
         Long codOrdenNueva = crearOrdenDeCompra(codProveedor);
         agregarArticuloAOrden(codOrdenNueva, articuloProveedor.getCodArticuloProveedor(), cantidadSolicitada);
         return codOrdenNueva;
+    }
+
+    public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorProveedor(Long codProveedor) {
+        Optional<OrdenDeCompra> orden = ordenCompraRepo.buscarOrdenPendienteOEnviadaPorProveedor(codProveedor);
+        if (orden.isPresent()) {
+            OrdenDeCompraDTO ordenDTO = new OrdenDeCompraDTO();
+            ordenDTO.setCodOrdenDeCompra(orden.get().getCodOrdenDeCompra());
+            ordenDTO.setTotalOrden(String.valueOf(orden.get().getTotalOrdenDeCompra()));
+            ordenDTO.setEstadoOrdenDeCompra(orden.get().getEstadoOrdenDeCompra().getNombreEstadoOC());
+            ordenDTO.setProveedor(orden.get().getProveedor().getNombreProveedor());
+            return Optional.of(ordenDTO);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorArticulo(Long codArticulo) {
+        Optional<OrdenDeCompra> orden = ordenCompraRepo.buscarOrdenPendienteOEnviadaPorArticulo(codArticulo);
+        if (orden.isPresent()) {
+            OrdenDeCompraDTO ordenDTO = new OrdenDeCompraDTO();
+            ordenDTO.setCodOrdenDeCompra(orden.get().getCodOrdenDeCompra());
+            ordenDTO.setTotalOrden(String.valueOf(orden.get().getTotalOrdenDeCompra()));
+            ordenDTO.setEstadoOrdenDeCompra(orden.get().getEstadoOrdenDeCompra().getNombreEstadoOC());
+            ordenDTO.setProveedor(orden.get().getProveedor().getNombreProveedor());
+            return Optional.of(ordenDTO);
+        }
+        return Optional.empty();
+    }
+
+    public String obtenerEstadoDeUnaOrden(Long codOrdenCompra){
+        OrdenDeCompra orden = ordenCompraRepo.buscarPorId(codOrdenCompra);
+        return orden.getEstadoOrdenDeCompra().getNombreEstadoOC();
     }
 }

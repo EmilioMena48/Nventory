@@ -67,19 +67,23 @@ public class OrdenDeCompraController {
     }
 
     public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorProveedor(Long codProveedor) {
-        return null;
+        return ordenCompraService.buscarOrdenAbiertaPorProveedor(codProveedor);
     }
 
     public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorArticulo(Long codArticulo) {
-        return null;
+        return ordenCompraService.buscarOrdenAbiertaPorArticulo(codArticulo);
     }
 
     public SugerenciaOrdenDTO obtenerSugerenciaParaArticulo(Long codArticulo) {
         return null;
     }
 
-    public List<ProveedorDTO> obtenerProveedoresParaArticulo(Long codArticulo) {
+    public List<ProveedorArticuloDTO> obtenerProveedoresParaArticulo(Long codArticulo) {
         return null;
+    }
+
+    public String obtenerEstadoDeUnaOrden(Long codOrdenCompra) {
+        return ordenCompraService.obtenerEstadoDeUnaOrden(codOrdenCompra);
     }
 }
 

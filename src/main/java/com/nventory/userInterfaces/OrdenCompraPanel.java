@@ -1,10 +1,7 @@
 package com.nventory.userInterfaces;
 
-import com.nventory.DTO.ArticuloDTO;
-import com.nventory.DTO.ProveedorDTO;
-import com.nventory.DTO.SugerenciaOrdenDTO;
+import com.nventory.DTO.*;
 import com.nventory.controller.OrdenDeCompraController;
-import com.nventory.DTO.OrdenDeCompraDTO;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,11 +15,11 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class OrdenCompraPanel extends BorderPane {
 
@@ -55,14 +52,13 @@ public class OrdenCompraPanel extends BorderPane {
             private final Button btnEnviar = new Button("Enviar al Proveedor");
             private final Button btnCancelar = new Button("Cancelar");
             private final Button btnRecibir = new Button("Recibir Mercadería");
-            private final Button btnEditar = new Button("Editar Artículos");
-            private final HBox container = new HBox(5, btnEnviar, btnCancelar, btnRecibir, btnEditar);
-
+            private final Button btnVerArticulos = new Button("Ver Artículos");
+            private final HBox container = new HBox(5, btnEnviar, btnCancelar, btnRecibir, btnVerArticulos);
 
             {
-                btnEditar.setOnAction(e -> {
+                btnVerArticulos.setOnAction(e -> {
                     OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                    abrirVentanaEditarArticulos(dto.getCodOrdenDeCompra(), btnEditar);
+                    abrirVentanaEditarArticulos(dto.getCodOrdenDeCompra(), dto.getEstadoOrdenDeCompra(), btnVerArticulos);
                 });
 
                 btnEnviar.setOnAction(e -> {
@@ -85,7 +81,6 @@ public class OrdenCompraPanel extends BorderPane {
                     });
                 });
 
-
                 btnCancelar.setOnAction(e -> {
                     Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
                     confirmacion.setTitle("Confirmación");
@@ -102,7 +97,6 @@ public class OrdenCompraPanel extends BorderPane {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
                             controller.cancelarOrdenDeCompra(dto.getCodOrdenDeCompra());
                             cargarDatos();
-
                         }
                     });
                 });
@@ -137,7 +131,6 @@ public class OrdenCompraPanel extends BorderPane {
                     OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
                     btnEnviar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
                     btnCancelar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
-                    btnEditar.setVisible("Pendiente".equals(dto.getEstadoOrdenDeCompra()));
                     btnRecibir.setVisible("Enviada".equals(dto.getEstadoOrdenDeCompra()));
                     setGraphic(container);
                 }
@@ -150,15 +143,118 @@ public class OrdenCompraPanel extends BorderPane {
         Button btnNuevaOrden = new Button("Nueva Orden de Compra");
         btnNuevaOrden.setOnAction(e -> seleccionarMetodoCreacion());
 
-        // Barra superior con botón
         HBox barraSuperior = new HBox(10, btnNuevaOrden);
         barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;");
         setTop(barraSuperior);
     }
 
-    private void abrirVentanaEditarArticulos(Long codigo, Node origen) {
+    private void abrirVentanaEditarArticulos(Long codigo, String estado, Node origen) {
         Stage ventana = new Stage();
-        OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codigo);
+        OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codigo, estado);
+        Scene escena = new Scene(panelArt, 1280, 720);
+        ventana.setScene(escena);
+        ventana.setTitle("Artículos de la Orden de Compra");
+
+        ventana.initModality(Modality.APPLICATION_MODAL);
+        ventana.initOwner(((Stage) origen.getScene().getWindow()));
+
+        ventana.showAndWait();
+        cargarDatos();
+    }
+
+    private void mostrarDialogoProveedorYCantidad(Long codArticulo, String nombreArticulo) {
+        SugerenciaOrdenDTO sugerencia = controller.obtenerSugerenciaParaArticulo(codArticulo);
+        List<ProveedorArticuloDTO> proveedores = controller.obtenerProveedoresParaArticulo(codArticulo);
+
+        if (proveedores.isEmpty()) {
+            mostrarAlerta(Alert.AlertType.WARNING, "No hay proveedores disponibles para este artículo.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Nueva Orden por Artículo");
+        dialog.setHeaderText("Crear orden para: " + nombreArticulo);
+
+        // UI Elements
+        TableView<ProveedorArticuloDTO> proveedorTable = new TableView<>();
+
+        TableColumn<ProveedorArticuloDTO, String> colProveedor = new TableColumn<>("Proveedor");
+        colProveedor.setCellValueFactory(new PropertyValueFactory<>("nombreProveedor"));
+
+        TableColumn<ProveedorArticuloDTO, BigDecimal> colPrecio = new TableColumn<>("Precio Unitario");
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
+
+        TableColumn<ProveedorArticuloDTO, Integer> colDemora = new TableColumn<>("Demora (días)");
+        colDemora.setCellValueFactory(new PropertyValueFactory<>("demoraEntregaDias"));
+
+        TableColumn<ProveedorArticuloDTO, BigDecimal> colCostoPedido = new TableColumn<>("Costo Pedido");
+        colCostoPedido.setCellValueFactory(new PropertyValueFactory<>("costoPedido"));
+
+        proveedorTable.getColumns().addAll(colProveedor, colPrecio, colDemora, colCostoPedido);
+        proveedorTable.setItems(FXCollections.observableArrayList(proveedores));
+
+        Label cantidadLabel = new Label("Cantidad sugerida:");
+        TextField cantidadField = new TextField(sugerencia.getCantidadSugerida().toString());
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("Artículo seleccionado:"), 0, 0);
+        grid.add(new Label(nombreArticulo), 1, 0);
+        grid.add(new Label("Seleccione proveedor:"), 0, 1);
+        grid.add(proveedorTable, 1, 1);
+        grid.add(cantidadLabel, 0, 2);
+        grid.add(cantidadField, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                ProveedorArticuloDTO proveedorSeleccionado = proveedorTable.getSelectionModel().getSelectedItem();
+                if (proveedorSeleccionado == null) {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Debe seleccionar un proveedor.");
+                    return;
+                }
+
+                try {
+                    int cantidad = (int) Long.parseLong(cantidadField.getText());
+                    crearYAbrirNuevaOrdenPorArticulo(codArticulo, proveedorSeleccionado.getCodProveedor(), cantidad);
+                } catch (NumberFormatException e) {
+                    mostrarAlerta(Alert.AlertType.ERROR, "Cantidad ingresada inválida.");
+                }
+            }
+        });
+    }
+    private void mostrarOpcionesOrdenExistente(Long codOrdenExistente, ProveedorDTO proveedorSeleccionado, Long codArticulo, String nombreArticulo) {
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle("Orden ya existente");
+        alerta.setHeaderText("Ya existe una orden abierta");
+        alerta.setContentText("¿Qué desea hacer?");
+
+        ButtonType irAOrden = new ButtonType("Ir a la orden existente");
+        ButtonType crearNueva = new ButtonType("Crear nueva orden");
+        ButtonType cancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alerta.getButtonTypes().setAll(irAOrden, crearNueva, cancelar);
+
+        alerta.showAndWait().ifPresent(opcion -> {
+            if (opcion == irAOrden) {
+                abrirVentanaEditarArticulos(codOrdenExistente, tablaOrdenes);
+            } else if (opcion == crearNueva) {
+                if (proveedorSeleccionado == null) {
+                    mostrarDialogoProveedorYCantidad(codArticulo, nombreArticulo);
+                }
+                crearYAbrirNuevaOrden(proveedorSeleccionado.getCodProveedor());
+            }
+            // Si cancela, no se hace nada
+        });
+    }
+
+    private void abrirVentanaEditarArticulos(Long codOrdenCompra, Node origen) {
+        String estadoOrden =  controller.obtenerEstadoDeUnaOrden(codOrdenCompra);
+        Stage ventana = new Stage();
+        OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codOrdenCompra, estadoOrden);
         Scene escena = new Scene(panelArt, 1280, 720);
         ventana.setScene(escena);
         ventana.setTitle("Editar Artículos de la Orden de Compra");
@@ -250,111 +346,25 @@ public class OrdenCompraPanel extends BorderPane {
         });
     }
 
-    private void mostrarDialogoProveedorYCantidad(Long codArticulo, String nombreArticulo) {
-        // Obtener sugerencia desde el backend
-        SugerenciaOrdenDTO sugerencia = controller.obtenerSugerenciaParaArticulo(codArticulo);
-        List<ProveedorDTO> proveedores = controller.obtenerProveedoresParaArticulo(codArticulo);
-
-        if (proveedores.isEmpty()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "No hay proveedores disponibles para este artículo.");
-            return;
-        }
-
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nueva Orden por Artículo");
-        dialog.setHeaderText("Crear orden para: " + nombreArticulo);
-
-        // UI Elements
-        Label proveedorLabel = new Label("Proveedor:");
-        ComboBox<String> proveedorCombo = new ComboBox<>();
-        Map<String, ProveedorDTO> mapNombreProveedor = new HashMap<>();
-        for (ProveedorDTO proveedor : proveedores) {
-            String nombre = proveedor.getNombreProveedor();
-            proveedorCombo.getItems().add(nombre);
-            mapNombreProveedor.put(nombre, proveedor);
-        }
-
-        // Preseleccionar sugerido
-        String nombreSugerido = sugerencia.getNombreProveedorSugerido();
-        proveedorCombo.getSelectionModel().select(nombreSugerido);
-
-        Label cantidadLabel = new Label("Cantidad sugerida:");
-        TextField cantidadField = new TextField(sugerencia.getCantidadSugerida().toString());
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.add(new Label("Artículo seleccionado:"), 0, 0);
-        grid.add(new Label(nombreArticulo), 1, 0);
-        grid.add(proveedorLabel, 0, 1);
-        grid.add(proveedorCombo, 1, 1);
-        grid.add(cantidadLabel, 0, 2);
-        grid.add(cantidadField, 1, 2);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        dialog.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                String proveedorSeleccionado = proveedorCombo.getValue();
-                ProveedorDTO proveedorDTO = mapNombreProveedor.get(proveedorSeleccionado);
-
-                try {
-                    int cantidad = (int) Long.parseLong(cantidadField.getText());
-                    crearYAbrirNuevaOrdenPorArticulo(codArticulo, proveedorDTO.getCodProveedor(), cantidad);
-                } catch (NumberFormatException e) {
-                    mostrarAlerta(Alert.AlertType.ERROR, "Cantidad ingresada inválida.");
-                }
-            }
-        });
-    }
-
-
-
-    private void mostrarOpcionesOrdenExistente(Long codOrdenExistente, ProveedorDTO proveedorSeleccionado, Long codArticulo, String nombreArticulo) {
-        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
-        alerta.setTitle("Orden ya existente");
-        alerta.setHeaderText("Ya existe una orden abierta");
-        alerta.setContentText("¿Qué desea hacer?");
-
-        ButtonType irAOrden = new ButtonType("Ir a la orden existente");
-        ButtonType crearNueva = new ButtonType("Crear nueva orden");
-        ButtonType cancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        alerta.getButtonTypes().setAll(irAOrden, crearNueva, cancelar);
-
-        alerta.showAndWait().ifPresent(opcion -> {
-            if (opcion == irAOrden) {
-                abrirVentanaEditarArticulos(codOrdenExistente, tablaOrdenes);
-            } else if (opcion == crearNueva) {
-                if (proveedorSeleccionado == null) {
-                    mostrarDialogoProveedorYCantidad(codArticulo, nombreArticulo);
-                }
-                crearYAbrirNuevaOrden(proveedorSeleccionado.getCodProveedor());
-            }
-            // Si cancela, no se hace nada
-        });
-    }
 
     private void crearYAbrirNuevaOrden(Long codProveedor) {
         Long nuevaOrdenId = controller.crearOrdenDeCompra(codProveedor);
-        abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
         cargarDatos();
+        abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
+
     }
 
     private void crearYAbrirNuevaOrdenPorArticulo(Long codArticulo, Long codProveedor, int cantidadSolicitada) {
         Long nuevaOrdenId = controller.crearOrdenDeCompraPorArticulo(codArticulo, codProveedor, cantidadSolicitada);
-        abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
         cargarDatos();
-    }
+        abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
 
+    }
 
     private void mostrarAlerta(Alert.AlertType tipo, String mensaje) {
         Alert alerta = new Alert(tipo, mensaje);
         alerta.showAndWait();
     }
-
-
 
     private void cargarDatos() {
         List<OrdenDeCompraDTO> ordenes = controller.obtenerTodasOrdenesDeCompra();

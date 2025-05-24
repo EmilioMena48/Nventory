@@ -26,5 +26,9 @@ public class OrdenDeCompraArticulo {
     @JoinColumn(name = "codArticuloProveedor")
     private ArticuloProveedor articuloProveedor;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "codOrdenCompra")
+    private OrdenDeCompra ordenDeCompra;
+
 
 }

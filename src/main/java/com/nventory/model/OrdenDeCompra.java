@@ -19,7 +19,7 @@ public class OrdenDeCompra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codOrdenDeCompra;
     private LocalDateTime fechaHoraEnvioProv;
-    private BigDecimal totalOrdenDeCompra;
+    private BigDecimal totalOrdenDeCompra = BigDecimal.ZERO;
 
     //Relacion Orden Compra - Proveedor
     @ManyToOne(fetch = FetchType.EAGER)
