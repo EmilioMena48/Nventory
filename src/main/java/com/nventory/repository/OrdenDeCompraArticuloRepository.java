@@ -35,6 +35,17 @@ public class OrdenDeCompraArticuloRepository extends HardDeletableRepositoryImpl
     }
 
 
+    //-------------Metodo para buscar una OrdenCompraArticulo de acuerdo al articulo seleccionado-----------
+    public List<OrdenDeCompraArticulo > buscarOrdenCompraArticuloDeArticulo (Long codArticuloProveedor){
+        EntityManager em = IndireccionJPA.getEntityManager();
+
+        String sql = "SELECT * FROM ordencompraarticulo WHERE codArticuloProveedor = :codArticuloProveedor";
+        TypedQuery<OrdenDeCompraArticulo> query = (TypedQuery<OrdenDeCompraArticulo>) em.createNativeQuery(sql, OrdenDeCompraArticulo.class);
+        query.setParameter("codArticuloProveedor", codArticuloProveedor);
+
+        return query.getResultList();
+
+    }
 
 
 }
