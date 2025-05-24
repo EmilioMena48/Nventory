@@ -27,8 +27,7 @@ public class OrdenDeCompra {
     private Proveedor proveedor;
 
     //Relacion OrdenCompra - OrdenCompraArticulo
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "codOrdenCompra") //crea la fk en OrdenCompraArticulo
+    @OneToMany(mappedBy = "ordenDeCompra", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrdenDeCompraArticulo> ordenDeCompraArticulo;
 
     //Relacion OrdenDeCompra - EstadoOrdenDeCompra

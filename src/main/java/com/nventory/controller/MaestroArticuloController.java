@@ -4,7 +4,6 @@ import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorDTO;
 import com.nventory.model.Articulo;
 import com.nventory.service.ArticuloService;
-import com.nventory.service.OrdenCompraService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
@@ -38,7 +37,7 @@ public class MaestroArticuloController {
 
     //----------Baja de articulos------------------------
     public void darDeBajaArticulo(ArticuloDTO articuloDTO){
-
+        articuloService.darDeBajaArticulo(articuloDTO);
     }
 
     //---------Metodo del controller para obtener todos los Proveedores de un articulo
