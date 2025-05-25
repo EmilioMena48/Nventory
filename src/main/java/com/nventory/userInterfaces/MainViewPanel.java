@@ -4,7 +4,6 @@ import com.nventory.controller.MaestroArticuloController;
 import com.nventory.controller.OrdenDeCompraController;
 import com.nventory.controller.ProveedorController;
 import com.nventory.controller.VentaController;
-import com.nventory.repository.ProveedorRepository;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -179,8 +178,8 @@ public class MainViewPanel  extends BorderPane {
     }
 
     private void mostrarOrdenCompra() {
-        OrdenDeCompraController controller = new OrdenDeCompraController();
-        contenidoBody.getChildren().setAll(botonVolver, new OrdenCompraPanel(controller));
+        OrdenDeCompraController ordenDeCompraController = new OrdenDeCompraController();
+        contenidoBody.getChildren().setAll(botonVolver, new OrdenCompraPanel(ordenDeCompraController));
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 
