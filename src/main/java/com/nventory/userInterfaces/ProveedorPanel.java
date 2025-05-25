@@ -503,10 +503,24 @@ class PopupMensaje {
         popup.initModality(Modality.APPLICATION_MODAL);
 
         Label lblMensaje = new Label(mensaje);
-        lblMensaje.setStyle("-fx-background-color: #6dbef1; -fx-text-fill: white; -fx-padding: 5px; -fx-font-size: 14px; -fx-border-radius: 5px; -fx-background-radius: 5px;");
+        lblMensaje.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        lblMensaje.setMaxWidth(320);
+        lblMensaje.setWrapText(true);
+        lblMensaje.setTextOverrun(OverrunStyle.ELLIPSIS);
 
-        StackPane root = new StackPane(lblMensaje);
-        root.setStyle("-fx-background-color: transparent; -fx-border-color: #bdc3c7; -fx-border-width: 1px; -fx-border-radius: 5px;");
+        VBox vbox = new VBox(15);
+        vbox.setAlignment(Pos.CENTER);
+        vbox.setPadding(new Insets(15));
+        vbox.getChildren().add(lblMensaje);
+
+        StackPane root = new StackPane(vbox);
+        root.setPadding(new Insets(15));
+        root.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-border-color: #bdc3c7;" +
+                        "-fx-border-width: 1px;" +
+                        "-fx-border-radius: 5px;"
+        );
         root.setAlignment(Pos.CENTER);
 
         Scene scene = new Scene(root, 350, 150);
@@ -525,35 +539,97 @@ class PopupMensaje {
             case 2 -> {
                 Button btnAceptar = new Button("Aceptar");
                 btnAceptar.setOnAction(e -> popup.close());
-                root.getChildren().add(btnAceptar);
-                StackPane.setAlignment(btnAceptar, Pos.BOTTOM_CENTER);
-
-                StackPane.setMargin(btnAceptar, new Insets(10));
-                btnAceptar.getStyleClass().add("button-aceptar");
+                btnAceptar.setStyle(
+                        "-fx-background-color: #27ae60; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                );
+                btnAceptar.setOnMouseEntered(e -> btnAceptar.setStyle(
+                        "-fx-background-color: #2ecc71; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+                btnAceptar.setOnMouseExited(e -> btnAceptar.setStyle(
+                        "-fx-background-color: #27ae60; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+                HBox hbox = new HBox(10, btnAceptar);
+                hbox.setAlignment(Pos.BOTTOM_CENTER);
+                root.getChildren().add(hbox);
                 popup.show();
             }
             case 3 -> {
                 Button btnAceptar = new Button("Aceptar");
                 Button btnCancelar = new Button("Cancelar");
+
+                btnAceptar.setStyle(
+                        "-fx-background-color: #27ae60; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                );
+                btnAceptar.setOnMouseEntered(e -> btnAceptar.setStyle(
+                        "-fx-background-color: #2ecc71; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+                btnAceptar.setOnMouseExited(e -> btnAceptar.setStyle(
+                        "-fx-background-color: #27ae60; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+
+                btnCancelar.setStyle(
+                        "-fx-background-color: #c0392b; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                );
+                btnCancelar.setOnMouseEntered(e -> btnCancelar.setStyle(
+                        "-fx-background-color: #e74c3c; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+                btnCancelar.setOnMouseExited(e -> btnCancelar.setStyle(
+                        "-fx-background-color: #c0392b; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-padding: 8 20; " +
+                                "-fx-background-radius: 5;"
+                ));
+
                 btnAceptar.setOnAction(e -> {
                     popup.close();
-                    if (accion != null) {
-                        accion.run();
-                    }
+                    if (accion != null) accion.run();
                 });
                 btnCancelar.setOnAction(e -> popup.close());
+
                 HBox hbox = new HBox(10, btnAceptar, btnCancelar);
                 hbox.setAlignment(Pos.BOTTOM_CENTER);
                 root.getChildren().add(hbox);
+
                 popup.show();
             }
             case 4 -> {
                 PauseTransition pause = new PauseTransition(Duration.seconds(1));
                 pause.setOnFinished(e -> {
                     popup.close();
-                    if (accion != null) {
-                        accion.run();
-                    }
+                    if (accion != null) accion.run();
                 });
                 popup.show();
                 pause.play();
