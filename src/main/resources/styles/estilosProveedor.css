@@ -127,6 +127,18 @@
     -fx-background-color: #c0392b;
 }
 
+.seleccion-articulo {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+    -fx-spacing: 10;
+    -fx-opacity: 0;
+    -fx-translate-y: 10;
+}
+
 @keyframes fadeIn {
     from {
         -fx-opacity: 0;

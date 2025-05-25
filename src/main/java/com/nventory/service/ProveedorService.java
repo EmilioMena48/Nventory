@@ -1,6 +1,7 @@
 package com.nventory.service;
 
 import com.nventory.DTO.ProveedorDTO;
+import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.model.Proveedor;
 import com.nventory.repository.ProveedorRepository;
 
@@ -15,16 +16,31 @@ public class ProveedorService {
         this.proveedorRepository = proveedorRepository;
     }
 
-    public List<ProveedorDTO> listarProveedores(boolean B) {
+    public List<ProveedorDTO> listarProveedores() {
         List<Proveedor> proveedores = proveedorRepository.buscarTodos();
         List<ProveedorDTO> proveedoresDto = new ArrayList<>();
         for (Proveedor proveedor : proveedores) {
             boolean A = proveedor.isActivo();
-            if (!((A && B) || (!A && !B))) continue;
+            if (!(proveedor.isActivo())) continue;
             ProveedorDTO proveedorDto = new ProveedorDTO();
             proveedorDto.setCodProveedor(proveedor.getCodProveedor());
             proveedorDto.setDescripcionProveedor(proveedor.getDescripcionProveedor());
             proveedorDto.setNombreProveedor(proveedor.getNombreProveedor());
+            proveedoresDto.add(proveedorDto);
+        }
+        return proveedoresDto;
+    }
+
+    public List<ProveedorEliminadoDTO> listarProveedoresEliminados() {
+        List<Proveedor> proveedores = proveedorRepository.buscarTodos();
+        List<ProveedorEliminadoDTO> proveedoresDto = new ArrayList<>();
+        for (Proveedor proveedor : proveedores) {
+            if (proveedor.isActivo()) continue;
+            ProveedorEliminadoDTO proveedorDto = new ProveedorEliminadoDTO();
+            proveedorDto.setCodProveedor(proveedor.getCodProveedor());
+            proveedorDto.setDescripcionProveedor(proveedor.getDescripcionProveedor());
+            proveedorDto.setNombreProveedor(proveedor.getNombreProveedor());
+            proveedorDto.setFechaHoraBajaProveedor(proveedor.getFechaHoraBajaProveedor());
             proveedoresDto.add(proveedorDto);
         }
         return proveedoresDto;
@@ -49,5 +65,16 @@ public class ProveedorService {
         proveedor.setDescripcionProveedor(proveedorDto.getDescripcionProveedor());
         proveedor.setNombreProveedor(proveedorDto.getNombreProveedor());
         proveedorRepository.guardar(proveedor);
+    }
+
+    public Long guardarProveedorYRetornarID(ProveedorDTO proveedorDto) {
+        Proveedor proveedor = new Proveedor();
+        proveedor.setDescripcionProveedor(proveedorDto.getDescripcionProveedor());
+        proveedor.setNombreProveedor(proveedorDto.getNombreProveedor());
+        return proveedorRepository.GuardarYRetornarID(proveedor);
+    }
+
+    public Proveedor buscarProveedorPorId(Long id) {
+        return proveedorRepository.buscarPorId(id);
     }
 }

@@ -67,5 +67,10 @@ public class ArticuloService {
         }
     }
 
+    //-----------------Metodo del service para listar todos los articulos-----------------------------
+    public List<Articulo> listarArticulos() {
+        return articuloRepository.buscarTodos();
+    }
+
 }
 
