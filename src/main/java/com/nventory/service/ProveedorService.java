@@ -66,4 +66,15 @@ public class ProveedorService {
         proveedor.setNombreProveedor(proveedorDto.getNombreProveedor());
         proveedorRepository.guardar(proveedor);
     }
+
+    public Long guardarProveedorYRetornarID(ProveedorDTO proveedorDto) {
+        Proveedor proveedor = new Proveedor();
+        proveedor.setDescripcionProveedor(proveedorDto.getDescripcionProveedor());
+        proveedor.setNombreProveedor(proveedorDto.getNombreProveedor());
+        return proveedorRepository.GuardarYRetornarID(proveedor);
+    }
+
+    public Proveedor buscarProveedorPorId(Long id) {
+        return proveedorRepository.buscarPorId(id);
+    }
 }
