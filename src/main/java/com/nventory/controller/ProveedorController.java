@@ -1,6 +1,7 @@
 package com.nventory.controller;
 
 import com.nventory.DTO.ProveedorDTO;
+import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.interfaces.ModuloProveedores;
 import com.nventory.repository.ProveedorRepository;
 import com.nventory.service.ProveedorService;
@@ -27,12 +28,12 @@ public class ProveedorController implements ModuloProveedores {
 
     @Override
     public List<ProveedorDTO> ListarProveedores() {
-        return proveedorService.listarProveedores(true);
+        return proveedorService.listarProveedores();
     }
 
     @Override
-    public List<ProveedorDTO> ListarProveedoresEliminados() {
-        return proveedorService.listarProveedores(false);
+    public List<ProveedorEliminadoDTO> ListarProveedoresEliminados() {
+        return proveedorService.listarProveedoresEliminados();
     }
 
     @Override

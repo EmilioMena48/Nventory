@@ -1,6 +1,7 @@
 package com.nventory.userInterfaces;
 
 import com.nventory.DTO.ProveedorDTO;
+import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.controller.ProveedorController;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -29,7 +30,8 @@ public class ProveedorPanel extends BorderPane {
 
     private final ProveedorController controller;
     private VBox areaContenido;
-    private TableView<ProveedorDTO> tablaProveedores;
+    private TableView<ProveedorDTO> tablaProveedores = new TableView<>();
+    private TableView<ProveedorEliminadoDTO> tablaProveedoresEliminados = new TableView<>();
     private ProveedorDTO proveedorDTO;
     private boolean modificar = false;
 
@@ -37,7 +39,7 @@ public class ProveedorPanel extends BorderPane {
         this.controller = controller;
         this.getStylesheets().add(Objects.requireNonNull(getClass().getResource(CSS)).toExternalForm());
         inicializarInterfaz();
-        cargarTablaProveedores(true);
+        cargarTablaProveedoresActivos();
     }
 
     private void inicializarInterfaz() {
@@ -57,6 +59,7 @@ public class ProveedorPanel extends BorderPane {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
         menu.getChildren().addAll(
+                crearBoton("Listar Proveedores", () -> cargarTablaProveedoresActivos()),
                 crearBoton("Alta Proveedor", this::mostrarFormularioAlta),
                 crearBoton("Listar Artículos por Proveedor", this::listarArticulosPorProveedor),
                 crearBoton("Asociar Artículo a Proveedor", this::asociarArticuloAProveedor),
@@ -101,6 +104,7 @@ public class ProveedorPanel extends BorderPane {
         } else {
             txtNombre.clear();
             txtDescripcion.clear();
+            proveedorDTO = null;
         }
         modificar = false;
 
@@ -118,7 +122,7 @@ public class ProveedorPanel extends BorderPane {
     private Button crearBotonCancelar() {
         Button btnCancelar = new Button("Cancelar");
         btnCancelar.getStyleClass().add("button-cancelar");
-        btnCancelar.setOnAction(e -> cargarTablaProveedores(true));
+        btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
         return btnCancelar;
     }
 
@@ -156,7 +160,7 @@ public class ProveedorPanel extends BorderPane {
                     txtNombre.clear();
                     txtDescripcion.clear();
                     proveedorDTO = null;
-                    cargarTablaProveedores(true);
+                    cargarTablaProveedoresActivos();
                 });
             } catch (Exception ex) {
                 mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage(), 2, null);
@@ -164,39 +168,72 @@ public class ProveedorPanel extends BorderPane {
         }
     }
 
-    private void cargarTablaProveedores(boolean activos) {
+    private void cargarTablaProveedoresActivos() {
         areaContenido.getChildren().clear();
-
-        tablaProveedores = new TableView<>();
-        tablaProveedores.getStyleClass().add("tablaProveedor");
-        tablaProveedores.setPlaceholder(new Label("No hay proveedores disponibles."));
-
-        tablaProveedores.getColumns().addAll(
-                crearColumna("Código", "codProveedor"),
-                crearColumna("Nombre", "nombreProveedor"),
-                crearColumna("Descripción", "descripcionProveedor"),
-                activos ? crearColumnaAcciones() : crearColumnaAccionesRestaurar()
+        tablaProveedores.getColumns().clear();
+        TableView<ProveedorDTO> tabla = tablaProveedores;
+        if (!tabla.getStyleClass().contains("tablaProveedor")) {
+            tabla.getStyleClass().add("tablaProveedor");
+        }
+        tabla.setPlaceholder(new Label("No hay proveedores disponibles."));
+        tabla.getColumns().addAll(crearColumnasBasicas());
+        tabla.getColumns().addAll(
+                crearColumnaAcciones()
         );
-        tablaProveedores.setFixedCellSize(25);
-        try {
-            List<ProveedorDTO> proveedores;
-            if (activos) {
-                proveedores = controller.ListarProveedores();
-            } else {
-                proveedores = controller.ListarProveedoresEliminados();
-            }
 
-            tablaProveedores.getItems().setAll(proveedores);
-            tablaProveedores.prefHeightProperty().bind(
-                    tablaProveedores.fixedCellSizeProperty().multiply(proveedores.size() + 1));
-            areaContenido.getChildren().add(tablaProveedores);
+        tabla.setFixedCellSize(25);
+
+        try {
+            List<ProveedorDTO> proveedores = controller.ListarProveedores();
+            tabla.getItems().setAll(proveedores);
+            tabla.prefHeightProperty().bind(
+                    tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1)
+            );
+            areaContenido.getChildren().add(tabla);
         } catch (Exception e) {
             mostrarAlerta(ERROR_CARGAR_PROVEEDORES + e.getMessage(), 2, null);
         }
     }
 
-    private <T> TableColumn<ProveedorDTO, T> crearColumna(String titulo, String propiedad) {
-        TableColumn<ProveedorDTO, T> columna = new TableColumn<>(titulo);
+    private void cargarTablaProveedoresEliminados() {
+        areaContenido.getChildren().clear();
+        tablaProveedoresEliminados.getColumns().clear();
+        TableView<ProveedorEliminadoDTO> tabla = tablaProveedoresEliminados;
+        if (!tabla.getStyleClass().contains("tablaProveedor")) {
+            tabla.getStyleClass().add("tablaProveedor");
+        }
+        tabla.setPlaceholder(new Label("No hay proveedores eliminados."));
+
+        tabla.getColumns().addAll(crearColumnasBasicas());
+        tabla.getColumns().addAll(
+                crearColumna("Fecha de Baja", "fechaHoraBajaProveedor"),
+                crearColumnaAccionesRestaurar()
+        );
+
+        tabla.setFixedCellSize(25);
+
+        try {
+            List<ProveedorEliminadoDTO> proveedores = controller.ListarProveedoresEliminados();
+            tabla.getItems().setAll(proveedores);
+            tabla.prefHeightProperty().bind(
+                    tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1)
+            );
+            areaContenido.getChildren().add(tabla);
+        } catch (Exception e) {
+            mostrarAlerta(ERROR_CARGAR_PROVEEDORES + e.getMessage(), 2, null);
+        }
+    }
+
+    private <S> List<TableColumn<S, ?>> crearColumnasBasicas() {
+        return List.of(
+                crearColumna("Código", "codProveedor"),
+                crearColumna("Nombre", "nombreProveedor"),
+                crearColumna("Descripción", "descripcionProveedor")
+        );
+    }
+
+    private <S, T> TableColumn<S, T> crearColumna(String titulo, String propiedad) {
+        TableColumn<S, T> columna = new TableColumn<>(titulo);
         columna.setCellValueFactory(new PropertyValueFactory<>(propiedad));
         return columna;
     }
@@ -220,7 +257,7 @@ public class ProveedorPanel extends BorderPane {
                     mostrarAlerta("¿Está seguro de eliminar este proveedor?", 3, () -> {
                         try {
                             controller.EliminarProveedor(proveedorDTO.getCodProveedor());
-                            cargarTablaProveedores(true);
+                            cargarTablaProveedoresActivos();
                         } catch (Exception ex) {
                             mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage());
                         }
@@ -239,15 +276,19 @@ public class ProveedorPanel extends BorderPane {
         return colAcciones;
     }
 
-    private TableColumn<ProveedorDTO, Void> crearColumnaAccionesRestaurar() {
-        TableColumn<ProveedorDTO, Void> colAcciones = new TableColumn<>("Acciones");
+    private TableColumn<ProveedorEliminadoDTO, Void> crearColumnaAccionesRestaurar() {
+        TableColumn<ProveedorEliminadoDTO, Void> colAcciones = new TableColumn<>("Acciones");
         colAcciones.setCellFactory(param -> new TableCell<>() {
             private final Button btnRestaurar = new Button("Restaurar");
             private final HBox container = new HBox(5, btnRestaurar);
 
             {
                 btnRestaurar.setOnAction(e -> {
-                    proveedorDTO = getTableView().getItems().get(getIndex());
+                    ProveedorEliminadoDTO proveedor = getTableView().getItems().get(getIndex());
+                    proveedorDTO = new ProveedorDTO();
+                    proveedorDTO.setCodProveedor(proveedor.getCodProveedor());
+                    proveedorDTO.setNombreProveedor(proveedor.getNombreProveedor());
+                    proveedorDTO.setDescripcionProveedor(proveedor.getDescripcionProveedor());
                     modificar = true;
                     mostrarFormularioAlta();
                 });
@@ -274,7 +315,7 @@ public class ProveedorPanel extends BorderPane {
 
     private void restaurarProveedor() {
         areaContenido.getChildren().clear();
-        cargarTablaProveedores(false);
+        cargarTablaProveedoresEliminados();
     }
 
     private void mostrarAlerta(String mensaje) {

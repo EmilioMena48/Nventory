@@ -1,6 +1,7 @@
 package com.nventory.interfaces;
 
 import com.nventory.DTO.ProveedorDTO;
+import com.nventory.DTO.ProveedorEliminadoDTO;
 import lombok.NonNull;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface ModuloProveedores  {
     public void GuardarProveedor(@NonNull ProveedorDTO proveedor);
     public void EliminarProveedor(@NonNull Long codProveedor);
     public List<ProveedorDTO> ListarProveedores();
-    public List<ProveedorDTO> ListarProveedoresEliminados();
+    public List<ProveedorEliminadoDTO> ListarProveedoresEliminados();
     public ProveedorDTO BuscarProveedor(@NonNull Long codProveedor);
     void ListarArticulosxProveedor();
     void AsociarArticuloProveedor();

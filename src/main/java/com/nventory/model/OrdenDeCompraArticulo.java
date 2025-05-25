@@ -30,10 +30,10 @@ public class OrdenDeCompraArticulo {
     @JoinColumn(name = "codOrdenCompra")
     private OrdenDeCompra ordenDeCompra;
 
-
+/*
     //Relacion OrdenDeCompraArticulo - OrdenCompra
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "codOrdenCompra")
     private OrdenDeCompra ordenDeCompra;
-
+*/
 }
