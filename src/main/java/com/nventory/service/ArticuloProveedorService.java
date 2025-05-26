@@ -7,6 +7,7 @@ import com.nventory.model.Proveedor;
 import com.nventory.repository.ArticuloProveedorRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,13 @@ public class ArticuloProveedorService {
     }
 
     public void eliminarArticuloProveedor(Long id) {
+        ArticuloProveedor articuloProveedor = repository.buscarPorId(id);
+        if (articuloProveedor != null) {
+            articuloProveedor.setFechaHoraBajaArticuloProveedor(LocalDateTime.now());
+            repository.guardar(articuloProveedor);
+        } else {
+            throw new IllegalArgumentException("El Articulo Proveedor no existe");
+        }
     }
 
     public void guardarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto){
@@ -44,8 +52,9 @@ public class ArticuloProveedorService {
 
     public List<Articulo> obtenerArticulosDeEseProveedor(Long idProveedor) {
         return repository.buscarTodosArticulosDelProveedor(idProveedor).stream()
-                .map(ArticuloProveedor::getArticulo)
                 .filter(Objects::nonNull)
+                .filter(articuloProveedor -> articuloProveedor.getFechaHoraBajaArticuloProveedor() == null)
+                .map(ArticuloProveedor::getArticulo)
                 .collect(Collectors.toList());
     }
 

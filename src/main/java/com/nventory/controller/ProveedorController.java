@@ -114,6 +114,21 @@ public class ProveedorController implements ModuloProveedores {
     }
 
     @Override
+    public void EliminarArticuloProveedor(Long articuloId, Long proveedorId) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articuloId, proveedorId);
+        Articulo articulo = articuloService.buscarArticuloPorId(articuloId);
+        Proveedor proveedor = proveedorService.buscarProveedorPorId(proveedorId);
+        if (articuloProveedor != null) {
+            if (articulo.getArticuloProveedor() != null && articulo.getArticuloProveedor().getCodArticuloProveedor().equals(articuloProveedor.getCodArticuloProveedor())) {
+                throw new IllegalStateException("El proveedor "+proveedor.getNombreProveedor()+" es predeterminado del articulo: " + articulo.getNombreArticulo());
+            }
+            articuloProveedorService.eliminarArticuloProveedor(articuloProveedor.getCodArticuloProveedor());
+        } else {
+            throw new IllegalStateException("No existe la asociacion entre el articulo y el proveedor.");
+        }
+    }
+
+    @Override
     public ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId) {
         ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articuloId, proveedorId);
         if (articuloProveedor != null) {
@@ -126,6 +141,12 @@ public class ProveedorController implements ModuloProveedores {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articuloId, proveedorId);
+        return articuloProveedor != null && articuloProveedor.getFechaHoraBajaArticuloProveedor() != null;
     }
 
     @Override

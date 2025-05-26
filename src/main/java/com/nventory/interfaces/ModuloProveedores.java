@@ -27,4 +27,6 @@ public interface ModuloProveedores  {
     public List<Articulo> ListarArticulos(Long codProveedor);
     public ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId);
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedor);
+    public void EliminarArticuloProveedor(Long articuloId, Long proveedorId);
+    public boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId);
 }

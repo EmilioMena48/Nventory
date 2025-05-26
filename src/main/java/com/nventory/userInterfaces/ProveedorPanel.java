@@ -413,6 +413,20 @@ public class ProveedorPanel extends BorderPane {
                 }
             });
 
+            btnEliminar.setOnAction(e -> {
+                Articulo articuloSeleccionado = tabla.getSelectionModel().getSelectedItem();
+                if (articuloSeleccionado != null) {
+                    mostrarAlerta("¿Está seguro de eliminar este artículo del proveedor?", 3, () -> {
+                        try {
+                            controller.EliminarArticuloProveedor(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
+                            cargarTablaProveedoresActivos();
+                        } catch (Exception ex) {
+                            mostrarAlerta("Error al eliminar artículo: " + ex.getMessage(), 2, null);
+                        }
+                    });
+                }
+            });
+
             Label proveedorLabel = new Label("Proveedor: " + proveedorDTO.getNombreProveedor());
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
             proveedorLabel.setPadding(new Insets(5, 0, 5, 0));
@@ -481,7 +495,9 @@ public class ProveedorPanel extends BorderPane {
         try {
             List<Articulo> articulos = articuloController.listarArticulos();
             if (proveedorDTO.getCodProveedor() != 0L) {
-                articulos.removeIf(articulo -> controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null);
+                articulos.removeIf(articulo -> articulo.getArticuloProveedor() != null &&
+                        ((controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null) &&
+                                (controller.EstaEliminadoArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()))));
             }
             tabla.getItems().setAll(articulos);
             tabla.prefHeightProperty().bind(

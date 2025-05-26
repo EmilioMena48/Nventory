@@ -72,5 +72,12 @@ public class ArticuloService {
         return articuloRepository.buscarTodos();
     }
 
+    public Articulo buscarArticuloPorId(Long id) {
+        Articulo articulo = articuloRepository.buscarPorId(id);
+        if (articulo == null) {
+            throw new IllegalArgumentException("El articulo con ID " + id + " no existe.");
+        }
+        return articulo;
+    }
 }
 
