@@ -15,7 +15,8 @@ public class OrdenDeCompraArticuloRepository extends HardDeletableRepositoryImpl
     public List<OrdenDeCompraArticulo> buscarOCAdeUnaOC(Long codOrdenCompra) {
         EntityManager em = IndireccionJPA.getEntityManager();
 
-        String sql = "SELECT * FROM ordendecompraarticulo WHERE codOrdenCompra = :codOrdenCompra";
+        //String sql = "SELECT * FROM ordendecompraarticulo WHERE codOrdenCompra = :codOrdenCompra";
+        String sql = "SELECT * FROM OrdenDeCompraArticulo WHERE codOrdenCompra = :codOrdenCompra";
         TypedQuery<OrdenDeCompraArticulo> query = (TypedQuery<OrdenDeCompraArticulo>) em.createNativeQuery(sql, OrdenDeCompraArticulo.class);
         query.setParameter("codOrdenCompra", codOrdenCompra);
 
@@ -25,7 +26,8 @@ public class OrdenDeCompraArticuloRepository extends HardDeletableRepositoryImpl
     public OrdenDeCompraArticulo buscarPorCodOrdenCompraYArticulo(Long codOrdenCompra, Long codOrdenCompraA) {
         EntityManager em = IndireccionJPA.getEntityManager();
 
-        String sql = "SELECT * FROM ordendecompraarticulo WHERE codOrdenCompraA = :codOrdenCompraA AND codOrdenCompra = :codOrdenCompra";
+        //String sql = "SELECT * FROM ordendecompraarticulo WHERE codOrdenCompraA = :codOrdenCompraA AND codOrdenCompra = :codOrdenCompra";
+        String sql = "SELECT * FROM OrdenDeCompraArticulo WHERE codOrdenCompraA = :codOrdenCompraA AND codOrdenCompra = :codOrdenCompra";
         TypedQuery<OrdenDeCompraArticulo> query = (TypedQuery<OrdenDeCompraArticulo>) em.createNativeQuery(sql, OrdenDeCompraArticulo.class);
         query.setParameter("codOrdenCompraA", codOrdenCompraA);
         query.setParameter("codOrdenCompra", codOrdenCompra);

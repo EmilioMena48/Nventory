@@ -9,6 +9,7 @@ import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ArticuloRepository;
+import com.nventory.repository.OrdenDeCompraRepository;
 import com.nventory.repository.ProveedorRepository;
 import com.nventory.service.ArticuloProveedorService;
 import com.nventory.service.ArticuloService;
@@ -25,7 +26,8 @@ public class ProveedorController implements ModuloProveedores {
     ArticuloRepository articuloRepository = new ArticuloRepository();
 
     public ProveedorController() {
-        this.proveedorService = new ProveedorService(new ProveedorRepository());
+        this.proveedorService = new ProveedorService(new ProveedorRepository(),
+                new OrdenDeCompraRepository());
         this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository());
         this.articuloService = new ArticuloService(articuloRepository);
 
@@ -75,6 +77,15 @@ public class ProveedorController implements ModuloProveedores {
 
     @Override
     public void EliminarProveedor(Long codProveedor) {
+        List<Articulo> articulos = ListarArticulos(codProveedor);
+        for (Articulo articulo : articulos) {
+            if (articulo.getArticuloProveedor() != null && articulo.getArticuloProveedor().getProveedor().getCodProveedor().equals(codProveedor)) {
+                throw new IllegalStateException("Es proveedor predeterminado de "+ articulo.getNombreArticulo());
+            }
+        }
+        if (proveedorService.estaEnOrdenesDeCompra(codProveedor)) {
+            throw new IllegalStateException("El proveedor tiene ordenes de compra pendientes o en curso.");
+        }
         proveedorService.EliminarProveedor(codProveedor);
     }
 

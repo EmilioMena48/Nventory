@@ -232,7 +232,7 @@ public class ProveedorPanel extends BorderPane {
                             controller.EliminarProveedor(proveedorDTO.getCodProveedor());
                             cargarTablaProveedoresActivos();
                         } catch (Exception ex) {
-                            mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage());
+                            mostrarAlerta("Error al Eliminar: " + ex.getMessage(), 2, null);
                         }
                         proveedorDTO = null;
                     });
@@ -371,8 +371,7 @@ public class ProveedorPanel extends BorderPane {
                 if (articuloProveedorPredeterminado == null) {
                     return new ReadOnlyBooleanWrapper(false);
                 } else {
-                    Long codProveedorPredeterminado = articuloProveedorPredeterminado.getProveedor().getCodProveedor();
-                    boolean asociado = proveedorDTO != null && proveedorDTO.getCodProveedor() == codProveedorPredeterminado;
+                    boolean asociado = articuloProveedorPredeterminado.getProveedor().getCodProveedor().equals(proveedorDTO.getCodProveedor());
                     return new ReadOnlyBooleanWrapper(asociado);
                 }
             });
