@@ -118,7 +118,7 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
-    -fx-padding: 10 20;
+    -fx-padding: 8 20;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
     -fx-transition: background-color 0.3s ease;

@@ -27,6 +27,7 @@ public class ProveedorController implements ModuloProveedores {
     public ProveedorController() {
         this.proveedorService = new ProveedorService(new ProveedorRepository());
         this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository());
+
         //----- Test Guardado en Base de Datos de Articulo -----
         articuloRepository.guardar(Articulo.builder()
                 .codArticulo(1L)
@@ -40,6 +41,29 @@ public class ProveedorController implements ModuloProveedores {
                 .stockActual(50)
                 .build());
 
+        articuloRepository.guardar(Articulo.builder()
+                .codArticulo(2L)
+                .costoAlmacenamiento(new BigDecimal("150.00"))
+                .costoCapitalInmovilizado(new BigDecimal("75.00"))
+                .costoCompra(new BigDecimal("300.00"))
+                .demandaArt(200)
+                .nombreArticulo("Articulo Test 2")
+                .descripcionArticulo("Descripcion del Articulo Test 2")
+                .fechaHoraBajaArticulo(null)
+                .stockActual(100)
+                .build());
+
+        articuloRepository.guardar(Articulo.builder()
+                .codArticulo(3L)
+                .costoAlmacenamiento(new BigDecimal("200.00"))
+                .costoCapitalInmovilizado(new BigDecimal("100.00"))
+                .costoCompra(new BigDecimal("400.00"))
+                .demandaArt(300)
+                .nombreArticulo("Articulo Test 3")
+                .descripcionArticulo("Descripcion del Articulo Test 3")
+                .fechaHoraBajaArticulo(null)
+                .stockActual(150)
+                .build());
         //----- Fin Test Guardado en Base de Datos de Articulo -----
     }
 
@@ -64,8 +88,8 @@ public class ProveedorController implements ModuloProveedores {
     }
 
     @Override
-    public void ListarArticulosxProveedor() {
-
+    public List<Articulo> ListarArticulos(Long codProveedor) {
+        return articuloProveedorService.obtenerArticulosDeEseProveedor(codProveedor);
     }
 
     @Override
@@ -74,13 +98,28 @@ public class ProveedorController implements ModuloProveedores {
     }
 
     @Override
-    public Proveedor guardarYRetornar(ProveedorDTO proveedorDto) {
+    public ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articuloId, proveedorId);
+        if (articuloProveedor != null) {
+            return ArticuloProveedorGuardadoDTO.builder()
+                    .precioUnitario(articuloProveedor.getPrecioUnitario())
+                    .costoEnvio(articuloProveedor.getCostoEnvio())
+                    .costoPedido(articuloProveedor.getCostoPedido())
+                    .demoraEntregaDias(articuloProveedor.getDemoraEntregaDias())
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Proveedor GuardarYRetornar(ProveedorDTO proveedorDto) {
         Long idProveedor = proveedorService.guardarProveedorYRetornarID(proveedorDto);
         return proveedorService.buscarProveedorPorId(idProveedor);
     }
 
     @Override
-    public Proveedor buscarProveedorPorId(Long idProveedor) {
+    public Proveedor BuscarProveedorPorId(Long idProveedor) {
         return proveedorService.buscarProveedorPorId(idProveedor);
     }
 }

@@ -9,6 +9,8 @@ import com.nventory.repository.ArticuloProveedorRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ArticuloProveedorService {
     ArticuloProveedorRepository repository;
@@ -29,6 +31,10 @@ public class ArticuloProveedorService {
         articuloProveedor.setArticulo(articulo);
         articuloProveedor.setProveedor(proveedor);
 
+        ArticuloProveedor articuloProveedorAux = buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
+        if (articuloProveedorAux != null) {
+            articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
+        }
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
         articuloProveedor.setCostoEnvio(articuloProveedorDto.getCostoEnvio());
         articuloProveedor.setCostoPedido(articuloProveedorDto.getCostoPedido());
@@ -36,27 +42,21 @@ public class ArticuloProveedorService {
         repository.guardar(articuloProveedor);
     }
 
-    public List<Proveedor> obtenerProveedoresDeEseArticulo(Long idArticulo) {
-        List<ArticuloProveedor> articuloProveedores = repository.buscarTodosArticuloProveedor(idArticulo);
-        List<Proveedor> proveedores = new ArrayList<>();
-        for (ArticuloProveedor articuloProveedor : articuloProveedores) {
-            Proveedor proveedor = articuloProveedor.getProveedor();
-            if (proveedor != null) {
-                proveedores.add(proveedor);
-            }
-        }
-        return proveedores;
+    public List<Articulo> obtenerArticulosDeEseProveedor(Long idProveedor) {
+        return repository.buscarTodosArticulosDelProveedor(idProveedor).stream()
+                .map(ArticuloProveedor::getArticulo)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
-    public List<Articulo> obtenerArticulosDeEseProveedor(Long idProveedor) {
-        List<ArticuloProveedor> articuloProveedores = repository.buscarTodosArticulosDelProveedor(idProveedor);
-        List<Articulo> articulos = new ArrayList<>();
-        for (ArticuloProveedor articuloProveedor : articuloProveedores) {
-            Articulo articulo = articuloProveedor.getArticulo();
-            if (articulo != null) {
-                articulos.add(articulo);
+    public ArticuloProveedor buscarArticuloProveedorPorId(Long articuloId, Long proveedorId) {
+        List<ArticuloProveedor> articulosProveedores = repository.buscarTodos();
+        for (ArticuloProveedor articuloProveedor : articulosProveedores) {
+            if (articuloProveedor.getArticulo().getCodArticulo().equals(articuloId) &&
+                articuloProveedor.getProveedor().getCodProveedor().equals(proveedorId)) {
+                return articuloProveedor;
             }
         }
-        return articulos;
+        return null;
     }
 }

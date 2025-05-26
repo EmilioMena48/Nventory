@@ -69,7 +69,6 @@ public class ProveedorPanel extends BorderPane {
         menu.getChildren().addAll(
                 crearBoton("Listar Proveedores", () -> cargarTablaProveedoresActivos()),
                 crearBoton("Alta Proveedor", this::mostrarFormularioAlta),
-                crearBoton("Listar Artículos por Proveedor", this::listarArticulosPorProveedor),
                 crearBoton("Restaurar Proveedor", this::restaurarProveedor)
         );
         menu.getStyleClass().add("sombreadoMenu");
@@ -202,19 +201,23 @@ public class ProveedorPanel extends BorderPane {
             Button btnModificar = new Button("Modificar");
             btnModificar.getStyleClass().add("button-seleccionar");
             Button btnEliminar = new Button("Eliminar");
-            btnEliminar.getStyleClass().add("button-seleccionar");
+            btnEliminar.getStyleClass().add("button-cancelar");
             Button btnAsociarArticulo = new Button("Asociar Artículo");
             btnAsociarArticulo.getStyleClass().add("button-seleccionar");
+            Button btnListarArticulos = new Button("Listar Articulos");
+            btnListarArticulos.getStyleClass().add("button-seleccionar");
 
             btnModificar.setDisable(true);
             btnEliminar.setDisable(true);
             btnAsociarArticulo.setDisable(true);
+            btnListarArticulos.setDisable(true);
 
             tabla.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
                 boolean seleccionado = newVal != null;
                 btnModificar.setDisable(!seleccionado);
                 btnEliminar.setDisable(!seleccionado);
                 btnAsociarArticulo.setDisable(!seleccionado);
+                btnListarArticulos.setDisable(!seleccionado);
             });
 
             btnModificar.setOnAction(e -> {
@@ -248,7 +251,15 @@ public class ProveedorPanel extends BorderPane {
                 }
             });
 
-            HBox contenedorBotones = new HBox(10, btnModificar, btnEliminar, btnAsociarArticulo);
+            btnListarArticulos.setOnAction(e -> {
+                proveedorDTO = tabla.getSelectionModel().getSelectedItem();
+                if (proveedorDTO != null) {
+                    modificar = false;
+                    cargarTablaArticulosDelProveedor();
+                }
+            });
+
+            HBox contenedorBotones = new HBox(10, btnModificar, btnEliminar, btnAsociarArticulo, btnListarArticulos);
             contenedorBotones.setAlignment(Pos.CENTER);
             contenedorBotones.setPadding(new Insets(10));
             VBox contenedorTotal = new VBox(10, tabla, contenedorBotones);
@@ -331,9 +342,91 @@ public class ProveedorPanel extends BorderPane {
         return columna;
     }
 
-    private void listarArticulosPorProveedor() {
+    private void cargarTablaArticulosDelProveedor() {
         areaContenido.getChildren().clear();
-        // Implementar lógica
+        tablaArticulos.getColumns().clear();
+        TableView<Articulo> tabla = tablaArticulos;
+
+        if (!tabla.getStyleClass().contains("tablaProveedor")) {
+            tabla.getStyleClass().add("tablaProveedor");
+        }
+
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tabla.setPlaceholder(new Label("No hay artículos asociados a este proveedor."));
+        tabla.getColumns().addAll(
+                crearColumna("Código", "codArticulo"),
+                crearColumna("Nombre", "nombreArticulo"),
+                crearColumna("Descripción", "descripcionArticulo")
+        );
+        tabla.setFixedCellSize(25);
+
+        try {
+            List<Articulo> articulos = controller.ListarArticulos(proveedorDTO.getCodProveedor());
+            tabla.getItems().setAll(articulos);
+            tabla.prefHeightProperty().bind(tabla.fixedCellSizeProperty().multiply(articulos.size() + 1));
+            tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+            Button btnCancelar = new Button("Cancelar");
+            btnCancelar.getStyleClass().add("button-cancelar");
+            Button btnAgregar = new Button("Agregar");
+            btnAgregar.getStyleClass().add("button-seleccionar");
+            Button btnModificar = new Button("Modificar");
+            btnModificar.getStyleClass().add("button-seleccionar");
+            Button btnEliminar = new Button("Eliminar");
+            btnEliminar.getStyleClass().add("button-cancelar");
+
+            btnModificar.setDisable(true);
+            btnEliminar.setDisable(true);
+
+            tabla.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                boolean seleccionado = newVal != null;
+                btnModificar.setDisable(!seleccionado);
+                btnEliminar.setDisable(!seleccionado);
+            });
+
+            btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
+
+            btnAgregar.setOnAction(e -> {
+                if (proveedorDTO != null) {
+                    modificar = false;
+                    mostrarSeleccionArticulo();
+                }
+            });
+
+            btnModificar.setOnAction(e -> {
+                Articulo articuloSeleccionado = tabla.getSelectionModel().getSelectedItem();
+                if (articuloSeleccionado != null) {
+                    mostrarFormularioAsociarArticulo(articuloSeleccionado);
+                }
+            });
+
+            Label proveedorLabel = new Label("Proveedor: " + proveedorDTO.getNombreProveedor());
+            proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+            proveedorLabel.setPadding(new Insets(5));
+
+            Label labelArticulos = new Label("Artículos Asociados:");
+            labelArticulos.setStyle("-fx-font-size: 12px;");
+
+            HBox contenedorBotones = new HBox(10,btnCancelar ,btnModificar, btnEliminar,btnAgregar);
+            contenedorBotones.setAlignment(Pos.CENTER);
+            contenedorBotones.setPadding(new Insets(10));
+
+            VBox contenedor = new VBox(10);
+            contenedor.getChildren().addAll(proveedorLabel ,labelArticulos ,tablaArticulos);
+
+            VBox contenedorTotal = new VBox(10, contenedor, contenedorBotones);
+            contenedorTotal.getStyleClass().add("sombreadoMenu");
+            contenedorTotal.setPadding(new Insets(10));
+
+            areaContenido.getChildren().add(contenedorTotal);
+
+            FadeTransition fade = new FadeTransition(Duration.millis(600), contenedorTotal);
+            fade.setFromValue(0);
+            fade.setToValue(1);
+            fade.play();
+        } catch (Exception e) {
+            mostrarAlerta("Error cargando artículos del proveedor: " + e.getMessage(), 2, null);
+        }
     }
 
     private void restaurarProveedor() {
@@ -375,6 +468,9 @@ public class ProveedorPanel extends BorderPane {
 
         try {
             List<Articulo> articulos = articuloController.listarArticulos();
+            if (proveedorDTO.getCodProveedor() != 0L) {
+                articulos.removeIf(articulo -> controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null);
+            }
             tabla.getItems().setAll(articulos);
             tabla.prefHeightProperty().bind(
                     tabla.fixedCellSizeProperty().multiply(articulos.size() + 1)
@@ -395,9 +491,11 @@ public class ProveedorPanel extends BorderPane {
             VBox contenedorSeleccion = new VBox(10);
             contenedorSeleccion.getStyleClass().add("seleccion-articulo");
             Label proveedorLabel = new Label("Proveedor: " + proveedorDTO.getNombreProveedor());
+            Label labelArticulos = new Label("Seleccione un Articulo:");
+            labelArticulos.setStyle("-fx-font-size: 12px;");
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
             proveedorLabel.setPadding(new Insets(10));
-            contenedorSeleccion.getChildren().addAll(proveedorLabel, tablaArticulos);
+            contenedorSeleccion.getChildren().addAll(proveedorLabel,labelArticulos, tablaArticulos);
             areaContenido.getChildren().add(contenedorSeleccion);
             FadeTransition fade = new FadeTransition(Duration.millis(600), contenedorSeleccion);
             fade.setFromValue(0);
@@ -420,6 +518,16 @@ public class ProveedorPanel extends BorderPane {
         txtPrecioUnitario.getStyleClass().add("text-field");
         txtCostoPedido.getStyleClass().add("text-field");
         txtCostoEnvio.getStyleClass().add("text-field");
+
+        if(proveedorDTO.getCodProveedor() != 0L) {
+            ArticuloProveedorGuardadoDTO articuloProveedor = controller.BuscarArticuloProveedor(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
+            if(articuloProveedor != null) {
+                txtDemoraEntrega.setText(String.valueOf(articuloProveedor.getDemoraEntregaDias()));
+                txtPrecioUnitario.setText(articuloProveedor.getPrecioUnitario().toString());
+                txtCostoPedido.setText(articuloProveedor.getCostoPedido().toString());
+                txtCostoEnvio.setText(articuloProveedor.getCostoEnvio().toString());
+            }
+        }
 
         Button btnCancelar = new Button("Cancelar");
         btnCancelar.getStyleClass().add("button-cancelar");
@@ -460,10 +568,10 @@ public class ProveedorPanel extends BorderPane {
                 ap.setCostoEnvio(costoEnvio);
 
                 if (proveedorDTO.getCodProveedor() == 0L) {
-                    Proveedor proveedor = controller.guardarYRetornar(proveedorDTO);
+                    Proveedor proveedor = controller.GuardarYRetornar(proveedorDTO);
                     controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
                 } else {
-                    Proveedor proveedor = controller.buscarProveedorPorId(proveedorDTO.getCodProveedor());
+                    Proveedor proveedor = controller.BuscarProveedorPorId(proveedorDTO.getCodProveedor());
                     controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
                 }
                 mostrarAlerta("Artículo asociado correctamente", 4, () -> {

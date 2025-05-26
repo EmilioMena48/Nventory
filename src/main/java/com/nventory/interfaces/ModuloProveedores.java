@@ -22,8 +22,9 @@ public interface ModuloProveedores  {
     public void EliminarProveedor(@NonNull Long codProveedor);
     public List<ProveedorDTO> ListarProveedores();
     public List<ProveedorEliminadoDTO> ListarProveedoresEliminados();
-    public Proveedor guardarYRetornar(ProveedorDTO proveedorDto);
-    public Proveedor buscarProveedorPorId(Long idProveedor);
-    void ListarArticulosxProveedor();
+    public Proveedor GuardarYRetornar(ProveedorDTO proveedorDto);
+    public Proveedor BuscarProveedorPorId(Long idProveedor);
+    public List<Articulo> ListarArticulos(Long codProveedor);
+    public ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId);
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedor);
 }
