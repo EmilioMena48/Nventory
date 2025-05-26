@@ -139,6 +139,18 @@
     -fx-translate-y: 10;
 }
 
+.button-seleccionar {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 5;
+}
+
+.button-seleccionar:hover {
+    -fx-background-color: #2ecc71;
+}
+
 @keyframes fadeIn {
     from {
         -fx-opacity: 0;

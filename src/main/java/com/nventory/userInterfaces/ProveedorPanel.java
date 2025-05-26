@@ -6,7 +6,6 @@ import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.controller.ArticuloController;
 import com.nventory.controller.ProveedorController;
 import com.nventory.model.Articulo;
-import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -37,8 +36,9 @@ public class ProveedorPanel extends BorderPane {
     private final ProveedorController controller;
     private  final ArticuloController articuloController;
     private VBox areaContenido;
-    private TableView<ProveedorDTO> tablaProveedores = new TableView<>();
-    private TableView<ProveedorEliminadoDTO> tablaProveedoresEliminados = new TableView<>();
+    private final TableView<ProveedorDTO> tablaProveedores = new TableView<>();
+    private final TableView<ProveedorEliminadoDTO> tablaProveedoresEliminados = new TableView<>();
+    private final TableView<Articulo> tablaArticulos = new TableView<>();
     private ProveedorDTO proveedorDTO;
     private boolean modificar = false;
 
@@ -183,24 +183,80 @@ public class ProveedorPanel extends BorderPane {
         areaContenido.getChildren().clear();
         tablaProveedores.getColumns().clear();
         TableView<ProveedorDTO> tabla = tablaProveedores;
+
         if (!tabla.getStyleClass().contains("tablaProveedor")) {
             tabla.getStyleClass().add("tablaProveedor");
         }
+
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay proveedores disponibles."));
         tabla.getColumns().addAll(crearColumnasBasicas());
-        tabla.getColumns().addAll(
-                crearColumnaAcciones()
-        );
-
         tabla.setFixedCellSize(25);
 
         try {
             List<ProveedorDTO> proveedores = controller.ListarProveedores();
             tabla.getItems().setAll(proveedores);
-            tabla.prefHeightProperty().bind(
-                    tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1)
-            );
-            areaContenido.getChildren().add(tabla);
+            tabla.prefHeightProperty().bind(tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1));
+            tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+            Button btnModificar = new Button("Modificar");
+            btnModificar.getStyleClass().add("button-seleccionar");
+            Button btnEliminar = new Button("Eliminar");
+            btnEliminar.getStyleClass().add("button-seleccionar");
+            Button btnAsociarArticulo = new Button("Asociar Artículo");
+            btnAsociarArticulo.getStyleClass().add("button-seleccionar");
+
+            btnModificar.setDisable(true);
+            btnEliminar.setDisable(true);
+            btnAsociarArticulo.setDisable(true);
+
+            tabla.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                boolean seleccionado = newVal != null;
+                btnModificar.setDisable(!seleccionado);
+                btnEliminar.setDisable(!seleccionado);
+                btnAsociarArticulo.setDisable(!seleccionado);
+            });
+
+            btnModificar.setOnAction(e -> {
+                proveedorDTO = tabla.getSelectionModel().getSelectedItem();
+                if (proveedorDTO != null) {
+                    modificar = true;
+                    mostrarFormularioAlta();
+                }
+            });
+
+            btnEliminar.setOnAction(e -> {
+                proveedorDTO = tabla.getSelectionModel().getSelectedItem();
+                if (proveedorDTO != null) {
+                    mostrarAlerta("¿Está seguro de eliminar este proveedor?", 3, () -> {
+                        try {
+                            controller.EliminarProveedor(proveedorDTO.getCodProveedor());
+                            cargarTablaProveedoresActivos();
+                        } catch (Exception ex) {
+                            mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage());
+                        }
+                        proveedorDTO = null;
+                    });
+                }
+            });
+
+            btnAsociarArticulo.setOnAction(e -> {
+                proveedorDTO = tabla.getSelectionModel().getSelectedItem();
+                if (proveedorDTO != null) {
+                    modificar = false;
+                    mostrarSeleccionArticulo();
+                }
+            });
+
+            HBox contenedorBotones = new HBox(10, btnModificar, btnEliminar, btnAsociarArticulo);
+            contenedorBotones.setAlignment(Pos.CENTER);
+            contenedorBotones.setPadding(new Insets(10));
+            VBox contenedorTotal = new VBox(10, tabla, contenedorBotones);
+            contenedorTotal.getStyleClass().add("sombreadoMenu");
+            contenedorTotal.setPadding(new Insets(10));
+
+            areaContenido.getChildren().add(contenedorTotal);
+
         } catch (Exception e) {
             mostrarAlerta(ERROR_CARGAR_PROVEEDORES + e.getMessage(), 2, null);
         }
@@ -210,26 +266,52 @@ public class ProveedorPanel extends BorderPane {
         areaContenido.getChildren().clear();
         tablaProveedoresEliminados.getColumns().clear();
         TableView<ProveedorEliminadoDTO> tabla = tablaProveedoresEliminados;
+
         if (!tabla.getStyleClass().contains("tablaProveedor")) {
             tabla.getStyleClass().add("tablaProveedor");
         }
+
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay proveedores eliminados."));
-
         tabla.getColumns().addAll(crearColumnasBasicas());
-        tabla.getColumns().addAll(
-                crearColumna("Fecha de Baja", "fechaHoraBajaProveedor"),
-                crearColumnaAccionesRestaurar()
-        );
-
+        tabla.getColumns().add(crearColumna("Fecha de Baja", "fechaHoraBajaProveedor"));
         tabla.setFixedCellSize(25);
 
         try {
             List<ProveedorEliminadoDTO> proveedores = controller.ListarProveedoresEliminados();
             tabla.getItems().setAll(proveedores);
-            tabla.prefHeightProperty().bind(
-                    tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1)
-            );
-            areaContenido.getChildren().add(tabla);
+            tabla.prefHeightProperty().bind(tabla.fixedCellSizeProperty().multiply(proveedores.size() + 1));
+            tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+            Button btnRestaurar = new Button("Restaurar");
+            btnRestaurar.getStyleClass().add("button-seleccionar");
+            btnRestaurar.setDisable(true);
+
+            tabla.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                btnRestaurar.setDisable(newVal == null);
+            });
+
+            btnRestaurar.setOnAction(e -> {
+                ProveedorEliminadoDTO proveedor = tabla.getSelectionModel().getSelectedItem();
+                if (proveedor != null) {
+                    proveedorDTO = new ProveedorDTO();
+                    proveedorDTO.setCodProveedor(proveedor.getCodProveedor());
+                    proveedorDTO.setNombreProveedor(proveedor.getNombreProveedor());
+                    proveedorDTO.setDescripcionProveedor(proveedor.getDescripcionProveedor());
+                    modificar = true;
+                    mostrarFormularioAlta();
+                }
+            });
+
+            HBox contenedorBotones = new HBox(10, btnRestaurar);
+            contenedorBotones.setAlignment(Pos.CENTER);
+            contenedorBotones.setPadding(new Insets(10));
+            VBox contenedorTotal = new VBox(10, tabla, contenedorBotones);
+            contenedorTotal.getStyleClass().add("sombreadoMenu");
+            contenedorTotal.setPadding(new Insets(10));
+
+            areaContenido.getChildren().add(contenedorTotal);
+
         } catch (Exception e) {
             mostrarAlerta(ERROR_CARGAR_PROVEEDORES + e.getMessage(), 2, null);
         }
@@ -247,76 +329,6 @@ public class ProveedorPanel extends BorderPane {
         TableColumn<S, T> columna = new TableColumn<>(titulo);
         columna.setCellValueFactory(new PropertyValueFactory<>(propiedad));
         return columna;
-    }
-
-    private TableColumn<ProveedorDTO, Void> crearColumnaAcciones() {
-        TableColumn<ProveedorDTO, Void> colAcciones = new TableColumn<>("Acciones");
-        colAcciones.setCellFactory(param -> new TableCell<>() {
-            private final Button btnModificar = new Button("Modificar");
-            private final Button btnEliminar = new Button("Eliminar");
-            private final Button btnAsociarArticulo = new Button("Asociar Artículo");
-            private final HBox container = new HBox(5, btnModificar, btnEliminar,btnAsociarArticulo);
-
-            {
-                btnModificar.setOnAction(e -> {
-                    proveedorDTO = getTableView().getItems().get(getIndex());
-                    modificar = true;
-                    mostrarFormularioAlta();
-                });
-
-                btnEliminar.setOnAction(e -> {
-                    proveedorDTO = getTableView().getItems().get(getIndex());
-                    mostrarAlerta("¿Está seguro de eliminar este proveedor?", 3, () -> {
-                        try {
-                            controller.EliminarProveedor(proveedorDTO.getCodProveedor());
-                            cargarTablaProveedoresActivos();
-                        } catch (Exception ex) {
-                            mostrarAlerta(ERROR_GUARDAR_PROVEEDOR + ex.getMessage());
-                        }
-                        proveedorDTO = null;
-                    });
-                });
-                btnAsociarArticulo.setOnAction(e -> {
-                    proveedorDTO = getTableView().getItems().get(getIndex());
-                    modificar = false;
-                    mostrarSeleccionArticulo();
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : container);
-            }
-        });
-        return colAcciones;
-    }
-
-    private TableColumn<ProveedorEliminadoDTO, Void> crearColumnaAccionesRestaurar() {
-        TableColumn<ProveedorEliminadoDTO, Void> colAcciones = new TableColumn<>("Acciones");
-        colAcciones.setCellFactory(param -> new TableCell<>() {
-            private final Button btnRestaurar = new Button("Restaurar");
-            private final HBox container = new HBox(5, btnRestaurar);
-
-            {
-                btnRestaurar.setOnAction(e -> {
-                    ProveedorEliminadoDTO proveedor = getTableView().getItems().get(getIndex());
-                    proveedorDTO = new ProveedorDTO();
-                    proveedorDTO.setCodProveedor(proveedor.getCodProveedor());
-                    proveedorDTO.setNombreProveedor(proveedor.getNombreProveedor());
-                    proveedorDTO.setDescripcionProveedor(proveedor.getDescripcionProveedor());
-                    modificar = true;
-                    mostrarFormularioAlta();
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : container);
-            }
-        });
-        return colAcciones;
     }
 
     private void listarArticulosPorProveedor() {
@@ -344,8 +356,6 @@ public class ProveedorPanel extends BorderPane {
         fade.play();
     }
 
-    private TableView<Articulo> tablaArticulos = new TableView<>();
-
     private void mostrarSeleccionArticulo() {
         areaContenido.getChildren().clear();
         tablaArticulos.getColumns().clear();
@@ -353,6 +363,7 @@ public class ProveedorPanel extends BorderPane {
             tablaArticulos.getStyleClass().add("tablaProveedor");
         }
         TableView<Articulo> tabla = tablaArticulos;
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay articulos"));
         tabla.getColumns().addAll(
                 crearColumna("Código", "codArticulo"),
@@ -518,7 +529,7 @@ class PopupMensaje {
         root.setStyle(
                 "-fx-background-color: transparent;" +
                         "-fx-border-color: #bdc3c7;" +
-                        "-fx-border-width: 1px;" +
+                        "-fx-border-width: 2px;" +
                         "-fx-border-radius: 5px;"
         );
         root.setAlignment(Pos.CENTER);
