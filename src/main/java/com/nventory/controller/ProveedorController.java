@@ -11,6 +11,7 @@ import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ArticuloRepository;
 import com.nventory.repository.ProveedorRepository;
 import com.nventory.service.ArticuloProveedorService;
+import com.nventory.service.ArticuloService;
 import com.nventory.service.ProveedorService;
 
 import java.math.BigDecimal;
@@ -19,14 +20,14 @@ import java.util.List;
 public class ProveedorController implements ModuloProveedores {
 
     ProveedorService proveedorService;
-
     ArticuloProveedorService articuloProveedorService;
-
+    ArticuloService articuloService;
     ArticuloRepository articuloRepository = new ArticuloRepository();
 
     public ProveedorController() {
         this.proveedorService = new ProveedorService(new ProveedorRepository());
         this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository());
+        this.articuloService = new ArticuloService(articuloRepository);
 
         //----- Test Guardado en Base de Datos de Articulo -----
         articuloRepository.guardar(Articulo.builder()
@@ -95,6 +96,10 @@ public class ProveedorController implements ModuloProveedores {
     @Override
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto) {
         articuloProveedorService.guardarArticuloProveedor(articulo, proveedor, articuloProveedorDto);
+        if(articulo.getArticuloProveedor() == null) {
+            articulo.setArticuloProveedor(articuloProveedorService.buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor()));
+            articuloRepository.guardar(articulo);
+        }
     }
 
     @Override

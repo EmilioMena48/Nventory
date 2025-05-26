@@ -6,13 +6,16 @@ import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.controller.ArticuloController;
 import com.nventory.controller.ProveedorController;
 import com.nventory.model.Articulo;
+import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
@@ -34,7 +37,7 @@ public class ProveedorPanel extends BorderPane {
     private static final String CAMPOS_VACIOS = "Los campos obligatorios no pueden estar vacíos.";
 
     private final ProveedorController controller;
-    private  final ArticuloController articuloController;
+    private final ArticuloController articuloController;
     private VBox areaContenido;
     private final TableView<ProveedorDTO> tablaProveedores = new TableView<>();
     private final TableView<ProveedorEliminadoDTO> tablaProveedoresEliminados = new TableView<>();
@@ -99,10 +102,20 @@ public class ProveedorPanel extends BorderPane {
         txtNombre.getStyleClass().add("text-field");
         txtDescripcion.getStyleClass().add("text-area");
 
-        Button btnGuardar = crearBotonGuardar(txtNombre, txtDescripcion);
-        Button btnCancelar = crearBotonCancelar();
+        Button btnCancelar = new Button("Cancelar");
+        btnCancelar.getStyleClass().add("button-cancelar");
+        btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
 
-        GridPane formulario = crearFormulario(txtNombre, txtDescripcion, btnGuardar, btnCancelar);
+        Button btnGuardar = new Button("Guardar Proveedor");
+        btnGuardar.getStyleClass().add("button-guardar");
+
+        btnGuardar.setOnAction(e -> {
+            if (txtNombre.getText().isEmpty()) {
+                mostrarAlerta(CAMPOS_VACIOS, 2, null);
+            } else {
+                guardarProveedor(txtNombre, txtDescripcion);
+            }
+        });
 
         if (modificar) {
             txtNombre.setText(proveedorDTO.getNombreProveedor());
@@ -112,41 +125,24 @@ public class ProveedorPanel extends BorderPane {
             txtDescripcion.clear();
             proveedorDTO = null;
         }
-        modificar = false;
 
-        animarFormulario(formulario);
-        areaContenido.getChildren().addAll(formulario);
-    }
-
-    private Button crearBotonGuardar(TextField txtNombre, TextArea txtDescripcion) {
-        Button btnGuardar = new Button("Guardar");
-        btnGuardar.getStyleClass().add("button-guardar");
-        btnGuardar.setOnAction(e -> guardarProveedor(txtNombre, txtDescripcion));
-        return btnGuardar;
-    }
-
-    private Button crearBotonCancelar() {
-        Button btnCancelar = new Button("Cancelar");
-        btnCancelar.getStyleClass().add("button-cancelar");
-        btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
-        return btnCancelar;
-    }
-
-    private GridPane crearFormulario(TextField txtNombre, TextArea txtDescripcion, Button btnGuardar, Button btnCancelar) {
         GridPane formulario = new GridPane();
         formulario.getStyleClass().add("formulario");
-
         formulario.setVgap(10);
         formulario.setHgap(10);
 
-        formulario.add(new Label("Nombre:"), 0, 0);
-        formulario.add(txtNombre, 0, 1);
-        formulario.add(new Label("Descripción:"), 0, 2);
-        formulario.add(txtDescripcion, 0, 3);
-        formulario.add(btnGuardar, 0, 4);
-        formulario.add(btnCancelar, 1, 4);
+        formulario.add(new Label("Nombre: "), 0, 0);
+        formulario.add(txtNombre, 1, 0);
 
-        return formulario;
+        formulario.add(new Label("Descripción: "), 0, 1);
+        formulario.add(txtDescripcion, 1, 1);
+
+        formulario.add(btnGuardar, 1, 2);
+        formulario.add(btnCancelar, 0, 2);
+
+        modificar = false;
+        animarFormulario(formulario);
+        areaContenido.getChildren().add(formulario);
     }
 
     private void guardarProveedor(TextField txtNombre, TextArea txtDescripcion) {
@@ -356,8 +352,11 @@ public class ProveedorPanel extends BorderPane {
         tabla.getColumns().addAll(
                 crearColumna("Código", "codArticulo"),
                 crearColumna("Nombre", "nombreArticulo"),
-                crearColumna("Descripción", "descripcionArticulo")
+                crearColumna("Descripción", "descripcionArticulo"),
+                crearColumna("Stock Actual", "stockActual")
         );
+
+        TableColumn<Articulo, Boolean> columnaAsociado = new TableColumn<>("Predeterminado");
         tabla.setFixedCellSize(25);
 
         try {
@@ -365,6 +364,21 @@ public class ProveedorPanel extends BorderPane {
             tabla.getItems().setAll(articulos);
             tabla.prefHeightProperty().bind(tabla.fixedCellSizeProperty().multiply(articulos.size() + 1));
             tabla.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+
+            columnaAsociado.setCellValueFactory(param -> {
+                Articulo articulo = param.getValue();
+                ArticuloProveedor articuloProveedorPredeterminado = articulo.getArticuloProveedor();
+                if (articuloProveedorPredeterminado == null) {
+                    return new ReadOnlyBooleanWrapper(false);
+                } else {
+                    Long codProveedorPredeterminado = articuloProveedorPredeterminado.getProveedor().getCodProveedor();
+                    boolean asociado = proveedorDTO != null && proveedorDTO.getCodProveedor() == codProveedorPredeterminado;
+                    return new ReadOnlyBooleanWrapper(asociado);
+                }
+            });
+            columnaAsociado.setCellFactory(CheckBoxTableCell.forTableColumn(columnaAsociado));
+            columnaAsociado.setEditable(false);
+            tabla.getColumns().add(columnaAsociado);
 
             Button btnCancelar = new Button("Cancelar");
             btnCancelar.getStyleClass().add("button-cancelar");
@@ -402,17 +416,17 @@ public class ProveedorPanel extends BorderPane {
 
             Label proveedorLabel = new Label("Proveedor: " + proveedorDTO.getNombreProveedor());
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-            proveedorLabel.setPadding(new Insets(5));
+            proveedorLabel.setPadding(new Insets(5, 0, 5, 0));
 
             Label labelArticulos = new Label("Artículos Asociados:");
             labelArticulos.setStyle("-fx-font-size: 12px;");
 
-            HBox contenedorBotones = new HBox(10,btnCancelar ,btnModificar, btnEliminar,btnAgregar);
+            HBox contenedorBotones = new HBox(10, btnCancelar, btnModificar, btnEliminar, btnAgregar);
             contenedorBotones.setAlignment(Pos.CENTER);
             contenedorBotones.setPadding(new Insets(10));
 
             VBox contenedor = new VBox(10);
-            contenedor.getChildren().addAll(proveedorLabel ,labelArticulos ,tablaArticulos);
+            contenedor.getChildren().addAll(proveedorLabel, labelArticulos, tablaArticulos);
 
             VBox contenedorTotal = new VBox(10, contenedor, contenedorBotones);
             contenedorTotal.getStyleClass().add("sombreadoMenu");
@@ -465,7 +479,6 @@ public class ProveedorPanel extends BorderPane {
         );
 
         tabla.setFixedCellSize(25);
-
         try {
             List<Articulo> articulos = articuloController.listarArticulos();
             if (proveedorDTO.getCodProveedor() != 0L) {
@@ -494,8 +507,8 @@ public class ProveedorPanel extends BorderPane {
             Label labelArticulos = new Label("Seleccione un Articulo:");
             labelArticulos.setStyle("-fx-font-size: 12px;");
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-            proveedorLabel.setPadding(new Insets(10));
-            contenedorSeleccion.getChildren().addAll(proveedorLabel,labelArticulos, tablaArticulos);
+            proveedorLabel.setPadding(new Insets(5, 0, 5, 0));
+            contenedorSeleccion.getChildren().addAll(proveedorLabel, labelArticulos, tablaArticulos);
             areaContenido.getChildren().add(contenedorSeleccion);
             FadeTransition fade = new FadeTransition(Duration.millis(600), contenedorSeleccion);
             fade.setFromValue(0);
@@ -519,9 +532,9 @@ public class ProveedorPanel extends BorderPane {
         txtCostoPedido.getStyleClass().add("text-field");
         txtCostoEnvio.getStyleClass().add("text-field");
 
-        if(proveedorDTO.getCodProveedor() != 0L) {
+        if (proveedorDTO.getCodProveedor() != 0L) {
             ArticuloProveedorGuardadoDTO articuloProveedor = controller.BuscarArticuloProveedor(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
-            if(articuloProveedor != null) {
+            if (articuloProveedor != null) {
                 txtDemoraEntrega.setText(String.valueOf(articuloProveedor.getDemoraEntregaDias()));
                 txtPrecioUnitario.setText(articuloProveedor.getPrecioUnitario().toString());
                 txtCostoPedido.setText(articuloProveedor.getCostoPedido().toString());
@@ -594,20 +607,23 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Artículo: "), 0, 0);
         formulario.add(new Label(articuloSeleccionado.getNombreArticulo()), 1, 0);
 
-        formulario.add(new Label("Demora entrega (días):"), 0, 1);
-        formulario.add(txtDemoraEntrega, 1, 1);
+        formulario.add(new Label("Proveedor: "), 0, 1);
+        formulario.add(new Label(proveedorDTO.getNombreProveedor()), 1, 1);
 
-        formulario.add(new Label("Precio unitario:"), 0, 2);
-        formulario.add(txtPrecioUnitario, 1, 2);
+        formulario.add(new Label("Demora entrega (días):"), 0, 2);
+        formulario.add(txtDemoraEntrega, 1, 2);
 
-        formulario.add(new Label("Costo pedido:"), 0, 3);
-        formulario.add(txtCostoPedido, 1, 3);
+        formulario.add(new Label("Precio unitario:"), 0, 3);
+        formulario.add(txtPrecioUnitario, 1, 3);
 
-        formulario.add(new Label("Costo envío:"), 0, 4);
-        formulario.add(txtCostoEnvio, 1, 4);
+        formulario.add(new Label("Costo pedido:"), 0, 4);
+        formulario.add(txtCostoPedido, 1, 4);
 
-        formulario.add(btnGuardar, 1, 5);
-        formulario.add(btnCancelar, 0, 5);
+        formulario.add(new Label("Costo envío:"), 0, 5);
+        formulario.add(txtCostoEnvio, 1, 5);
+
+        formulario.add(btnGuardar, 1, 6);
+        formulario.add(btnCancelar, 0, 6);
 
         animarFormulario(formulario);
         areaContenido.getChildren().add(formulario);

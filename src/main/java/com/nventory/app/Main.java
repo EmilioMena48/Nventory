@@ -13,7 +13,7 @@ public class Main extends Application {
         MainViewPanel root = new MainViewPanel();
 
         //Tamaño de la pantalla inicial
-        Scene scene = new Scene(root, 854, 480);
+        Scene scene = new Scene(root, 854, 504);
         scene.getStylesheets().add(getClass().getResource("/styles/estilosMainView.css").toExternalForm());
 
         //Título de la pantalla

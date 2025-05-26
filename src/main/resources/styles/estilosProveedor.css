@@ -25,6 +25,7 @@
     -fx-border-color: #bdc3c7;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
+    -fx-max-width: 400px;
     -fx-padding: 20px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 4);
     -fx-spacing: 10;
@@ -48,6 +49,7 @@
     -fx-padding: 5px 10px;
     -fx-border-color: transparent;
     -fx-font-size: 14px;
+    -fx-max-width: 180px;
 }
 
 .tablaProveedor {
@@ -136,7 +138,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
     -fx-spacing: 10;
     -fx-opacity: 0;
-    -fx-translate-y: 10;
 }
 
 .button-seleccionar {
