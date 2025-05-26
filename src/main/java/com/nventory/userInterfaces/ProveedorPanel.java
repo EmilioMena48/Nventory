@@ -426,6 +426,7 @@ public class ProveedorPanel extends BorderPane {
                     });
                 }
             });
+            tabla.setRowFactory(null);
 
             Label proveedorLabel = new Label("Proveedor: " + proveedorDTO.getNombreProveedor());
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
@@ -497,7 +498,7 @@ public class ProveedorPanel extends BorderPane {
             if (proveedorDTO.getCodProveedor() != 0L) {
                 articulos.removeIf(articulo -> articulo.getArticuloProveedor() != null &&
                         ((controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null) &&
-                                (controller.EstaEliminadoArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()))));
+                                (!(controller.EstaEliminadoArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor())))));
             }
             tabla.getItems().setAll(articulos);
             tabla.prefHeightProperty().bind(

@@ -15,7 +15,6 @@ import com.nventory.service.ArticuloProveedorService;
 import com.nventory.service.ArticuloService;
 import com.nventory.service.ProveedorService;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class ProveedorController implements ModuloProveedores {
@@ -30,44 +29,6 @@ public class ProveedorController implements ModuloProveedores {
                 new OrdenDeCompraRepository());
         this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository());
         this.articuloService = new ArticuloService(articuloRepository);
-
-        //----- Test Guardado en Base de Datos de Articulo -----
-        articuloRepository.guardar(Articulo.builder()
-                .codArticulo(1L)
-                .costoAlmacenamiento(new BigDecimal("100.00"))
-                .costoCapitalInmovilizado(new BigDecimal("50.00"))
-                .costoCompra(new BigDecimal("200.00"))
-                .demandaArt(100)
-                .nombreArticulo("Articulo Test")
-                .descripcionArticulo("Descripcion del Articulo Test")
-                .fechaHoraBajaArticulo(null)
-                .stockActual(50)
-                .build());
-
-        articuloRepository.guardar(Articulo.builder()
-                .codArticulo(2L)
-                .costoAlmacenamiento(new BigDecimal("150.00"))
-                .costoCapitalInmovilizado(new BigDecimal("75.00"))
-                .costoCompra(new BigDecimal("300.00"))
-                .demandaArt(200)
-                .nombreArticulo("Articulo Test 2")
-                .descripcionArticulo("Descripcion del Articulo Test 2")
-                .fechaHoraBajaArticulo(null)
-                .stockActual(100)
-                .build());
-
-        articuloRepository.guardar(Articulo.builder()
-                .codArticulo(3L)
-                .costoAlmacenamiento(new BigDecimal("200.00"))
-                .costoCapitalInmovilizado(new BigDecimal("100.00"))
-                .costoCompra(new BigDecimal("400.00"))
-                .demandaArt(300)
-                .nombreArticulo("Articulo Test 3")
-                .descripcionArticulo("Descripcion del Articulo Test 3")
-                .fechaHoraBajaArticulo(null)
-                .stockActual(150)
-                .build());
-        //----- Fin Test Guardado en Base de Datos de Articulo -----
     }
 
     @Override

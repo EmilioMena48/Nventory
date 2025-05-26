@@ -1,11 +1,7 @@
 package com.nventory.repository;
 
-import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-
-import java.util.List;
 
 public class ProveedorRepository extends SoftDeletableRepositoryImpl<Proveedor, Long> {
     public ProveedorRepository() {
