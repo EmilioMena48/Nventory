@@ -3,23 +3,24 @@ package com.nventory.service;
 import com.nventory.DTO.*;
 import com.nventory.model.*;
 import com.nventory.repository.*;
-import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+@AllArgsConstructor
 public class OrdenCompraService {
 
-    private final OrdenDeCompraRepository ordenCompraRepo = new OrdenDeCompraRepository();
-    private final EstadoOrdenDeCompraRepository estadoOrdenDeCompraRepo = new EstadoOrdenDeCompraRepository();
-    private final OrdenDeCompraArticuloRepository ordenDeCompraArticuloRepo = new OrdenDeCompraArticuloRepository();
-    private final ArticuloProveedorRepository articuloProveedorRepo = new ArticuloProveedorRepository();
-    private final ProveedorRepository proveedorRepo = new ProveedorRepository();
-    private final ArticuloRepository articuloRepo = new ArticuloRepository();
-
+    private final OrdenDeCompraRepository ordenCompraRepo;
+    private final EstadoOrdenDeCompraRepository estadoOrdenDeCompraRepo;
+    private final OrdenDeCompraArticuloRepository ordenDeCompraArticuloRepo;
+    private final ArticuloProveedorRepository articuloProveedorRepo;
+    private final ProveedorRepository proveedorRepo;
+    private final ArticuloRepository articuloRepo;
+    private final TipoStockMovimientoRepository tipoStockMovimientoRepo;
+    private final StockMovimientoRepository stockMovimientoRepo;
 
     public List<OrdenDeCompraDTO> obtenerTodasOrdenesDeCompra() {
 
@@ -51,7 +52,7 @@ public class OrdenCompraService {
     public void enviarOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
 
-        if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente")) ) {
+        if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente" ).getCodEstadoOC())) {
             ordenCompra.setEstadoOrdenDeCompra(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada"));
             ordenCompra.setFechaHoraEnvioProv(LocalDateTime.now());
             ordenCompraRepo.guardar(ordenCompra);
@@ -59,23 +60,20 @@ public class OrdenCompraService {
     }
 
 
+
     public void cancelarOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
-
-        if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente")) ) {
+        if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente").getCodEstadoOC())) {
             EstadoOrdenDeCompra estadoCancelada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Cancelada");
             ordenCompra.setEstadoOrdenDeCompra(estadoCancelada);
             ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
-    @Transactional
-    public void recibirOrdenCompra(Long codOrdenCompra) {
-        TipoStockMovimientoRepository tipoStockMovimientoRepo = new TipoStockMovimientoRepository();
-        StockMovimientoRepository stockMovimientoRepo = new StockMovimientoRepository();
-        OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
 
-        if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada")) ) {
+    public void recibirOrdenCompra(Long codOrdenCompra) {
+        OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
+        if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada").getCodEstadoOC()) ) {
             List<OrdenDeCompraArticulo> articulosOrd = ordenDeCompraArticuloRepo.buscarOCAdeUnaOC(codOrdenCompra);
             for (OrdenDeCompraArticulo OCarticulo : articulosOrd) {
                 //Reponer stock
@@ -85,6 +83,7 @@ public class OrdenCompraService {
                 int stockReposicion = OCarticulo.getCantidadSolicitadaOCA();
                 Integer nuevoStock = stockReposicion + stockActual;
                 art.setStockActual(nuevoStock);
+                articuloRepo.guardar(art);
 
                 //Auditar movimiento de stock
                 StockMovimiento entradaStock = new StockMovimiento();
@@ -95,6 +94,7 @@ public class OrdenCompraService {
                 TipoStockMovimiento entrada = tipoStockMovimientoRepo.buscarTSMPorNombre("Entrada");
                 entradaStock.setTipoStockMovimiento(entrada);
                 stockMovimientoRepo.guardar(entradaStock);
+                ordenDeCompraArticuloRepo.guardar(OCarticulo);
 
                 /* Implementar que Si con la orden la cantidad del artículo no supera
                  el Pto de Ped con modelo LoteFijo informar al usuario.*/
@@ -102,6 +102,7 @@ public class OrdenCompraService {
             //Cambiar estado de la Orden
             EstadoOrdenDeCompra finalizada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Finalizada");
             ordenCompra.setEstadoOrdenDeCompra(finalizada);
+            ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
@@ -124,18 +125,25 @@ public class OrdenCompraService {
 
     public List<ArticuloProveedorDTO> obtenerArticulosDeProveedor(Long codOrdenCompra) {
         List<ArticuloProveedorDTO> articulosOrdDTO = new ArrayList<>();
-        Proveedor prov = ordenCompraRepo.buscarPorId(codOrdenCompra).getProveedor();
-
+        Long codProv = ordenCompraRepo.buscarPorId(codOrdenCompra).getProveedor().getCodProveedor();
+        List<ArticuloProveedor> articuloProveedors = articuloProveedorRepo.buscarTodosArticulosDelProveedor(codProv);
+        for (ArticuloProveedor articuloProveedor : articuloProveedors) {
+            ArticuloProveedorDTO articuloProveedorDTO = new ArticuloProveedorDTO();
+            articuloProveedorDTO.setId(articuloProveedor.getCodArticuloProveedor());
+            articuloProveedorDTO.setNombre(articuloProveedor.getArticulo().getNombreArticulo());
+            articuloProveedorDTO.setPrecioUnitario(String.valueOf(articuloProveedor.getPrecioUnitario()));
+            articulosOrdDTO.add(articuloProveedorDTO);
+        }
         return articulosOrdDTO;
     }
 
-    @Transactional
+
     public void agregarArticuloAOrden(Long codOrdenCompra, Long codArticuloProveedor, int cantidadSolicitadaOCA) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
         ArticuloProveedor articuloProveedor = articuloProveedorRepo.buscarPorId(codArticuloProveedor);
-        boolean esPendiente = ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente"));
+        boolean esPendiente = ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente").getCodEstadoOC());
 
-        if (ordenCompra.getProveedor().equals(articuloProveedor.getProveedor()) && esPendiente) {
+        if (ordenCompra.getProveedor().getCodProveedor().equals(articuloProveedor.getProveedor().getCodProveedor()) && esPendiente) {
             OrdenDeCompraArticulo ordenCompraArticulo = new OrdenDeCompraArticulo();
             ordenCompraArticulo.setCantidadSolicitadaOCA(cantidadSolicitadaOCA);
             ordenCompraArticulo.setPrecioUnitarioOCA(articuloProveedor.getPrecioUnitario());
@@ -143,10 +151,12 @@ public class OrdenCompraService {
             BigDecimal subTotal = articuloProveedor.getPrecioUnitario().multiply(BigDecimal.valueOf(cantidadSolicitadaOCA));
             ordenCompraArticulo.setSubTotalOCA(subTotal);
             ordenCompraArticulo.setArticuloProveedor(articuloProveedor);
+            ordenCompraArticulo.setOrdenDeCompra(ordenCompra);
             ordenDeCompraArticuloRepo.guardar(ordenCompraArticulo);
 
-            ordenCompra.setOrdenDeCompraArticulo(List.of(ordenCompraArticulo));
+
             recalcularTotalOrdenCompra(codOrdenCompra);
+            ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
@@ -176,35 +186,37 @@ public class OrdenCompraService {
         return listaArticuloDTO;
     }
 
-    @Transactional
+
     public void eliminarArticuloDeOrden(Long codOrdenCompra, Long codOrdenCompraArticulo) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
-        if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente"))) {
+        if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente").getCodEstadoOC())) {
             OrdenDeCompraArticulo OCA = ordenDeCompraArticuloRepo.buscarPorCodOrdenCompraYArticulo(codOrdenCompra, codOrdenCompraArticulo);
-            boolean esElMismo = OCA.equals(ordenDeCompraArticuloRepo.buscarPorId(codOrdenCompraArticulo));
+            boolean esElMismo = OCA.getCodOrdenCompraA().equals(ordenDeCompraArticuloRepo.buscarPorId(codOrdenCompraArticulo).getCodOrdenCompraA());
             if (esElMismo) {
                 ordenDeCompraArticuloRepo.borrar(codOrdenCompraArticulo);
-            }
-        }
-    }
-
-    @Transactional
-    public void modificarCantidadArticulo(Long codOrdenCompra, Long codOrdenCompraA, int nuevoCantidad) {
-        OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
-        if (ordenCompra.getEstadoOrdenDeCompra().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente"))) {
-            OrdenDeCompraArticulo OCA = ordenDeCompraArticuloRepo.buscarPorCodOrdenCompraYArticulo(codOrdenCompra, codOrdenCompraA);
-            boolean esElMismo = OCA.equals(ordenDeCompraArticuloRepo.buscarPorId(codOrdenCompraA));
-            if (esElMismo) {
-                OCA.setCantidadSolicitadaOCA(nuevoCantidad);
-                BigDecimal nuevoSubTotal = OCA.getPrecioUnitarioOCA().multiply(BigDecimal.valueOf(nuevoCantidad));
-                OCA.setSubTotalOCA(nuevoSubTotal);
                 recalcularTotalOrdenCompra(codOrdenCompra);
             }
         }
     }
 
 
-    @Transactional
+    public void modificarCantidadArticulo(Long codOrdenCompra, Long codOrdenCompraA, int nuevoCantidad) {
+        OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
+        if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente").getCodEstadoOC())) {
+            OrdenDeCompraArticulo OCA = ordenDeCompraArticuloRepo.buscarPorCodOrdenCompraYArticulo(codOrdenCompra, codOrdenCompraA);
+            boolean esElMismo = OCA.getCodOrdenCompraA().equals(ordenDeCompraArticuloRepo.buscarPorId(codOrdenCompraA).getCodOrdenCompraA());
+            if (esElMismo) {
+                OCA.setCantidadSolicitadaOCA(nuevoCantidad);
+                BigDecimal nuevoSubTotal = OCA.getPrecioUnitarioOCA().multiply(BigDecimal.valueOf(nuevoCantidad));
+                OCA.setSubTotalOCA(nuevoSubTotal);
+                ordenDeCompraArticuloRepo.guardar(OCA);
+                recalcularTotalOrdenCompra(codOrdenCompra);
+            }
+        }
+    }
+
+
+
     public void recalcularTotalOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra orden = ordenCompraRepo.buscarPorId(codOrdenCompra);
         List<OrdenDeCompraArticulo> listaOCA = ordenDeCompraArticuloRepo.buscarOCAdeUnaOC(codOrdenCompra);
@@ -214,9 +226,10 @@ public class OrdenCompraService {
             nuevoTotalOrdenCompra = nuevoTotalOrdenCompra.add(subTotal);
         }
         orden.setTotalOrdenDeCompra(nuevoTotalOrdenCompra);
+        ordenCompraRepo.guardar(orden);
     }
 
-    @Transactional
+
     public Long crearOrdenDeCompra(Long codProveedor) {
         Proveedor proveedor = proveedorRepo.buscarPorId(codProveedor);
         EstadoOrdenDeCompra estadoPendiente = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente");
@@ -227,7 +240,7 @@ public class OrdenCompraService {
         return orden.getCodOrdenDeCompra();
     }
 
-    @Transactional
+
     public Long crearOrdenDeCompraPorArticulo(Long codArticulo, Long codProveedor, int cantidadSolicitada) {
         ArticuloProveedor articuloProveedor = articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor);
         Long codOrdenNueva = crearOrdenDeCompra(codProveedor);
@@ -264,5 +277,28 @@ public class OrdenCompraService {
     public String obtenerEstadoDeUnaOrden(Long codOrdenCompra){
         OrdenDeCompra orden = ordenCompraRepo.buscarPorId(codOrdenCompra);
         return orden.getEstadoOrdenDeCompra().getNombreEstadoOC();
+    }
+
+    public List<ProveedorArticuloDTO> obtenerProveedoresParaArticulo(Long codArticulo) {
+        List<ProveedorArticuloDTO> proveedorArticuloDTOS = new ArrayList<>();
+        List<ArticuloProveedor> listaArticulosProveedor = articuloProveedorRepo.buscarTodosArticuloProveedor(codArticulo);
+        for (ArticuloProveedor articulo : listaArticulosProveedor) {
+            ProveedorArticuloDTO proveedorArticuloDTO = new ProveedorArticuloDTO();
+            proveedorArticuloDTO.setCodProveedor(articulo.getProveedor().getCodProveedor());
+            proveedorArticuloDTO.setNombreProveedor(articulo.getProveedor().getNombreProveedor());
+            proveedorArticuloDTO.setPrecioUnitario(String.valueOf(articulo.getPrecioUnitario()));
+            proveedorArticuloDTO.setDemoraEntregaDias(articulo.getDemoraEntregaDias());
+            proveedorArticuloDTO.setCostoPedido(String.valueOf(articulo.getCostoPedido()));
+            proveedorArticuloDTOS.add(proveedorArticuloDTO);
+        }
+        return proveedorArticuloDTOS;
+    }
+
+    public SugerenciaOrdenDTO obtenerSugerenciaParaArticulo(Long codArticulo) {
+        SugerenciaOrdenDTO sugerenciaOrdenDTO = new SugerenciaOrdenDTO();
+        Articulo art = articuloRepo.buscarPorId(codArticulo);
+        sugerenciaOrdenDTO.setNombreProveedorSugerido(art.getArticuloProveedor().getProveedor().getNombreProveedor());
+        //Hay que sugerir una cantidad dependiendo del Modelo de inventario.
+        return sugerenciaOrdenDTO;
     }
 }

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ProveedorArticuloDTO {
     private Long codProveedor;
     private String nombreProveedor;
-    private int demoraEntregaDías;
+    private int demoraEntregaDias;
     private String precioUnitario;
     private String costoPedido;
 }

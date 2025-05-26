@@ -1,14 +1,26 @@
 package com.nventory.controller;
 
 import com.nventory.DTO.*;
+import com.nventory.repository.*;
 import com.nventory.service.OrdenCompraService;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class OrdenDeCompraController {
-    private final OrdenCompraService ordenCompraService = new OrdenCompraService();
+    private final OrdenDeCompraRepository ordenCompraRepo = new OrdenDeCompraRepository();
+    private final EstadoOrdenDeCompraRepository estadoOrdenDeCompraRepo = new EstadoOrdenDeCompraRepository();
+    private final OrdenDeCompraArticuloRepository ordenDeCompraArticuloRepo = new OrdenDeCompraArticuloRepository();
+    private final ArticuloProveedorRepository articuloProveedorRepo = new ArticuloProveedorRepository();
+    private final ProveedorRepository proveedorRepo = new ProveedorRepository();
+    private final ArticuloRepository articuloRepo = new ArticuloRepository();
+    private final TipoStockMovimientoRepository tipoStockMovimientoRepo = new TipoStockMovimientoRepository();
+    private final StockMovimientoRepository stockMovimientoRepo = new StockMovimientoRepository();
+
+
+    private final OrdenCompraService ordenCompraService = new OrdenCompraService(
+            ordenCompraRepo,estadoOrdenDeCompraRepo,ordenDeCompraArticuloRepo,articuloProveedorRepo,
+            proveedorRepo,articuloRepo,tipoStockMovimientoRepo,stockMovimientoRepo
+    );
 
     public List<OrdenDeCompraDTO> obtenerTodasOrdenesDeCompra() {
         return ordenCompraService.obtenerTodasOrdenesDeCompra();
@@ -34,8 +46,8 @@ public class OrdenDeCompraController {
     }
 
     public List<ArticuloProveedorDTO> obtenerArticulosProveedorDisponibles(Long idOrdenDeCompra) {
-       //Reotrnar todos los ArticulosProveedor del Proveedor asignado a esa OrdenDeCompra
-        return null;
+
+        return ordenCompraService.obtenerArticulosDeProveedor(idOrdenDeCompra);
     }
 
     public void agregarArticuloAOrden(Long idOrdenDeCompra, Long  idArticuloProveedor, int cantidad) {
@@ -75,11 +87,11 @@ public class OrdenDeCompraController {
     }
 
     public SugerenciaOrdenDTO obtenerSugerenciaParaArticulo(Long codArticulo) {
-        return null;
+        return ordenCompraService.obtenerSugerenciaParaArticulo(codArticulo);
     }
 
     public List<ProveedorArticuloDTO> obtenerProveedoresParaArticulo(Long codArticulo) {
-        return null;
+        return ordenCompraService.obtenerProveedoresParaArticulo(codArticulo);
     }
 
     public String obtenerEstadoDeUnaOrden(Long codOrdenCompra) {
