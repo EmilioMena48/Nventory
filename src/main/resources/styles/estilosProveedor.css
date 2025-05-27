@@ -89,7 +89,7 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 5px;
-    -fx-padding: 5 5;
+    -fx-padding: 8 20;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
     -fx-transition: background-color 0.3s ease;
@@ -149,7 +149,7 @@
 }
 
 .button-seleccionar:hover {
-    -fx-background-color: #2ecc71;
+    -fx-background-color: #219653;
 }
 
 @keyframes fadeIn {

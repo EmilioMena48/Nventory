@@ -68,10 +68,6 @@ public class ProveedorController implements ModuloProveedores {
     @Override
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto) {
         articuloProveedorService.guardarArticuloProveedor(articulo, proveedor, articuloProveedorDto);
-        if(articulo.getArticuloProveedor() == null) {
-            articulo.setArticuloProveedor(articuloProveedorService.buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor()));
-            articuloRepository.guardar(articulo);
-        }
     }
 
     @Override

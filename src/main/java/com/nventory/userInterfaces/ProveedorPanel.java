@@ -70,7 +70,7 @@ public class ProveedorPanel extends BorderPane {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
         menu.getChildren().addAll(
-                crearBoton("Listar Proveedores", () -> cargarTablaProveedoresActivos()),
+                crearBoton("Listar Proveedores", this::cargarTablaProveedoresActivos),
                 crearBoton("Alta Proveedor", this::mostrarFormularioAlta),
                 crearBoton("Restaurar Proveedor", this::restaurarProveedor)
         );
@@ -341,6 +341,8 @@ public class ProveedorPanel extends BorderPane {
     private void cargarTablaArticulosDelProveedor() {
         areaContenido.getChildren().clear();
         tablaArticulos.getColumns().clear();
+        tablaArticulos.getItems().clear();
+        tablaArticulos.getSelectionModel().clearSelection();
         TableView<Articulo> tabla = tablaArticulos;
 
         if (!tabla.getStyleClass().contains("tablaProveedor")) {
@@ -349,12 +351,10 @@ public class ProveedorPanel extends BorderPane {
 
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay artículos asociados a este proveedor."));
-        tabla.getColumns().addAll(
-                crearColumna("Código", "codArticulo"),
-                crearColumna("Nombre", "nombreArticulo"),
-                crearColumna("Descripción", "descripcionArticulo"),
-                crearColumna("Stock Actual", "stockActual")
-        );
+        tabla.getColumns().add(crearColumna("Código", "codArticulo"));
+        tabla.getColumns().add(crearColumna("Nombre", "nombreArticulo"));
+        tabla.getColumns().add(crearColumna("Descripción", "descripcionArticulo"));
+        tabla.getColumns().add(crearColumna("Stock Actual", "stockActual"));
 
         TableColumn<Articulo, Boolean> columnaAsociado = new TableColumn<>("Predeterminado");
         tabla.setFixedCellSize(25);
@@ -486,11 +486,9 @@ public class ProveedorPanel extends BorderPane {
         TableView<Articulo> tabla = tablaArticulos;
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay articulos"));
-        tabla.getColumns().addAll(
-                crearColumna("Código", "codArticulo"),
-                crearColumna("Nombre", "nombreArticulo"),
-                crearColumna("Descripción", "descripcionArticulo")
-        );
+        tabla.getColumns().add(crearColumna("Código", "codArticulo"));
+        tabla.getColumns().add(crearColumna("Nombre", "nombreArticulo"));
+        tabla.getColumns().add(crearColumna("Descripción", "descripcionArticulo"));
 
         tabla.setFixedCellSize(25);
         try {
@@ -690,27 +688,7 @@ class PopupMensaje {
             case 2 -> {
                 Button btnAceptar = new Button("Aceptar");
                 btnAceptar.setOnAction(e -> popup.close());
-                btnAceptar.setStyle(
-                        "-fx-background-color: #27ae60; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                );
-                btnAceptar.setOnMouseEntered(e -> btnAceptar.setStyle(
-                        "-fx-background-color: #2ecc71; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
-                btnAceptar.setOnMouseExited(e -> btnAceptar.setStyle(
-                        "-fx-background-color: #27ae60; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
+                btnAceptar.getStyleClass().add("button-seleccionar");
                 HBox hbox = new HBox(10, btnAceptar);
                 hbox.setAlignment(Pos.BOTTOM_CENTER);
                 root.getChildren().add(hbox);
@@ -720,49 +698,8 @@ class PopupMensaje {
                 Button btnAceptar = new Button("Aceptar");
                 Button btnCancelar = new Button("Cancelar");
 
-                btnAceptar.setStyle(
-                        "-fx-background-color: #27ae60; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                );
-                btnAceptar.setOnMouseEntered(e -> btnAceptar.setStyle(
-                        "-fx-background-color: #2ecc71; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
-                btnAceptar.setOnMouseExited(e -> btnAceptar.setStyle(
-                        "-fx-background-color: #27ae60; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
-
-                btnCancelar.setStyle(
-                        "-fx-background-color: #c0392b; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                );
-                btnCancelar.setOnMouseEntered(e -> btnCancelar.setStyle(
-                        "-fx-background-color: #e74c3c; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
-                btnCancelar.setOnMouseExited(e -> btnCancelar.setStyle(
-                        "-fx-background-color: #c0392b; " +
-                                "-fx-text-fill: white; " +
-                                "-fx-font-weight: bold; " +
-                                "-fx-padding: 8 20; " +
-                                "-fx-background-radius: 5;"
-                ));
+                btnAceptar.getStyleClass().add("button-seleccionar");
+                btnCancelar.getStyleClass().add("button-cancelar");
 
                 btnAceptar.setOnAction(e -> {
                     popup.close();
