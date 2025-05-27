@@ -219,6 +219,9 @@ public class OrdenCompraPanel extends BorderPane {
 
                 try {
                     int cantidad = (int) Long.parseLong(cantidadField.getText());
+                    System.out.println("CodArticulo: " + codArticulo);
+                    System.out.println("CodProveedor: " + proveedorSeleccionado.getCodProveedor());
+                    System.out.println("Cantidad: " + cantidad);
                     crearYAbrirNuevaOrdenPorArticulo(codArticulo, proveedorSeleccionado.getCodProveedor(), cantidad);
                 } catch (NumberFormatException e) {
                     mostrarAlerta(Alert.AlertType.ERROR, "Cantidad ingresada inválida.");
@@ -226,7 +229,29 @@ public class OrdenCompraPanel extends BorderPane {
             }
         });
     }
-    private void mostrarOpcionesOrdenExistente(Long codOrdenExistente, ProveedorDTO proveedorSeleccionado, Long codArticulo, String nombreArticulo) {
+    private void mostarOpcionesOrdenArticuloExistente(Long codOrdenCompra, Long codArticulo, String nombreArticulo) {
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle("Articulo Existente");
+        alerta.setHeaderText("Ya existe una Orden con ese Articulo");
+        alerta.setContentText("¿Qué desea hacer?");
+
+        ButtonType irAOrden = new ButtonType("Ir a la orden existente");
+        ButtonType crearNueva = new ButtonType("Crear nueva orden para el articulo");
+        ButtonType cancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alerta.getButtonTypes().setAll(irAOrden, crearNueva, cancelar);
+
+        alerta.showAndWait().ifPresent(opcion -> {
+            if (opcion == irAOrden) {
+                abrirVentanaEditarArticulos(codOrdenCompra, tablaOrdenes);
+            } else if (opcion == crearNueva) {
+                mostrarDialogoProveedorYCantidad(codArticulo, nombreArticulo);
+            }
+            // Si cancela, no se hace nada
+        });
+
+    }
+    private void mostrarOpcionesOrdenExistente(Long codOrdenExistente, ProveedorDTO proveedorSeleccionado) {
         Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
         alerta.setTitle("Orden ya existente");
         alerta.setHeaderText("Ya existe una orden abierta");
@@ -242,9 +267,6 @@ public class OrdenCompraPanel extends BorderPane {
             if (opcion == irAOrden) {
                 abrirVentanaEditarArticulos(codOrdenExistente, tablaOrdenes);
             } else if (opcion == crearNueva) {
-                if (proveedorSeleccionado == null) {
-                    mostrarDialogoProveedorYCantidad(codArticulo, nombreArticulo);
-                }
                 crearYAbrirNuevaOrden(proveedorSeleccionado.getCodProveedor());
             }
             // Si cancela, no se hace nada
@@ -308,7 +330,7 @@ public class OrdenCompraPanel extends BorderPane {
             Long codProveedor = proveedorSeleccionado.getCodProveedor();
 
             controller.buscarOrdenAbiertaPorProveedor(codProveedor).ifPresentOrElse(
-                    ordenExistente -> mostrarOpcionesOrdenExistente(ordenExistente.getCodOrdenDeCompra(), proveedorSeleccionado, null, null),
+                    ordenExistente -> mostrarOpcionesOrdenExistente(ordenExistente.getCodOrdenDeCompra(), proveedorSeleccionado),
                     () -> crearYAbrirNuevaOrden(codProveedor)
             );
         });
@@ -340,7 +362,7 @@ public class OrdenCompraPanel extends BorderPane {
             Long codArticulo = articuloSeleccionado.getCodArticulo();
 
             controller.buscarOrdenAbiertaPorArticulo(codArticulo).ifPresentOrElse(
-                    ordenExistente -> mostrarOpcionesOrdenExistente(ordenExistente.getCodOrdenDeCompra(), null, codArticulo, articuloSeleccionado.getNombreArticulo() ),
+                    ordenExistente -> mostarOpcionesOrdenArticuloExistente(ordenExistente.getCodOrdenDeCompra(), articuloSeleccionado.getCodArticulo(), articuloSeleccionado.getNombreArticulo()),
                     () -> mostrarDialogoProveedorYCantidad(codArticulo, articuloSeleccionado.getNombreArticulo())
             );
         });
@@ -349,17 +371,20 @@ public class OrdenCompraPanel extends BorderPane {
 
     private void crearYAbrirNuevaOrden(Long codProveedor) {
         Long nuevaOrdenId = controller.crearOrdenDeCompra(codProveedor);
+        System.out.println("ID de la nueva orden: " + nuevaOrdenId);
         cargarDatos();
         abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
 
     }
 
     private void crearYAbrirNuevaOrdenPorArticulo(Long codArticulo, Long codProveedor, int cantidadSolicitada) {
-        Long nuevaOrdenId = controller.crearOrdenDeCompraPorArticulo(codArticulo, codProveedor, cantidadSolicitada);
+        Long nuevaOrdenId = controller.crearOrdenDeCompra(codProveedor);
+        Long articuloProveedorID = controller.buscarArticuloProveedorPorRelacion(codArticulo,codProveedor);
+        controller.agregarArticuloAOrden(nuevaOrdenId,articuloProveedorID,cantidadSolicitada);
         cargarDatos();
         abrirVentanaEditarArticulos(nuevaOrdenId, tablaOrdenes);
-
     }
+
 
     private void mostrarAlerta(Alert.AlertType tipo, String mensaje) {
         Alert alerta = new Alert(tipo, mensaje);

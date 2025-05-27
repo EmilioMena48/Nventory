@@ -3,6 +3,7 @@ package com.nventory.service;
 import com.nventory.DTO.*;
 import com.nventory.model.*;
 import com.nventory.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
@@ -214,7 +215,7 @@ public class OrdenCompraService {
 
 
 
-    public void recalcularTotalOrdenCompra(Long codOrdenCompra) {
+    private void recalcularTotalOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra orden = ordenCompraRepo.buscarPorId(codOrdenCompra);
         List<OrdenDeCompraArticulo> listaOCA = ordenDeCompraArticuloRepo.buscarOCAdeUnaOC(codOrdenCompra);
         BigDecimal nuevoTotalOrdenCompra = BigDecimal.ZERO;
@@ -229,21 +230,25 @@ public class OrdenCompraService {
 
     public Long crearOrdenDeCompra(Long codProveedor) {
         Proveedor proveedor = proveedorRepo.buscarPorId(codProveedor);
+        if (proveedor == null) {
+            throw new IllegalArgumentException("Proveedor no encontrado");
+        }
+
         EstadoOrdenDeCompra estadoPendiente = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente");
-        OrdenDeCompra orden  = new OrdenDeCompra();
+        if (estadoPendiente == null) {
+            throw new IllegalStateException("Estado 'Pendiente' no configurado en el sistema");
+        }
+
+        OrdenDeCompra orden = new OrdenDeCompra();
         orden.setProveedor(proveedor);
         orden.setEstadoOrdenDeCompra(estadoPendiente);
-        ordenCompraRepo.guardar(orden);
-        return orden.getCodOrdenDeCompra();
+        orden.setTotalOrdenDeCompra(BigDecimal.ZERO);
+
+        Long codOrden = ordenCompraRepo.guardarYdevolverID(orden);
+
+        return codOrden;
     }
 
-
-    public Long crearOrdenDeCompraPorArticulo(Long codArticulo, Long codProveedor, int cantidadSolicitada) {
-        ArticuloProveedor articuloProveedor = articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor);
-        Long codOrdenNueva = crearOrdenDeCompra(codProveedor);
-        agregarArticuloAOrden(codOrdenNueva, articuloProveedor.getCodArticuloProveedor(), cantidadSolicitada);
-        return codOrdenNueva;
-    }
 
     public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorProveedor(Long codProveedor) {
         Optional<OrdenDeCompra> orden = ordenCompraRepo.buscarOrdenPendienteOEnviadaPorProveedor(codProveedor);
@@ -295,7 +300,12 @@ public class OrdenCompraService {
         SugerenciaOrdenDTO sugerenciaOrdenDTO = new SugerenciaOrdenDTO();
         Articulo art = articuloRepo.buscarPorId(codArticulo);
         sugerenciaOrdenDTO.setNombreProveedorSugerido(art.getArticuloProveedor().getProveedor().getNombreProveedor());
+        sugerenciaOrdenDTO.setCantidadSugerida(10);
         //Hay que sugerir una cantidad dependiendo del Modelo de inventario.
         return sugerenciaOrdenDTO;
+    }
+
+    public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
+        return articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor).getCodArticuloProveedor();
     }
 }

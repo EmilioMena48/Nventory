@@ -74,10 +74,6 @@ public class OrdenDeCompraController {
         return ordenCompraService.obtenerTodosLosArticulos();
     }
 
-    public Long crearOrdenDeCompraPorArticulo(Long codArticulo, Long codProveedor, int cantidadSolicitada) {
-        return ordenCompraService.crearOrdenDeCompraPorArticulo(codArticulo, codProveedor, cantidadSolicitada);
-    }
-
     public Optional<OrdenDeCompraDTO> buscarOrdenAbiertaPorProveedor(Long codProveedor) {
         return ordenCompraService.buscarOrdenAbiertaPorProveedor(codProveedor);
     }
@@ -96,6 +92,10 @@ public class OrdenDeCompraController {
 
     public String obtenerEstadoDeUnaOrden(Long codOrdenCompra) {
         return ordenCompraService.obtenerEstadoDeUnaOrden(codOrdenCompra);
+    }
+
+    public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
+        return ordenCompraService.buscarArticuloProveedorPorRelacion(codArticulo, codProveedor);
     }
 }
 

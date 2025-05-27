@@ -4,6 +4,7 @@ import com.nventory.model.OrdenDeCompra;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,25 @@ public class OrdenDeCompraRepository extends BaseRepositoryImpl <OrdenDeCompra, 
     public OrdenDeCompraRepository() {
         super(OrdenDeCompra.class);
     }
+
+    public Long guardarYdevolverID(OrdenDeCompra orden) {
+        EntityManager em = getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(orden); // Genera y asigna el ID
+            em.getTransaction().commit();
+            return orden.getCodOrdenDeCompra(); // Ya tiene el ID cargado
+        } catch (Exception e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
 
     public Optional<OrdenDeCompra> buscarOrdenPendienteOEnviadaPorProveedor(Long codProveedor) {
         EntityManager em = IndireccionJPA.getEntityManager();
@@ -45,6 +65,7 @@ public class OrdenDeCompraRepository extends BaseRepositoryImpl <OrdenDeCompra, 
     }
 
 
+    }
 
 
 
@@ -53,4 +74,6 @@ public class OrdenDeCompraRepository extends BaseRepositoryImpl <OrdenDeCompra, 
 
 
 
-}
+
+
+
