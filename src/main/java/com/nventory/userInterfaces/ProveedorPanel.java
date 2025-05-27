@@ -39,9 +39,6 @@ public class ProveedorPanel extends BorderPane {
     private final ProveedorController controller;
     private final ArticuloController articuloController;
     private VBox areaContenido;
-    private final TableView<ProveedorDTO> tablaProveedores = new TableView<>();
-    private final TableView<ProveedorEliminadoDTO> tablaProveedoresEliminados = new TableView<>();
-    private final TableView<Articulo> tablaArticulos = new TableView<>();
     private ProveedorDTO proveedorDTO;
     private boolean modificar = false;
 
@@ -176,12 +173,9 @@ public class ProveedorPanel extends BorderPane {
 
     private void cargarTablaProveedoresActivos() {
         areaContenido.getChildren().clear();
-        tablaProveedores.getColumns().clear();
-        TableView<ProveedorDTO> tabla = tablaProveedores;
-
-        if (!tabla.getStyleClass().contains("tablaProveedor")) {
-            tabla.getStyleClass().add("tablaProveedor");
-        }
+        proveedorDTO = null;
+        TableView<ProveedorDTO> tabla = new TableView<>();
+        tabla.getStyleClass().add("tablaProveedor");
 
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay proveedores disponibles."));
@@ -271,13 +265,8 @@ public class ProveedorPanel extends BorderPane {
 
     private void cargarTablaProveedoresEliminados() {
         areaContenido.getChildren().clear();
-        tablaProveedoresEliminados.getColumns().clear();
-        TableView<ProveedorEliminadoDTO> tabla = tablaProveedoresEliminados;
-
-        if (!tabla.getStyleClass().contains("tablaProveedor")) {
-            tabla.getStyleClass().add("tablaProveedor");
-        }
-
+        TableView<ProveedorEliminadoDTO> tabla = new TableView<>();
+        tabla.getStyleClass().add("tablaProveedor");
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay proveedores eliminados."));
         tabla.getColumns().addAll(crearColumnasBasicas());
@@ -340,14 +329,8 @@ public class ProveedorPanel extends BorderPane {
 
     private void cargarTablaArticulosDelProveedor() {
         areaContenido.getChildren().clear();
-        tablaArticulos.getColumns().clear();
-        tablaArticulos.getItems().clear();
-        tablaArticulos.getSelectionModel().clearSelection();
-        TableView<Articulo> tabla = tablaArticulos;
-
-        if (!tabla.getStyleClass().contains("tablaProveedor")) {
-            tabla.getStyleClass().add("tablaProveedor");
-        }
+        TableView<Articulo> tabla = new TableView<>();
+        tabla.getStyleClass().add("tablaProveedor");
 
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay artículos asociados a este proveedor."));
@@ -397,7 +380,10 @@ public class ProveedorPanel extends BorderPane {
                 btnEliminar.setDisable(!seleccionado);
             });
 
-            btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
+            btnCancelar.setOnAction(e -> {
+                proveedorDTO = null;
+                cargarTablaProveedoresActivos();
+            });
 
             btnAgregar.setOnAction(e -> {
                 if (proveedorDTO != null) {
@@ -440,7 +426,7 @@ public class ProveedorPanel extends BorderPane {
             contenedorBotones.setPadding(new Insets(10));
 
             VBox contenedor = new VBox(10);
-            contenedor.getChildren().addAll(proveedorLabel, labelArticulos, tablaArticulos);
+            contenedor.getChildren().addAll(proveedorLabel, labelArticulos, tabla);
 
             VBox contenedorTotal = new VBox(10, contenedor, contenedorBotones);
             contenedorTotal.getStyleClass().add("sombreadoMenu");
@@ -462,10 +448,6 @@ public class ProveedorPanel extends BorderPane {
         cargarTablaProveedoresEliminados();
     }
 
-    private void mostrarAlerta(String mensaje) {
-        PopupMensaje.mostrarPopup(mensaje, 1, null);
-    }
-
     private void mostrarAlerta(String mensaje, int tipo, Runnable accion) {
         PopupMensaje.mostrarPopup(mensaje, tipo, accion);
     }
@@ -479,11 +461,8 @@ public class ProveedorPanel extends BorderPane {
 
     private void mostrarSeleccionArticulo() {
         areaContenido.getChildren().clear();
-        tablaArticulos.getColumns().clear();
-        if (!tablaArticulos.getStyleClass().contains("tablaProveedor")) {
-            tablaArticulos.getStyleClass().add("tablaProveedor");
-        }
-        TableView<Articulo> tabla = tablaArticulos;
+        TableView<Articulo> tabla = new TableView<>();
+        tabla.getStyleClass().add("tablaProveedor");
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tabla.setPlaceholder(new Label("No hay articulos"));
         tabla.getColumns().add(crearColumna("Código", "codArticulo"));
@@ -522,7 +501,7 @@ public class ProveedorPanel extends BorderPane {
             labelArticulos.setStyle("-fx-font-size: 12px;");
             proveedorLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
             proveedorLabel.setPadding(new Insets(5, 0, 5, 0));
-            contenedorSeleccion.getChildren().addAll(proveedorLabel, labelArticulos, tablaArticulos);
+            contenedorSeleccion.getChildren().addAll(proveedorLabel, labelArticulos, tabla);
             areaContenido.getChildren().add(contenedorSeleccion);
             FadeTransition fade = new FadeTransition(Duration.millis(600), contenedorSeleccion);
             fade.setFromValue(0);
@@ -558,7 +537,10 @@ public class ProveedorPanel extends BorderPane {
 
         Button btnCancelar = new Button("Cancelar");
         btnCancelar.getStyleClass().add("button-cancelar");
-        btnCancelar.setOnAction(e -> cargarTablaProveedoresActivos());
+        btnCancelar.setOnAction(e -> {
+            proveedorDTO = null;
+            cargarTablaProveedoresActivos();
+        });
 
         Button btnGuardar = new Button("Guardar Asociación");
         btnGuardar.getStyleClass().add("button-guardar");
@@ -645,9 +627,10 @@ public class ProveedorPanel extends BorderPane {
 }
 
 class PopupMensaje {
-
+    private static final String CSS = "/styles/estilosProveedor.css";
     public static void mostrarPopup(String mensaje, int tipo, Runnable accion) {
         Stage popup = new Stage();
+
         popup.initStyle(StageStyle.UNDECORATED);
         popup.initModality(Modality.APPLICATION_MODAL);
 
@@ -674,8 +657,8 @@ class PopupMensaje {
 
         Scene scene = new Scene(root, 350, 150);
         scene.setFill(null);
+        scene.getStylesheets().add(Objects.requireNonNull(PopupMensaje.class.getResource(CSS)).toExternalForm());
         popup.setScene(scene);
-
         popup.centerOnScreen();
 
         switch (tipo) {
