@@ -153,10 +153,7 @@ public class OrdenCompraService {
             ordenCompraArticulo.setArticuloProveedor(articuloProveedor);
             ordenCompraArticulo.setOrdenDeCompra(ordenCompra);
             ordenDeCompraArticuloRepo.guardar(ordenCompraArticulo);
-
-
             recalcularTotalOrdenCompra(codOrdenCompra);
-            ordenCompraRepo.guardar(ordenCompra);
         }
     }
 
