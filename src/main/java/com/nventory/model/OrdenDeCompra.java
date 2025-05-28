@@ -20,7 +20,6 @@ public class OrdenDeCompra {
     private Long codOrdenDeCompra;
     private LocalDateTime fechaHoraEnvioProv;
     private BigDecimal totalOrdenDeCompra = BigDecimal.ZERO;
-    private LocalDateTime fechaHoraInicioOC;
 
     //Relacion Orden Compra - Proveedor
     @ManyToOne(fetch = FetchType.EAGER)

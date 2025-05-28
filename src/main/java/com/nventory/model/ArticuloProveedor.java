@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -18,11 +17,11 @@ public class ArticuloProveedor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codArticuloProveedor;
+    private BigDecimal costoEnvio;
     private BigDecimal costoPedido;
     private int demoraEntregaDias;
     private LocalDateTime fechaHoraBajaArticuloProveedor;
     private BigDecimal precioUnitario;
-    private LocalDate fechaProxRevisionAP;
 
     //Relacion ArticuloProveedor - Articulo
     @ManyToOne(fetch = FetchType.EAGER)
