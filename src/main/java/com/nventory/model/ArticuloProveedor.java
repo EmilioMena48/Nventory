@@ -33,7 +33,8 @@ public class ArticuloProveedor {
     @JoinColumn(name = "codProveedor")
     private Proveedor proveedor;
 
-
-
-
+    //Relacion ArticuloProveedor - ConfiguracionInventario
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "codConfiguracionInventario")
+    private ConfiguracionInventario configuracionInventario;
 }

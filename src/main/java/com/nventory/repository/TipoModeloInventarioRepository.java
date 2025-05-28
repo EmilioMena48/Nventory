@@ -20,4 +20,12 @@ public class TipoModeloInventarioRepository extends BaseRepositoryImpl<TipoModel
             return false;
         }
     }
+
+    public Long GuardarYRetornarID(TipoModeloInventario model){
+        EntityManager em = IndireccionJPA.getEntityManager();
+        em.getTransaction().begin();
+        em.persist(model);
+        em.getTransaction().commit();
+        return model.getCodTipoModeloI();
+    }
 }

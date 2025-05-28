@@ -1,14 +1,13 @@
 package com.nventory.service;
 
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
-import com.nventory.model.Articulo;
-import com.nventory.model.ArticuloProveedor;
-import com.nventory.model.Proveedor;
+import com.nventory.model.*;
 import com.nventory.repository.ArticuloProveedorRepository;
+import com.nventory.repository.ConfiguracionInventarioRepository;
+import com.nventory.repository.TipoModeloInventarioRepository;
+import lombok.NonNull;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -16,12 +15,11 @@ import java.util.stream.Collectors;
 public class ArticuloProveedorService {
     ArticuloProveedorRepository repository;
 
+    TipoModeloInventarioRepository tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
+    ConfiguracionInventarioRepository configuracionInventarioRepository = new ConfiguracionInventarioRepository();
+
     public ArticuloProveedorService(ArticuloProveedorRepository repository) {
         this.repository = repository;
-    }
-
-    public List<ArticuloProveedor> listarArticulosProveedor() {
-        return repository.buscarTodos();
     }
 
     public void eliminarArticuloProveedor(Long id) {
@@ -34,7 +32,7 @@ public class ArticuloProveedorService {
         }
     }
 
-    public void guardarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto){
+    public void guardarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto) {
         ArticuloProveedor articuloProveedor = new ArticuloProveedor();
         articuloProveedor.setArticulo(articulo);
         articuloProveedor.setProveedor(proveedor);
@@ -47,6 +45,10 @@ public class ArticuloProveedorService {
         articuloProveedor.setCostoEnvio(articuloProveedorDto.getCostoEnvio());
         articuloProveedor.setCostoPedido(articuloProveedorDto.getCostoPedido());
         articuloProveedor.setDemoraEntregaDias(articuloProveedorDto.getDemoraEntregaDias());
+        repository.guardar(articuloProveedor);
+    }
+
+    public void guardarArticuloProveedor(@NonNull ArticuloProveedor articuloProveedor) {
         repository.guardar(articuloProveedor);
     }
 
@@ -67,5 +69,29 @@ public class ArticuloProveedorService {
             }
         }
         return null;
+    }
+
+    public ConfiguracionInventario inicializarModelo(boolean isLoteFijo) {
+        ConfiguracionInventario config = new ConfiguracionInventario();
+        TipoModeloInventario tipoModelo = new TipoModeloInventario();
+        Long idCI;
+        config.setInventarioMaximoIF(0);
+        config.setLoteOptimoLF(0);
+        config.setPuntoPedidoLF(0);
+        config.setStockSeguridadIF(0);
+        config.setStockSeguridadLF(0);
+        if (isLoteFijo) {
+            tipoModelo.setNombreModeloInventario("Modelo Lote Fijo");
+            Long idTPI = tipoModeloInventarioRepository.GuardarYRetornarID(tipoModelo);
+            config.setNombreConfiguracionInventario("Modelo Lote Fijo");
+            config.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorId(idTPI));
+        } else {
+            tipoModelo.setNombreModeloInventario("Modelo Periodo Fijo");
+            Long idTPI = tipoModeloInventarioRepository.GuardarYRetornarID(tipoModelo);
+            config.setNombreConfiguracionInventario("Modelo Periodo Fijo");
+            config.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorId(idTPI));
+        }
+        idCI = configuracionInventarioRepository.GuardarYRetornarID(config);
+        return configuracionInventarioRepository.buscarPorId(idCI);
     }
 }

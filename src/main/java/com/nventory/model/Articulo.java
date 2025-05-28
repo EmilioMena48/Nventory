@@ -27,6 +27,10 @@ public class Articulo {
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
 
+    /**
+     * Ya cree la relación articuloProveedor - ConfiguraciónInventario
+     * Lo dejo por si se necesita, para que explote
+     */
     //Relacion Articulo - ConfiguracionInventario
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "codConfiguracionInventario")

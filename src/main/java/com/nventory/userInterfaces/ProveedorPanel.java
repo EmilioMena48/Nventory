@@ -10,6 +10,7 @@ import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,6 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -514,25 +516,35 @@ public class ProveedorPanel extends BorderPane {
 
     private void mostrarFormularioAsociarArticulo(Articulo articuloSeleccionado) {
         areaContenido.getChildren().clear();
+        boolean asignarModelo;
 
         TextField txtDemoraEntrega = new TextField();
         TextField txtPrecioUnitario = new TextField();
         TextField txtCostoPedido = new TextField();
         TextField txtCostoEnvio = new TextField();
+        SelectorSwitch toggleSwitch = new SelectorSwitch(true);
 
         txtDemoraEntrega.getStyleClass().add("text-field");
         txtPrecioUnitario.getStyleClass().add("text-field");
         txtCostoPedido.getStyleClass().add("text-field");
         txtCostoEnvio.getStyleClass().add("text-field");
+        HBox toggleContainer = new HBox(toggleSwitch);
+        toggleContainer.setMinHeight(15);
+        toggleContainer.setAlignment(Pos.CENTER);
 
         if (proveedorDTO.getCodProveedor() != 0L) {
             ArticuloProveedorGuardadoDTO articuloProveedor = controller.BuscarArticuloProveedor(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
             if (articuloProveedor != null) {
+                asignarModelo = false;
                 txtDemoraEntrega.setText(String.valueOf(articuloProveedor.getDemoraEntregaDias()));
                 txtPrecioUnitario.setText(articuloProveedor.getPrecioUnitario().toString());
                 txtCostoPedido.setText(articuloProveedor.getCostoPedido().toString());
                 txtCostoEnvio.setText(articuloProveedor.getCostoEnvio().toString());
+            } else {
+                asignarModelo = true;
             }
+        } else {
+            asignarModelo = true;
         }
 
         Button btnCancelar = new Button("Cancelar");
@@ -578,10 +590,14 @@ public class ProveedorPanel extends BorderPane {
 
                 if (proveedorDTO.getCodProveedor() == 0L) {
                     Proveedor proveedor = controller.GuardarYRetornar(proveedorDTO);
-                    controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
+                    controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap, toggleSwitch.isLoteFijo());
                 } else {
                     Proveedor proveedor = controller.BuscarProveedorPorId(proveedorDTO.getCodProveedor());
-                    controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
+                    if (asignarModelo) {
+                        controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap, toggleSwitch.isLoteFijo());
+                    } else {
+                        controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
+                    }
                 }
                 mostrarAlerta("Artículo asociado correctamente", 4, () -> {
                     txtDemoraEntrega.clear();
@@ -600,12 +616,15 @@ public class ProveedorPanel extends BorderPane {
         formulario.setVgap(10);
         formulario.setHgap(10);
 
-        formulario.add(new Label("Artículo: "), 0, 0);
-        formulario.add(new Label(articuloSeleccionado.getNombreArticulo()), 1, 0);
+        HBox articuloProveedorBox = new HBox(
+                new Label("Proveedor: "),
+                new Label(proveedorDTO.getNombreProveedor()),
+                new Label("Artículo: "),
+                new Label(articuloSeleccionado.getNombreArticulo()));
+        articuloProveedorBox.setAlignment(Pos.CENTER);
+        articuloProveedorBox.setSpacing(10);
 
-        formulario.add(new Label("Proveedor: "), 0, 1);
-        formulario.add(new Label(proveedorDTO.getNombreProveedor()), 1, 1);
-
+        formulario.add(articuloProveedorBox, 0, 0, 2, 1);
         formulario.add(new Label("Demora entrega (días):"), 0, 2);
         formulario.add(txtDemoraEntrega, 1, 2);
 
@@ -618,8 +637,12 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Costo envío:"), 0, 5);
         formulario.add(txtCostoEnvio, 1, 5);
 
-        formulario.add(btnGuardar, 1, 6);
-        formulario.add(btnCancelar, 0, 6);
+        if(asignarModelo) {
+            formulario.add(toggleContainer, 0, 6, 2, 1);
+        }
+
+        formulario.add(btnGuardar, 1, 7);
+        formulario.add(btnCancelar, 0, 7);
 
         animarFormulario(formulario);
         areaContenido.getChildren().add(formulario);
@@ -706,5 +729,56 @@ class PopupMensaje {
                 pause.play();
             }
         }
+    }
+}
+
+class SelectorSwitch extends StackPane {
+    private static final String CSS = "/styles/estilosProveedor.css";
+    private final StackPane sliderPane;
+    private final double width = 200;
+    private final double height = 40;
+    @Getter
+    private boolean isLoteFijo;
+
+    public SelectorSwitch(boolean initialLoteFijo) {
+        this.isLoteFijo = initialLoteFijo;
+        this.getStylesheets().add(Objects.requireNonNull(SelectorSwitch.class.getResource(CSS)).toExternalForm());
+
+        Label loteLabel = new Label("Lote Fijo");
+        Label tiempoLabel = new Label("Tiempo Fijo");
+
+        loteLabel.setPrefSize(width / 2, height);
+        tiempoLabel.setPrefSize(width / 2, height);
+        loteLabel.setAlignment(Pos.CENTER);
+        tiempoLabel.setAlignment(Pos.CENTER);
+
+        HBox switchBox = new HBox(loteLabel, tiempoLabel);
+        switchBox.setPrefSize(width, height);
+        switchBox.setMaxWidth(width);
+        switchBox.setMinWidth(width);
+        switchBox.getStyleClass().add("switch-container");
+
+        sliderPane = new StackPane();
+        sliderPane.setPrefSize(width / 2, height);
+        sliderPane.setMaxWidth(width / 2);
+        sliderPane.setMinWidth(width / 2);
+        sliderPane.getStyleClass().add("switch-slider");
+        sliderPane.setTranslateX(initialLoteFijo ? 0 : width / 2);
+
+        StackPane container = new StackPane(switchBox, sliderPane);
+        container.setAlignment(Pos.CENTER_LEFT);
+        container.setPrefSize(width, height);
+
+        container.setOnMouseClicked(e -> toggle());
+
+        this.getChildren().add(container);
+    }
+
+    private void toggle() {
+        double targetX = isLoteFijo ? width / 2 : 0;
+        TranslateTransition transition = new TranslateTransition(Duration.millis(200), sliderPane);
+        transition.setToX(targetX);
+        transition.play();
+        isLoteFijo = !isLoteFijo;
     }
 }

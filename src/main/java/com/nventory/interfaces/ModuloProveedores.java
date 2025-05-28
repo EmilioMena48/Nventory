@@ -11,22 +11,23 @@ import java.util.List;
 
 public interface ModuloProveedores  {
     /*
-     * Modulo Proveedores
+     * Módulo Proveedores
      *
-     * Este modulo permite gestionar los proveedores de la aplicacion.
+     * Este módulo permite gestionar los proveedores de la application.
      *
      * @author Juan Pablo
      * @version 1.0
      */
-    public void GuardarProveedor(@NonNull ProveedorDTO proveedor);
-    public void EliminarProveedor(@NonNull Long codProveedor);
-    public List<ProveedorDTO> ListarProveedores();
-    public List<ProveedorEliminadoDTO> ListarProveedoresEliminados();
-    public Proveedor GuardarYRetornar(ProveedorDTO proveedorDto);
-    public Proveedor BuscarProveedorPorId(Long idProveedor);
-    public List<Articulo> ListarArticulos(Long codProveedor);
-    public ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId);
-    public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedor);
-    public void EliminarArticuloProveedor(Long articuloId, Long proveedorId);
-    public boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId);
+    void GuardarProveedor(@NonNull ProveedorDTO proveedor);
+    void EliminarProveedor(@NonNull Long codProveedor);
+    List<ProveedorDTO> ListarProveedores();
+    List<ProveedorEliminadoDTO> ListarProveedoresEliminados();
+    Proveedor GuardarYRetornar(ProveedorDTO proveedorDto);
+    Proveedor BuscarProveedorPorId(Long idProveedor);
+    List<Articulo> ListarArticulos(Long codProveedor);
+    ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId);
+    void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedor);
+    void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto, Boolean tipoModelo);
+    void EliminarArticuloProveedor(Long articuloId, Long proveedorId);
+    boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId);
 }

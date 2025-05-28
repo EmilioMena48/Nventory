@@ -25,7 +25,6 @@ public class ProveedorService {
         List<Proveedor> proveedores = proveedorRepository.buscarTodos();
         List<ProveedorDTO> proveedoresDto = new ArrayList<>();
         for (Proveedor proveedor : proveedores) {
-            boolean A = proveedor.isActivo();
             if (!(proveedor.isActivo())) continue;
             ProveedorDTO proveedorDto = new ProveedorDTO();
             proveedorDto.setCodProveedor(proveedor.getCodProveedor());
