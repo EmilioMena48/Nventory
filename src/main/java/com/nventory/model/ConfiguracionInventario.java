@@ -17,13 +17,11 @@ public class ConfiguracionInventario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codConfiguracionInventario;
     private LocalDateTime fechaHoraBajaConfiguracionInventario;
-    private int inventarioMaximoIF;
-    private int loteOptimoLF;
-    private String nombreConfiguracionInventario;
-    private int puntoPedidoLF;
-    private int stockSeguridadIF;
-    private int stockSeguridadLF;
-
+    private int inventarioMaximo;
+    private int loteOptimo;
+    private int puntoPedido;
+    private int stockSeguridad;
+    private int cantidadPedir;
 
     //Relacion ConfiguracionInventario - TipoModeloInventario
     @ManyToOne(fetch = FetchType.EAGER)

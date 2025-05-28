@@ -19,22 +19,15 @@ public class Articulo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codArticulo;
     private BigDecimal costoAlmacenamiento;
-    private BigDecimal costoCapitalInmovilizado;
-    private BigDecimal costoCompra;
     private int demandaArt;
     private String nombreArticulo;
     private String descripcionArticulo;
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
-
-    /**
-     * Ya cree la relación articuloProveedor - ConfiguraciónInventario
-     * Lo dejo por si se necesita, para que explote
-     */
-    //Relacion Articulo - ConfiguracionInventario
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "codConfiguracionInventario")
-    private ConfiguracionInventario configuracionInventario;
+    private int desviacionEstandarArticulo;
+    private int diasEntreRevisiones;
+    private BigDecimal nivelServicioArticulo;
+    private BigDecimal precioArticulo;
 
     //Relacion entre Articulo - ArticuloProveedor
 
