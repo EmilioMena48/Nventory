@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 public class StockMovimiento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long codStockMovimiento;
     private int cantidad;
     private String comentario;
     private LocalDateTime fechaHoraMovimiento;
 
 
     //Relacion StockMovimiento - OrdenDeCompraArticulo
-    @ManyToOne(optional = true, fetch = FetchType.EAGER)
+    @OneToOne(optional = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "codOrdenDeCompraArticulo")
     private OrdenDeCompraArticulo ordenDeCompraArticulo;
 
@@ -39,7 +39,7 @@ public class StockMovimiento {
 
 
     //Relacion StockMovimiento - VentaArticulo
-    @ManyToOne(optional = true, fetch = FetchType.EAGER)
+    @OneToOne(optional = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "ordenVentaArticulo")
     private  VentaArticulo ventaArticulo;
 
