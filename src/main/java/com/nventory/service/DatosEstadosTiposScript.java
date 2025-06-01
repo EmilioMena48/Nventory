@@ -22,7 +22,7 @@ public class DatosEstadosTiposScript {
 
     public void ejecutar() {
         crearEstadosOrdenCompraIniciales();
-        //crearTipoModeloInventarioIniciales();
+        crearTipoModeloInventarioIniciales();
         crearTipoStockMovimientoIniciales();
         crearArticulosIniciales();
     }

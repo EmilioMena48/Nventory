@@ -101,9 +101,9 @@ public class ProveedorController implements ModuloProveedores {
         if (articuloProveedor != null) {
             return ArticuloProveedorGuardadoDTO.builder()
                     .precioUnitario(articuloProveedor.getPrecioUnitario())
-                    .costoEnvio(articuloProveedor.getCostoEnvio())
                     .costoPedido(articuloProveedor.getCostoPedido())
                     .demoraEntregaDias(articuloProveedor.getDemoraEntregaDias())
+                    .fechaProxRevisionAP(articuloProveedor.getFechaProxRevisionAP())
                     .build();
         } else {
             return null;

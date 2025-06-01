@@ -26,6 +26,9 @@ import javafx.util.Duration;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -517,17 +520,22 @@ public class ProveedorPanel extends BorderPane {
     private void mostrarFormularioAsociarArticulo(Articulo articuloSeleccionado) {
         areaContenido.getChildren().clear();
         boolean asignarModelo;
+        boolean tiempoFijo = false;
 
         TextField txtDemoraEntrega = new TextField();
         TextField txtPrecioUnitario = new TextField();
         TextField txtCostoPedido = new TextField();
-        TextField txtCostoEnvio = new TextField();
+        ComboBox<String> diasEntregaComboBox = new ComboBox<>();
+        diasEntregaComboBox.getItems().addAll("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
+        diasEntregaComboBox.getSelectionModel().select("Lunes");
+
         SelectorSwitch toggleSwitch = new SelectorSwitch(true);
 
         txtDemoraEntrega.getStyleClass().add("text-field");
         txtPrecioUnitario.getStyleClass().add("text-field");
         txtCostoPedido.getStyleClass().add("text-field");
-        txtCostoEnvio.getStyleClass().add("text-field");
+        diasEntregaComboBox.getStyleClass().add("text-field");
+
         HBox toggleContainer = new HBox(toggleSwitch);
         toggleContainer.setMinHeight(15);
         toggleContainer.setAlignment(Pos.CENTER);
@@ -539,11 +547,27 @@ public class ProveedorPanel extends BorderPane {
                 txtDemoraEntrega.setText(String.valueOf(articuloProveedor.getDemoraEntregaDias()));
                 txtPrecioUnitario.setText(articuloProveedor.getPrecioUnitario().toString());
                 txtCostoPedido.setText(articuloProveedor.getCostoPedido().toString());
-                txtCostoEnvio.setText(articuloProveedor.getCostoEnvio().toString());
+                LocalDate fechaProxRevision = articuloProveedor.getFechaProxRevisionAP();
+                if (fechaProxRevision != null) {
+                    String fechaProxRevisionString = fechaProxRevision.getDayOfWeek().name();
+                    switch (fechaProxRevisionString) {
+                        case "MONDAY" -> diasEntregaComboBox.getSelectionModel().select("Lunes");
+                        case "TUESDAY" -> diasEntregaComboBox.getSelectionModel().select("Martes");
+                        case "WEDNESDAY" -> diasEntregaComboBox.getSelectionModel().select("Miércoles");
+                        case "THURSDAY" -> diasEntregaComboBox.getSelectionModel().select("Jueves");
+                        case "FRIDAY" -> diasEntregaComboBox.getSelectionModel().select("Viernes");
+                        case "SATURDAY" -> diasEntregaComboBox.getSelectionModel().select("Sábado");
+                        case "SUNDAY" -> diasEntregaComboBox.getSelectionModel().select("Domingo");
+                    }
+                    tiempoFijo = true;
+                }
             } else {
+                tiempoFijo = true;
                 asignarModelo = true;
+
             }
         } else {
+            tiempoFijo = true;
             asignarModelo = true;
         }
 
@@ -562,8 +586,7 @@ public class ProveedorPanel extends BorderPane {
                 int demora = 0;
                 BigDecimal precio = BigDecimal.ZERO;
                 BigDecimal costoPedido = BigDecimal.ZERO;
-                BigDecimal costoEnvio = BigDecimal.ZERO;
-
+                String diaSeleccionado = "";
                 try {
                     if (!txtDemoraEntrega.getText().isBlank()) {
                         demora = Integer.parseInt(txtDemoraEntrega.getText());
@@ -574,9 +597,8 @@ public class ProveedorPanel extends BorderPane {
                     if (!txtCostoPedido.getText().isBlank()) {
                         costoPedido = new BigDecimal(txtCostoPedido.getText());
                     }
-                    if (!txtCostoEnvio.getText().isBlank()) {
-                        costoEnvio = new BigDecimal(txtCostoEnvio.getText());
-                    }
+                    diaSeleccionado = diasEntregaComboBox.getSelectionModel().getSelectedItem();
+
                 } catch (NumberFormatException ex) {
                     mostrarAlerta("Por favor ingrese solo números válidos en los campos numéricos.", 2, null);
                     return;
@@ -586,7 +608,30 @@ public class ProveedorPanel extends BorderPane {
                 ap.setDemoraEntregaDias(demora);
                 ap.setPrecioUnitario(precio);
                 ap.setCostoPedido(costoPedido);
-                ap.setCostoEnvio(costoEnvio);
+
+                if (asignarModelo && !toggleSwitch.isLoteFijo()) {
+                    switch (diaSeleccionado) {
+                        case "Lunes" -> diaSeleccionado = "MONDAY";
+                        case "Martes" -> diaSeleccionado = "TUESDAY";
+                        case "Miércoles" -> diaSeleccionado = "WEDNESDAY";
+                        case "Jueves" -> diaSeleccionado = "THURSDAY";
+                        case "Viernes" -> diaSeleccionado = "FRIDAY";
+                        case "Sábado" -> diaSeleccionado = "SATURDAY";
+                        case "Domingo" -> diaSeleccionado = "SUNDAY";
+                        default -> {
+                            mostrarAlerta("Día de entrega no válido.", 2, null);
+                            return;
+                        }
+                    }
+                    DayOfWeek diaEntrega = DayOfWeek.valueOf(diaSeleccionado);
+                    LocalDate fechaProxRevision = LocalDate.now().with(diaEntrega);
+                    if (fechaProxRevision.isBefore(LocalDate.now())) {
+                        fechaProxRevision = fechaProxRevision.plusWeeks(1);
+                    }
+                    ap.setFechaProxRevisionAP(fechaProxRevision);
+                } else {
+                    ap.setFechaProxRevisionAP(null);
+                }
 
                 if (proveedorDTO.getCodProveedor() == 0L) {
                     Proveedor proveedor = controller.GuardarYRetornar(proveedorDTO);
@@ -603,7 +648,6 @@ public class ProveedorPanel extends BorderPane {
                     txtDemoraEntrega.clear();
                     txtPrecioUnitario.clear();
                     txtCostoPedido.clear();
-                    txtCostoEnvio.clear();
                     cargarTablaProveedoresActivos();
                 });
             } catch (Exception ex) {
@@ -634,8 +678,12 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Costo pedido:"), 0, 4);
         formulario.add(txtCostoPedido, 1, 4);
 
-        formulario.add(new Label("Costo envío:"), 0, 5);
-        formulario.add(txtCostoEnvio, 1, 5);
+        if (tiempoFijo) {
+            formulario.add(new Label("Día de entrega:"), 0, 5);
+            formulario.add(diasEntregaComboBox, 1, 5);
+        } else {
+            diasEntregaComboBox.setVisible(false);
+        }
 
         if(asignarModelo) {
             formulario.add(toggleContainer, 0, 6, 2, 1);

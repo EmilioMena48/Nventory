@@ -41,10 +41,11 @@ public class ArticuloProveedorService {
         if (articuloProveedorAux != null) {
             articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
         }
+
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
-        articuloProveedor.setCostoEnvio(articuloProveedorDto.getCostoEnvio());
         articuloProveedor.setCostoPedido(articuloProveedorDto.getCostoPedido());
         articuloProveedor.setDemoraEntregaDias(articuloProveedorDto.getDemoraEntregaDias());
+        articuloProveedor.setFechaProxRevisionAP(articuloProveedorDto.getFechaProxRevisionAP());
         repository.guardar(articuloProveedor);
     }
 
@@ -73,23 +74,20 @@ public class ArticuloProveedorService {
 
     public ConfiguracionInventario inicializarModelo(boolean isLoteFijo) {
         ConfiguracionInventario config = new ConfiguracionInventario();
-        TipoModeloInventario tipoModelo = new TipoModeloInventario();
+        TipoModeloInventario tipoModelo;
         Long idCI;
-        config.setInventarioMaximoIF(0);
-        config.setLoteOptimoLF(0);
-        config.setPuntoPedidoLF(0);
-        config.setStockSeguridadIF(0);
-        config.setStockSeguridadLF(0);
+        config.setCantidadPedir(0);
+        config.setLoteOptimo(0);
+        config.setPuntoPedido(0);
+        config.setStockSeguridad(0);
+        config.setInventarioMaximo(0);
+
         if (isLoteFijo) {
-            tipoModelo.setNombreModeloInventario("Modelo Lote Fijo");
-            Long idTPI = tipoModeloInventarioRepository.GuardarYRetornarID(tipoModelo);
-            config.setNombreConfiguracionInventario("Modelo Lote Fijo");
-            config.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorId(idTPI));
+            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Lote Fijo");
+            config.setTipoModeloInventario(tipoModelo);
         } else {
-            tipoModelo.setNombreModeloInventario("Modelo Periodo Fijo");
-            Long idTPI = tipoModeloInventarioRepository.GuardarYRetornarID(tipoModelo);
-            config.setNombreConfiguracionInventario("Modelo Periodo Fijo");
-            config.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorId(idTPI));
+            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Inventario Fijo");
+            config.setTipoModeloInventario(tipoModelo);
         }
         idCI = configuracionInventarioRepository.GuardarYRetornarID(config);
         return configuracionInventarioRepository.buscarPorId(idCI);

@@ -3,6 +3,8 @@ package com.nventory.DTO;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -10,8 +12,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class ArticuloProveedorGuardadoDTO {
-    private BigDecimal costoEnvio;
     private BigDecimal costoPedido;
     private int demoraEntregaDias;
     private BigDecimal precioUnitario;
+    private LocalDate fechaProxRevisionAP;
 }

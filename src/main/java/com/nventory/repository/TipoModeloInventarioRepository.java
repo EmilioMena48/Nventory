@@ -21,6 +21,13 @@ public class TipoModeloInventarioRepository extends BaseRepositoryImpl<TipoModel
         }
     }
 
+    public TipoModeloInventario buscarPorNombre(String nombre) {
+        EntityManager em = IndireccionJPA.getEntityManager();
+        TypedQuery<TipoModeloInventario> query = em.createQuery("SELECT e FROM TipoModeloInventario e WHERE e.nombreModeloInventario = :nombre", TipoModeloInventario.class);
+        query.setParameter("nombre", nombre);
+        return query.getResultStream().findFirst().orElse(null);
+    }
+
     public Long GuardarYRetornarID(TipoModeloInventario model){
         EntityManager em = IndireccionJPA.getEntityManager();
         em.getTransaction().begin();
