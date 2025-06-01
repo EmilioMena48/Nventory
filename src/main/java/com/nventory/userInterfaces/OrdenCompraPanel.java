@@ -53,6 +53,9 @@ public class OrdenCompraPanel extends BorderPane {
         TableColumn<OrdenDeCompraDTO, String> colProveedor = new TableColumn<>("Proveedor");
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
 
+        TableColumn<OrdenDeCompraDTO, String> colFecha = new TableColumn<>("Fecha de Creación");
+        colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaHoraCreacion"));
+
         TableColumn<OrdenDeCompraDTO, String> colTotal = new TableColumn<>("Total");
         colTotal.setCellValueFactory(new PropertyValueFactory<>("totalOrden"));
 
@@ -146,7 +149,7 @@ public class OrdenCompraPanel extends BorderPane {
             }
         });
 
-        tablaOrdenes.getColumns().addAll(colId, colEstado, colProveedor, colTotal, colAcciones);
+        tablaOrdenes.getColumns().addAll(colId, colEstado, colProveedor,colFecha ,colTotal, colAcciones);
         setCenter(tablaOrdenes);
 
         Button btnNuevaOrden = new Button("Nueva Orden de Compra");
@@ -270,11 +273,19 @@ public class OrdenCompraPanel extends BorderPane {
 
         dialog.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
-                ProveedorArticuloDTO proveedorSeleccionado = proveedorTable.getSelectionModel().getSelectedItem();
+                ProveedorArticuloDTO proveedorSeleccionado = null;
+                for (Map.Entry<ProveedorArticuloDTO, CheckBox> entry : checkBoxes.entrySet()) {
+                    if (entry.getValue().isSelected()) {
+                        proveedorSeleccionado = entry.getKey();
+                        break;
+                    }
+                }
+
                 if (proveedorSeleccionado == null) {
                     mostrarAlerta(Alert.AlertType.ERROR, "Debe seleccionar un proveedor.");
                     return;
                 }
+
 
                 try {
                     int cantidad = (int) Long.parseLong(cantidadField.getText());

@@ -122,7 +122,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u");
+                        setText(item.getNombre() + " - $" + item.getPrecioUnitario() + " c/u" + " Costo Pedido: " + item.getCostoPedido());
                     }
                 }
             });
