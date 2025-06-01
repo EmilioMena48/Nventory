@@ -11,6 +11,7 @@ public class OrdenDeCompraDTO {
 
     private Long codOrdenDeCompra;
     private String estadoOrdenDeCompra;
+    private String fechaHoraCreacion;
     private String proveedor;
     private String totalOrden;
 }

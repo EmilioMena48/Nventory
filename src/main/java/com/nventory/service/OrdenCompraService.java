@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class OrdenCompraService {
     private final ArticuloRepository articuloRepo;
     private final TipoStockMovimientoRepository tipoStockMovimientoRepo;
     private final StockMovimientoRepository stockMovimientoRepo;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     public List<OrdenDeCompraDTO> obtenerTodasOrdenesDeCompra() {
 
@@ -44,6 +46,10 @@ public class OrdenCompraService {
 
             String estado = ordenCompra.getEstadoOrdenDeCompra().getNombreEstadoOC();
             ordenCompraDTO.setEstadoOrdenDeCompra(estado);
+
+            String fechaFormateada = ordenCompra.getFechaHoraInicioOC().format(formatter);
+            ordenCompraDTO.setFechaHoraCreacion(fechaFormateada);
+
 
             ordenesDto.add(ordenCompraDTO);
         }
@@ -135,6 +141,7 @@ public class OrdenCompraService {
             articuloProveedorDTO.setId(articuloProveedor.getCodArticuloProveedor());
             articuloProveedorDTO.setNombre(articuloProveedor.getArticulo().getNombreArticulo());
             articuloProveedorDTO.setPrecioUnitario(String.valueOf(articuloProveedor.getPrecioUnitario()));
+            articuloProveedorDTO.setCostoPedido(String.valueOf(articuloProveedor.getCostoPedido()));
             articulosOrdDTO.add(articuloProveedorDTO);
         }
         return articulosOrdDTO;
@@ -255,6 +262,7 @@ public class OrdenCompraService {
         orden.setProveedor(proveedor);
         orden.setEstadoOrdenDeCompra(estadoPendiente);
         orden.setTotalOrdenDeCompra(BigDecimal.ZERO);
+        orden.setFechaHoraInicioOC(LocalDateTime.now());
 
         Long codOrden = ordenCompraRepo.guardarYdevolverID(orden);
 

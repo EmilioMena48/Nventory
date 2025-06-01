@@ -12,4 +12,5 @@ public class ArticuloProveedorDTO {
     private Long id;
     private String nombre;
     private String precioUnitario;
+    private String costoPedido;
 }
