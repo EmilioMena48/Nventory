@@ -49,5 +49,22 @@ public class OrdenDeCompraArticuloRepository extends HardDeletableRepositoryImpl
 
     }
 
+    public boolean existePorOrdenYArticuloProveedor(Long codOrden, Long codArticuloProveedor) {
+        EntityManager em = getEntityManager();
+        try {
+            Long count = em.createQuery("""
+                SELECT COUNT(o) FROM OrdenDeCompraArticulo o
+                WHERE o.ordenDeCompra.id = :codOrden
+                AND o.articuloProveedor.id = :codArticuloProveedor
+            """, Long.class)
+                    .setParameter("codOrden", codOrden)
+                    .setParameter("codArticuloProveedor", codArticuloProveedor)
+                    .getSingleResult();
+            return count != null && count > 0;
+        } finally {
+            em.close();
+        }
+    }
+
 
 }

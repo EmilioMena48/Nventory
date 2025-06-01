@@ -3,10 +3,18 @@ package com.nventory.userInterfaces;
 import com.nventory.DTO.*;
 import com.nventory.controller.OrdenDeCompraController;
 
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.*;
@@ -15,6 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -175,9 +184,54 @@ public class OrdenCompraPanel extends BorderPane {
         dialog.setTitle("Nueva Orden por Artículo");
         dialog.setHeaderText("Crear orden para: " + nombreArticulo);
 
-        // UI Elements
         TableView<ProveedorArticuloDTO> proveedorTable = new TableView<>();
+        proveedorTable.setPrefWidth(600);
+        proveedorTable.setPrefHeight(250);
 
+// Columna de selección con CheckBox
+        TableColumn<ProveedorArticuloDTO, Boolean> colSeleccionar = new TableColumn<>("Seleccionar");
+        colSeleccionar.setCellValueFactory(param -> new SimpleBooleanProperty(false));
+        colSeleccionar.setCellFactory(tc -> {
+            CheckBoxTableCell<ProveedorArticuloDTO, Boolean> cell = new CheckBoxTableCell<>();
+            cell.setAlignment(Pos.CENTER);
+            return cell;
+        });
+
+// Agregamos lógica para permitir solo una selección (similar a RadioButton)
+        Map<ProveedorArticuloDTO, CheckBox> checkBoxes = new HashMap<>();
+        ObservableList<ProveedorArticuloDTO> proveedorItems = FXCollections.observableArrayList(proveedores);
+
+        colSeleccionar.setCellFactory(tc -> new TableCell<>() {
+            private final CheckBox checkBox = new CheckBox();
+
+            {
+                checkBox.setOnAction(event -> {
+                    for (Map.Entry<ProveedorArticuloDTO, CheckBox> entry : checkBoxes.entrySet()) {
+                        entry.getValue().setSelected(false);
+                    }
+                    checkBox.setSelected(true);
+                });
+            }
+
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    ProveedorArticuloDTO proveedor = getTableView().getItems().get(getIndex());
+                    checkBoxes.put(proveedor, checkBox);
+                    setGraphic(checkBox);
+
+                    // Preseleccionar el proveedor sugerido
+                    if (proveedor.getCodProveedor().equals(sugerencia.getCodProveedor())) {
+                        checkBox.setSelected(true);
+                    }
+                }
+            }
+        });
+
+// Resto de columnas
         TableColumn<ProveedorArticuloDTO, String> colProveedor = new TableColumn<>("Proveedor");
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("nombreProveedor"));
 
@@ -190,15 +244,17 @@ public class OrdenCompraPanel extends BorderPane {
         TableColumn<ProveedorArticuloDTO, BigDecimal> colCostoPedido = new TableColumn<>("Costo Pedido");
         colCostoPedido.setCellValueFactory(new PropertyValueFactory<>("costoPedido"));
 
-        proveedorTable.getColumns().addAll(colProveedor, colPrecio, colDemora, colCostoPedido);
-        proveedorTable.setItems(FXCollections.observableArrayList(proveedores));
+        proveedorTable.getColumns().addAll(colSeleccionar, colProveedor, colPrecio, colDemora, colCostoPedido);
+        proveedorTable.setItems(proveedorItems);
 
+// Layout
         Label cantidadLabel = new Label("Cantidad sugerida:");
         TextField cantidadField = new TextField(sugerencia.getCantidadSugerida().toString());
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
+        grid.setPadding(new Insets(20));
         grid.add(new Label("Artículo seleccionado:"), 0, 0);
         grid.add(new Label(nombreArticulo), 1, 0);
         grid.add(new Label("Seleccione proveedor:"), 0, 1);
@@ -206,6 +262,9 @@ public class OrdenCompraPanel extends BorderPane {
         grid.add(cantidadLabel, 0, 2);
         grid.add(cantidadField, 1, 2);
 
+// Ajustes visuales al diálogo
+        dialog.getDialogPane().setMinWidth(700);
+        dialog.getDialogPane().setMinHeight(400);
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 

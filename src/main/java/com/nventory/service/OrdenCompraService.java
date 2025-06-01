@@ -4,6 +4,8 @@ import com.nventory.DTO.*;
 import com.nventory.model.*;
 import com.nventory.repository.*;
 import jakarta.transaction.Transactional;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
@@ -139,24 +141,34 @@ public class OrdenCompraService {
     }
 
 
-    public void agregarArticuloAOrden(Long codOrdenCompra, Long codArticuloProveedor, int cantidadSolicitadaOCA) {
-        OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
+    public void agregarArticuloAOrden(Long codOrden, Long codArticuloProveedor, int cantidad) {
+        if (ordenDeCompraArticuloRepo.existePorOrdenYArticuloProveedor(codOrden, codArticuloProveedor)) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Artículo duplicado");
+                alert.setHeaderText("Este artículo ya está en la orden");
+                alert.setContentText("Ya existe una entrada para este artículo en la orden. \nSi lo desea puede modificar la cantidad desde la tabla.");
+                alert.showAndWait();
+            });
+            return;
+        }
+        // Lógica normal si no existe aún:
         ArticuloProveedor articuloProveedor = articuloProveedorRepo.buscarPorId(codArticuloProveedor);
-        boolean esPendiente = ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente").getCodEstadoOC());
-
-        if (ordenCompra.getProveedor().getCodProveedor().equals(articuloProveedor.getProveedor().getCodProveedor()) && esPendiente) {
-            OrdenDeCompraArticulo ordenCompraArticulo = new OrdenDeCompraArticulo();
-            ordenCompraArticulo.setCantidadSolicitadaOCA(cantidadSolicitadaOCA);
-            ordenCompraArticulo.setPrecioUnitarioOCA(articuloProveedor.getPrecioUnitario());
-
-            BigDecimal subTotal = articuloProveedor.getPrecioUnitario().multiply(BigDecimal.valueOf(cantidadSolicitadaOCA));
-            ordenCompraArticulo.setSubTotalOCA(subTotal);
-            ordenCompraArticulo.setArticuloProveedor(articuloProveedor);
-            ordenCompraArticulo.setOrdenDeCompra(ordenCompra);
-            ordenDeCompraArticuloRepo.guardar(ordenCompraArticulo);
-            recalcularTotalOrdenCompra(codOrdenCompra);
+        OrdenDeCompra orden = ordenCompraRepo.buscarPorId(codOrden);
+        EstadoOrdenDeCompra pendiente = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Pendiente");
+        Boolean esElMismoProv = orden.getProveedor().getCodProveedor().equals(articuloProveedor.getProveedor().getCodProveedor());
+        if (orden.getEstadoOrdenDeCompra().getNombreEstadoOC().equals(pendiente.getNombreEstadoOC()) && esElMismoProv) {
+            OrdenDeCompraArticulo nuevaEntrada = new OrdenDeCompraArticulo();
+            nuevaEntrada.setOrdenDeCompra(orden);
+            nuevaEntrada.setArticuloProveedor(articuloProveedor);
+            nuevaEntrada.setCantidadSolicitadaOCA(cantidad);
+            nuevaEntrada.setPrecioUnitarioOCA(articuloProveedor.getPrecioUnitario());
+            nuevaEntrada.setSubTotalOCA(articuloProveedor.getPrecioUnitario().multiply(BigDecimal.valueOf(cantidad)));
+            ordenDeCompraArticuloRepo.guardar(nuevaEntrada);
+            recalcularTotalOrdenCompra(codOrden);
         }
     }
+
 
     public List<ProveedorDTO> obtenerProveedores() {
         List<ProveedorDTO> proveedoresDTOs = new ArrayList<>();
@@ -300,6 +312,7 @@ public class OrdenCompraService {
         SugerenciaOrdenDTO sugerenciaOrdenDTO = new SugerenciaOrdenDTO();
         Articulo art = articuloRepo.buscarPorId(codArticulo);
         sugerenciaOrdenDTO.setNombreProveedorSugerido(art.getArticuloProveedor().getProveedor().getNombreProveedor());
+        sugerenciaOrdenDTO.setCodProveedor(art.getArticuloProveedor().getProveedor().getCodProveedor());
         sugerenciaOrdenDTO.setCantidadSugerida(10);
         //Hay que sugerir una cantidad dependiendo del Modelo de inventario.
         return sugerenciaOrdenDTO;
