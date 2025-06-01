@@ -40,6 +40,7 @@ public class ArticuloProveedorService {
         ArticuloProveedor articuloProveedorAux = buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
         if (articuloProveedorAux != null) {
             articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
+            articuloProveedor.setConfiguracionInventario(articuloProveedorAux.getConfiguracionInventario());
         }
 
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
