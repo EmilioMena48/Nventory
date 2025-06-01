@@ -28,7 +28,6 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -520,7 +519,6 @@ public class ProveedorPanel extends BorderPane {
     private void mostrarFormularioAsociarArticulo(Articulo articuloSeleccionado) {
         areaContenido.getChildren().clear();
         boolean asignarModelo;
-        boolean tiempoFijo = false;
 
         TextField txtDemoraEntrega = new TextField();
         TextField txtPrecioUnitario = new TextField();
@@ -559,15 +557,13 @@ public class ProveedorPanel extends BorderPane {
                         case "SATURDAY" -> diasEntregaComboBox.getSelectionModel().select("Sábado");
                         case "SUNDAY" -> diasEntregaComboBox.getSelectionModel().select("Domingo");
                     }
-                    tiempoFijo = true;
+                } else {
+                    diasEntregaComboBox.setDisable(true);
                 }
             } else {
-                tiempoFijo = true;
                 asignarModelo = true;
-
             }
         } else {
-            tiempoFijo = true;
             asignarModelo = true;
         }
 
@@ -609,7 +605,7 @@ public class ProveedorPanel extends BorderPane {
                 ap.setPrecioUnitario(precio);
                 ap.setCostoPedido(costoPedido);
 
-                if (asignarModelo && !toggleSwitch.isLoteFijo()) {
+                if (!diasEntregaComboBox.isDisable()) {
                     switch (diaSeleccionado) {
                         case "Lunes" -> diaSeleccionado = "MONDAY";
                         case "Martes" -> diaSeleccionado = "TUESDAY";
@@ -678,12 +674,8 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Costo pedido:"), 0, 4);
         formulario.add(txtCostoPedido, 1, 4);
 
-        if (tiempoFijo) {
-            formulario.add(new Label("Día de entrega:"), 0, 5);
-            formulario.add(diasEntregaComboBox, 1, 5);
-        } else {
-            diasEntregaComboBox.setVisible(false);
-        }
+        formulario.add(new Label("Día de entrega:"), 0, 5);
+        formulario.add(diasEntregaComboBox, 1, 5);
 
         if(asignarModelo) {
             formulario.add(toggleContainer, 0, 6, 2, 1);
