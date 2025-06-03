@@ -15,11 +15,14 @@ public class ArticuloDTO {
 
     private Long codArticulo;
     private BigDecimal costoAlmacenamiento;
-    private BigDecimal costoCapitalInmovilizado;
-    private BigDecimal costoCompra;
+    private BigDecimal nivelServicioArticulo;
+    private BigDecimal precioArticulo;
     private int demandaArt;
     private String nombreArticulo;
     private String descripcionArticulo;
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
+    private int diasEntreRevisiones;
+    private int desviacionEstandarArticulo;
+
 }

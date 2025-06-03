@@ -62,10 +62,12 @@ public class MaestroArticuloPanel extends BorderPane {
             // Campos vacíos para alta
             TextField txtNombre = new TextField();
             TextArea txtDescripcion = new TextArea();
-            TextField txtStock = new TextField();
+            TextField txtStockActual = new TextField();
             TextField txtCostoAlmacenamiento = new TextField();
-            TextField txtCostoCompra = new TextField();
-            TextField txtCostoCapital = new TextField();
+            TextField txtPrecioArticulo = new TextField();
+            TextField txtNivelServicioArticulo = new TextField();
+            TextField txtDesviacionEstandarArticulo = new TextField();
+            TextField txtDiasEntreRevisiones = new TextField();
             TextField txtDemanda = new TextField();
 
             // Botones
@@ -78,10 +80,12 @@ public class MaestroArticuloPanel extends BorderPane {
             layout.getChildren().addAll(
                     new Label("Nombre:"), txtNombre,
                     new Label("Descripción:"), txtDescripcion,
-                    new Label("Stock actual:"), txtStock,
+                    new Label("Stock actual:"), txtStockActual,
                     new Label("Costo de almacenamiento:"), txtCostoAlmacenamiento,
-                    new Label("Costo de compra:"), txtCostoCompra,
-                    new Label("Costo de capital inmovilizado:"), txtCostoCapital,
+                    new Label("Precio del artículo:"), txtPrecioArticulo,
+                    new Label("Nivel de servicio del artículo:"), txtNivelServicioArticulo,
+                    new Label("Desviacion estandar del artículo:"), txtDesviacionEstandarArticulo,
+                    new Label("Dias entre revisiones:"), txtDiasEntreRevisiones,
                     new Label("Demanda del artículo:"), txtDemanda,
                     botones
             );
@@ -95,10 +99,12 @@ public class MaestroArticuloPanel extends BorderPane {
                     ArticuloDTO articuloDTO = new ArticuloDTO();
                     articuloDTO.setNombreArticulo(txtNombre.getText());
                     articuloDTO.setDescripcionArticulo(txtDescripcion.getText());
-                    articuloDTO.setStockActual(Integer.valueOf(txtStock.getText()));
+                    articuloDTO.setStockActual(Integer.parseInt(txtStockActual.getText()));
                     articuloDTO.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
-                    articuloDTO.setCostoCompra(new BigDecimal(txtCostoCompra.getText()));
-                    articuloDTO.setCostoCapitalInmovilizado(new BigDecimal(txtCostoCapital.getText()));
+                    articuloDTO.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
+                    articuloDTO.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
+                    articuloDTO.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
+                    articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
                     // Acá llamás al controller para guardar el nuevo artículo
@@ -193,10 +199,12 @@ public class MaestroArticuloPanel extends BorderPane {
                     // Campos editables
                     TextField txtNombre = new TextField(articulo.getNombreArticulo());
                     TextArea txtDescripcion = new TextArea(articulo.getDescripcionArticulo());
-                    TextField txtStock = new TextField(String.valueOf(articulo.getStockActual()));
+                    TextField txtStockActual = new TextField(String.valueOf(articulo.getStockActual()));
                     TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articulo.getCostoAlmacenamiento()));
-                    TextField txtCostoCompra = new TextField(String.valueOf(articulo.getCostoCompra()));
-                    TextField txtCostoCapital = new TextField(String.valueOf(articulo.getCostoCapitalInmovilizado()));
+                    TextField txtPrecioArticulo = new TextField(String.valueOf(articulo.getPrecioArticulo()));
+                    TextField txtNivelServicioArticulo = new TextField(String.valueOf(articulo.getNivelServicioArticulo()));
+                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articulo.getDesviacionEstandarArticulo()));
+                    TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articulo.getDiasEntreRevisiones()));
                     TextField txtDemanda = new TextField(String.valueOf(articulo.getDemandaArt()));
 
                     // Botones
@@ -209,10 +217,12 @@ public class MaestroArticuloPanel extends BorderPane {
                     layout.getChildren().addAll(
                             new Label("Nombre:"), txtNombre,
                             new Label("Descripción:"), txtDescripcion,
-                            new Label("Stock actual:"), txtStock,
+                            new Label("Stock actual:"), txtStockActual,
                             new Label("Costo de almacenamiento:"), txtCostoAlmacenamiento,
-                            new Label("Costo de compra:"), txtCostoCompra,
-                            new Label("Costo de capital inmovilizado:"), txtCostoCapital,
+                            new Label("Precio del artículo:"), txtPrecioArticulo,
+                            new Label("Nivel de servicio del artículo:"), txtNivelServicioArticulo,
+                            new Label("Desviacion estandar del artículo:"), txtDesviacionEstandarArticulo,
+                            new Label("Dias entre revisiones:"), txtDiasEntreRevisiones,
                             new Label("Demanda del artículo:"), txtDemanda,
                             botones
                     );
@@ -227,10 +237,12 @@ public class MaestroArticuloPanel extends BorderPane {
                             articuloDTO.setCodArticulo(articulo.getCodArticulo());
                             articuloDTO.setNombreArticulo(txtNombre.getText());
                             articuloDTO.setDescripcionArticulo(txtDescripcion.getText());
-                            articuloDTO.setStockActual(Integer.valueOf(txtStock.getText()));
+                            articuloDTO.setStockActual(Integer.parseInt(txtStockActual.getText()));
                             articuloDTO.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
-                            articuloDTO.setCostoCompra(new BigDecimal(txtCostoCompra.getText()));
-                            articuloDTO.setCostoCapitalInmovilizado(new BigDecimal(txtCostoCapital.getText()));
+                            articuloDTO.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
+                            articuloDTO.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
+                            articuloDTO.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
+                            articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                             articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
 
@@ -266,8 +278,24 @@ public class MaestroArticuloPanel extends BorderPane {
                         articuloDTO.setCodArticulo(articulo.getCodArticulo());
                         articuloDTO.setFechaHoraBajaArticulo(LocalDateTime.now()); //Se setea la fecha actual para la baja
 
-                        //Llamamos al controller pasandole el dto que contiene la fecha de baja
-                        controller.darDeBajaArticulo(articuloDTO);
+
+                        try {
+                            //Llamamos al controller pasandole el dto que contiene la fecha de baja
+                            controller.darDeBajaArticulo(articuloDTO);
+
+                            Alert exito = new Alert(Alert.AlertType.INFORMATION);
+                            exito.setTitle("Baja exitosa");
+                            exito.setHeaderText(null);
+                            exito.setContentText("El artículo fue dado de baja correctamente.");
+                            exito.showAndWait();
+
+                        } catch (IllegalStateException | IllegalArgumentException ex) {
+                            Alert error = new Alert(Alert.AlertType.ERROR);
+                            error.setTitle("Error al dar de baja");
+                            error.setHeaderText("No se pudo dar de baja el artículo");
+                            error.setContentText(ex.getMessage());
+                            error.showAndWait();
+                        }
                     }
                 });
 

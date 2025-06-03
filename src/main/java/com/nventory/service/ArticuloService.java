@@ -2,10 +2,7 @@ package com.nventory.service;
 
 import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorDTO;
-import com.nventory.model.Articulo;
-import com.nventory.model.ArticuloProveedor;
-import com.nventory.model.OrdenDeCompraArticulo;
-import com.nventory.model.Proveedor;
+import com.nventory.model.*;
 import com.nventory.repository.*;
 
 import java.util.ArrayList;
@@ -30,16 +27,38 @@ public class ArticuloService {
     //-----------------Metodo del service para dar de baja un articulo------------------------------------------
     public void darDeBajaArticulo(ArticuloDTO articuloDTO){
         Articulo articulo = articuloRepository.buscarPorId(articuloDTO.getCodArticulo());
-        ArticuloProveedor articuloProveedorPredeterminado = articulo.getArticuloProveedor();
+
+        //Se valida que el articulo no tenga stock para darle de baja
+        if(articulo.getStockActual() > 0){
+            throw new IllegalStateException("No se puede dar de baja: el artículo aún tiene stock.");
+        }
+
+        //Se valida que el articulo no tenga ordenes de compra pendiente o enviada para poder dar de baja
+        ArticuloProveedor proveedorPredeterminado = articulo.getArticuloProveedor();
+
         //Si no hay proveedor predeterminado, permitir la baja directamente
-        if(articuloProveedorPredeterminado != null ){
-            Long codArticuloProveedor = articuloProveedorPredeterminado.getCodArticuloProveedor();
+        if(proveedorPredeterminado != null ){
+            Long codArticuloProveedor = proveedorPredeterminado.getCodArticuloProveedor();
 
             //Buscar ordenesCompraArticulo relacionadas a ese codArticuloProveedor
             List<OrdenDeCompraArticulo> ordenesCompraArticulo = ordenDeCompraArticuloRepository.buscarOrdenCompraArticuloDeArticulo(codArticuloProveedor);
 
+            for(OrdenDeCompraArticulo oca : ordenesCompraArticulo){
+                OrdenDeCompra orden = oca.getOrdenDeCompra();
+                EstadoOrdenDeCompra estado = orden.getEstadoOrdenDeCompra();
+                String nombreEstado = estado.getNombreEstadoOC();
 
+                //Si es Pendiente o Enviada, no se puede hacer la baja
+                if("Pendiente".equalsIgnoreCase(nombreEstado) || "Enviada".equalsIgnoreCase(nombreEstado)){
+
+                    throw new IllegalStateException("No se puede dar de baja un artículo con órdenes de compra pendientes o enviadas.");
+                }
+            }
         }
+
+        // Si pasa las validaciones, dar de baja
+        articulo.setFechaHoraBajaArticulo(articuloDTO.getFechaHoraBajaArticulo());
+        articuloRepository.guardar(articulo);
     }
 
     //-----------------Metodo del service para obtener Proveedores del articulo seleccionado------------------------
