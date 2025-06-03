@@ -158,9 +158,17 @@ public class OrdenCompraPanel extends BorderPane {
         Button btnNuevaOrden = new Button("Nueva Orden de Compra");
         btnNuevaOrden.setOnAction(e -> seleccionarMetodoCreacion());
 
-        HBox barraSuperior = new HBox(10, btnNuevaOrden);
+        Button btnRealizarOrden = new Button("Generar Ordenes del día");
+        btnRealizarOrden.setOnAction(e -> generarOrdenesDelDia());
+
+        HBox barraSuperior = new HBox(10, btnNuevaOrden, btnRealizarOrden);
         barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;");
         setTop(barraSuperior);
+    }
+
+    private void generarOrdenesDelDia() {
+        controller.generarOrdenesDelDia();
+        cargarDatos();
     }
 
     private void mostrarArticulosAlertas(Optional<List<String>> listaArticulosAlertas) {

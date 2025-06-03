@@ -97,5 +97,9 @@ public class OrdenDeCompraController {
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
         return ordenCompraService.buscarArticuloProveedorPorRelacion(codArticulo, codProveedor);
     }
+
+    public void generarOrdenesDelDia() {
+        ordenCompraService.generarOrdenesDelDia();
+    }
 }
 

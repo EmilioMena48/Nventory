@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -350,5 +351,22 @@ public class OrdenCompraService {
 
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
         return articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor).getCodArticuloProveedor();
+    }
+    public void generarOrdenesDelDia() {
+       List<Articulo> articulos = articuloRepo.buscarTodos();
+       for (Articulo art : articulos) {
+           ArticuloProveedor articuloProv = art.getArticuloProveedor();
+           String modelo = articuloProv.getConfiguracionInventario().getTipoModeloInventario().getNombreModeloInventario();
+           if ("Modelo Periodo Fijo".equals(modelo) && LocalDate.now().equals(articuloProv.getFechaProxRevisionAP())) {
+               int cantidadApedir = articuloProv.getConfiguracionInventario().getCantidadPedir();
+               if (cantidadApedir > 0) {
+                   Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
+                   agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);
+               }
+               int T = art.getDiasEntreRevisiones();
+               articuloProv.setFechaProxRevisionAP(LocalDate.now().plusDays(T));
+               articuloProveedorRepo.guardar(articuloProv);
+           }
+       }
     }
 }
