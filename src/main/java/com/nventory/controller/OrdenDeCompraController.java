@@ -36,8 +36,8 @@ public class OrdenDeCompraController {
 
     }
 
-    public void recibirOrdenDeCompra(Long id){
-        ordenCompraService.recibirOrdenCompra(id);
+    public Optional<List<String>> recibirOrdenDeCompra(Long id){
+        return ordenCompraService.recibirOrdenCompra(id);
     }
 
 

@@ -80,8 +80,9 @@ public class OrdenCompraService {
     }
 
 
-    public void recibirOrdenCompra(Long codOrdenCompra) {
+    public Optional<List<String>> recibirOrdenCompra(Long codOrdenCompra) {
         OrdenDeCompra ordenCompra = ordenCompraRepo.buscarPorId(codOrdenCompra);
+        List<String> avisosArticulos = new ArrayList<>();
         if (ordenCompra.getEstadoOrdenDeCompra().getCodEstadoOC().equals(estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Enviada").getCodEstadoOC()) ) {
             List<OrdenDeCompraArticulo> articulosOrd = ordenDeCompraArticuloRepo.buscarOCAdeUnaOC(codOrdenCompra);
             for (OrdenDeCompraArticulo OCarticulo : articulosOrd) {
@@ -105,13 +106,23 @@ public class OrdenCompraService {
                 stockMovimientoRepo.guardar(entradaStock);
                 ordenDeCompraArticuloRepo.guardar(OCarticulo);
 
-                /* Implementar que Si con la orden la cantidad del artículo no supera
-                 el Pto de Ped con modelo LoteFijo informar al usuario.*/
+                //Emitir avisos
+                ConfiguracionInventario configInv = OCarticulo.getArticuloProveedor().getConfiguracionInventario();
+                if (configInv.getTipoModeloInventario().getNombreModeloInventario().equals("Modelo Lote Fijo")){
+                    if (configInv.getPuntoPedido() >= art.getStockActual()){
+                        avisosArticulos.add("Artículo: " + art.getNombreArticulo() + " Stock actual: " + art.getStockActual() + " Punto de pedido: " + configInv.getPuntoPedido());
+                    }
+                }
             }
             //Cambiar estado de la Orden
             EstadoOrdenDeCompra finalizada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Finalizada");
             ordenCompra.setEstadoOrdenDeCompra(finalizada);
             ordenCompraRepo.guardar(ordenCompra);
+        }
+        if (!(avisosArticulos.isEmpty())) {
+            return Optional.of(avisosArticulos);
+        } else {
+            return Optional.empty();
         }
     }
 
@@ -319,12 +330,23 @@ public class OrdenCompraService {
     public SugerenciaOrdenDTO obtenerSugerenciaParaArticulo(Long codArticulo) {
         SugerenciaOrdenDTO sugerenciaOrdenDTO = new SugerenciaOrdenDTO();
         Articulo art = articuloRepo.buscarPorId(codArticulo);
-        sugerenciaOrdenDTO.setNombreProveedorSugerido(art.getArticuloProveedor().getProveedor().getNombreProveedor());
-        sugerenciaOrdenDTO.setCodProveedor(art.getArticuloProveedor().getProveedor().getCodProveedor());
-        sugerenciaOrdenDTO.setCantidadSugerida(10);
-        //Hay que sugerir una cantidad dependiendo del Modelo de inventario.
+
+        ArticuloProveedor artProv = art.getArticuloProveedor();
+        sugerenciaOrdenDTO.setNombreProveedorSugerido(artProv.getProveedor().getNombreProveedor());
+        sugerenciaOrdenDTO.setCodProveedor(artProv.getProveedor().getCodProveedor());
+
+        ConfiguracionInventario configInventario = artProv.getConfiguracionInventario();
+        String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
+
+        if ("Modelo Lote Fijo".equals(modelo)) {
+            sugerenciaOrdenDTO.setCantidadSugerida(configInventario.getLoteOptimo());
+        } else if ("Modelo Periodo Fijo".equals(modelo)) {
+            sugerenciaOrdenDTO.setCantidadSugerida(configInventario.getCantidadPedir());
+        }
+        System.out.println(sugerenciaOrdenDTO.toString());
         return sugerenciaOrdenDTO;
     }
+
 
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
         return articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor).getCodArticuloProveedor();

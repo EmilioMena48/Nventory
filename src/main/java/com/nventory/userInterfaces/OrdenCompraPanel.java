@@ -20,15 +20,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.awt.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 public class OrdenCompraPanel extends BorderPane {
 
@@ -127,7 +126,11 @@ public class OrdenCompraPanel extends BorderPane {
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
-                            controller.recibirOrdenDeCompra(dto.getCodOrdenDeCompra());
+                            Optional<List<String>> listaArticulosAlertas = controller.recibirOrdenDeCompra(dto.getCodOrdenDeCompra());
+                            if (listaArticulosAlertas.isPresent()) {
+                                mostrarArticulosAlertas(listaArticulosAlertas);
+                                System.out.println("Mostrando alerta");
+                            }
                             cargarDatos();
                         }
                     });
@@ -159,6 +162,18 @@ public class OrdenCompraPanel extends BorderPane {
         barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;");
         setTop(barraSuperior);
     }
+
+    private void mostrarArticulosAlertas(Optional<List<String>> listaArticulosAlertas) {
+        if (listaArticulosAlertas.isPresent() && !listaArticulosAlertas.get().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Avisos de Stock de Articulos");
+            alert.setHeaderText("Algunos artículos no alcanzaron su punto de pedido");
+            alert.setContentText(String.join("\n", listaArticulosAlertas.get()));
+            alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); // Asegura que se vea completo
+            alert.showAndWait();
+        }
+    }
+
 
     private void abrirVentanaEditarArticulos(Long codigo, String estado, Node origen) {
         Stage ventana = new Stage();
