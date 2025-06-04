@@ -47,6 +47,13 @@ public class MaestroArticuloController {
         articuloService.asignarProveedorPredeterminado(codArticuloProveedor);
     }
 
+    //--------Metodo para buscar art por nombre, lo uso en venta
+    public ArticuloDTO buscarArtPorNombre (String nombre){return articuloService.buscarArtPorNombre(nombre);}
+
+    //----------Buscar Articulos que no estén dados de baja---------------------
+    public List<ArticuloDTO> listarArticulosDisponibles(){ return articuloService.listarArticulosDisponibles(); }
 
     // Métodos para añadir, borrar, editar, etc.
+
+
 }

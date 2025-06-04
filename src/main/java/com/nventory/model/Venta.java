@@ -18,7 +18,7 @@ import java.util.List;
 public class Venta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "numeroVenta")
+    //@Column(name = "numeroVenta")
     private Long numeroVenta;
     private LocalDateTime fechaHoraVenta;
     private BigDecimal montoTotalVenta;

@@ -98,5 +98,37 @@ public class ArticuloService {
         }
         return articulo;
     }
+
+    //-----------------Metodo para buscar art por nombre, lo uso en ventas--------------------------------
+    public ArticuloDTO buscarArtPorNombre(String nombre) {
+        ArticuloDTO artDTO = new ArticuloDTO();
+        Articulo art = articuloRepository.buscarArticuloPorNombre(nombre);
+        artDTO.setNombreArticulo(art.getNombreArticulo());
+        artDTO.setCodArticulo(art.getCodArticulo());
+        artDTO.setDemandaArt(art.getDemandaArt());
+        artDTO.setStockActual(art.getStockActual());
+        artDTO.setDescripcionArticulo(art.getDescripcionArticulo());
+        artDTO.setCostoAlmacenamiento(art.getCostoAlmacenamiento());
+        artDTO.setPrecioArticulo(art.getPrecioArticulo());
+
+
+        return artDTO;
+    }
+
+    //-----------------Metodo para buscar art que no estén dados de baja------------------------------------------
+    public List<ArticuloDTO> listarArticulosDisponibles () {
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+        List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
+                ArticuloDTO articuloDTO = new ArticuloDTO();
+                articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
+                articulosDisponibles.add(articuloDTO);
+            }
+        }
+        return articulosDisponibles;
+    }
+
+
 }
 

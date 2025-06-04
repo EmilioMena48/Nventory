@@ -1,27 +1,26 @@
 package com.nventory.service;
 
-import com.nventory.DTO.ProveedorDTO;
-import com.nventory.DTO.StockMovimientoDTO;
-import com.nventory.DTO.VentaArticuloDTO;
-import com.nventory.DTO.VentaDTO;
-import com.nventory.model.Articulo;
-import com.nventory.model.Proveedor;
-import com.nventory.model.Venta;
-import com.nventory.model.VentaArticulo;
-import com.nventory.repository.ArticuloRepository;
-import com.nventory.repository.VentaArticuloRepositori;
-import com.nventory.repository.VentaRepository;
+import com.nventory.DTO.*;
+import com.nventory.controller.ArticuloController;
+import com.nventory.controller.OrdenDeCompraController;
+import com.nventory.model.*;
+import com.nventory.repository.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class VentaService {
 
-    private ArticuloRepository articuloRepository;
+    private ArticuloService articuloService;
+    private ArticuloProveedorService articuloProveedorService;
     private VentaRepository ventaRepository;
     private VentaArticuloRepositori ventaArticuloRepositori;
     private StockMovimientoService stockMovimientoService;
+    private OrdenCompraService ordenCompraService;
+    private OrdenDeCompraArticuloRepository ordenDeCompraArticuloRepository;
+    private OrdenDeCompraController ordenDeCompraController;
 
     public VentaService(VentaRepository ventaRepository) {
         this.ventaRepository = ventaRepository;
@@ -47,7 +46,7 @@ public class VentaService {
         List<VentaArticulo> ventasArticulo = ventaArticuloRepositori.buscarVentasArticuloPorId(idVenta);
         for (VentaArticulo ventaArticulo : ventasArticulo) {
             VentaArticuloDTO ventaArticuloDTO = new VentaArticuloDTO(
-                    ventaArticulo.getOrdenVentaArticulo(),
+                    ventaArticulo.getCodVentaArticulo(),
                     ventaArticulo.getCantidadVendida(),
                     ventaArticulo.getPrecioVenta(),
                     ventaArticulo.getSubTotalVenta(),
@@ -61,7 +60,7 @@ public class VentaService {
 
     public void registrarVenta(VentaDTO ventaDTO) {
         Venta venta = new Venta();
-        articuloRepository = new ArticuloRepository();
+        articuloService = new ArticuloService();
         stockMovimientoService = new StockMovimientoService();
 
         venta.setFechaHoraVenta(ventaDTO.getFechaHoraVenta());
@@ -72,21 +71,21 @@ public class VentaService {
             ventaArticulo.setCantidadVendida(ventaArticuloDTO.getCantidadVendida());
             ventaArticulo.setPrecioVenta(ventaArticuloDTO.getPrecioVenta());
             ventaArticulo.setSubTotalVenta(calcularSubtotalVenta(ventaArticuloDTO));
-            Articulo articulo = articuloRepository.buscarPorId(ventaArticuloDTO.getCodArticulo());
-            if (!comprobarStockArticulo(ventaArticulo.getCantidadVendida(), articulo.getStockActual())) {
-                throw new IllegalArgumentException("No hay stock suficiente para el artículo con ID: " + articulo.getCodArticulo());
+            ArticuloDTO articuloDTO = articuloService.buscarArtPorNombre(ventaArticuloDTO.getNombreArticulo());
+            if (!comprobarStockArticulo(ventaArticulo.getCantidadVendida(), articuloDTO.getStockActual())) {
+                throw new IllegalArgumentException("No hay stock suficiente para el artículo con ID: " + articuloDTO.getCodArticulo());
             }
+            Articulo articulo = articuloService.buscarArticuloPorId(articuloDTO.getCodArticulo());
             ventaArticulo.setArticulo(articulo);
             venta.addVentaArticulo(ventaArticulo);
         }
         venta.setMontoTotalVenta(calcularTotalVenta(ventasArticuloDTO));
 
-        // Revisar
         Venta ventaGuardada = ventaRepository.guardarNuevaVenta(venta);
 
         List<VentaArticulo> ventaArticuloList = ventaGuardada.getVentaArticulo();
         for(VentaArticulo vA : ventaArticuloList) {
-            System.out.println("orden ventaArt"+vA.getOrdenVentaArticulo());
+            System.out.println("orden ventaArt"+vA.getCodVentaArticulo());
             StockMovimientoDTO smDTO = new StockMovimientoDTO();
             smDTO.setCantidad(vA.getCantidadVendida());
             smDTO.setComentario(null);
@@ -94,8 +93,14 @@ public class VentaService {
             smDTO.setOrdenDeCompraArticuloID(null);
             smDTO.setTipoStockMovimientoID(2L);
             smDTO.setArticuloID(vA.getArticulo().getCodArticulo());
-            smDTO.setVentaArticuloID(vA.getOrdenVentaArticulo());
+            smDTO.setVentaArticuloID(vA.getCodVentaArticulo());
             stockMovimientoService.generarStockMovimiento(smDTO);
+        }
+
+        for (VentaArticuloDTO ventaArticuloDTO : ventasArticuloDTO) {
+            ArticuloDTO articuloDTO = articuloService.buscarArtPorNombre(ventaArticuloDTO.getNombreArticulo());
+            Articulo articulo = articuloService.buscarArticuloPorId(articuloDTO.getCodArticulo());
+            generarOrdenCompra(articulo);
         }
     }
 
@@ -104,6 +109,27 @@ public class VentaService {
             return false;
         } else {
             return true;
+        }
+    }
+
+    public void generarOrdenCompra(Articulo articulo) {
+        ArticuloProveedor artProv = articulo.getArticuloProveedor();
+        ConfiguracionInventario configInventario = artProv.getConfiguracionInventario();
+        TipoModeloInventario tipoModeloInventario = configInventario.getTipoModeloInventario();
+        Long idModelo = tipoModeloInventario.getCodTipoModeloI();
+
+        if(idModelo == 1L) {
+            ordenDeCompraController = new OrdenDeCompraController();
+            Optional<OrdenDeCompraDTO> ordenCompra = ordenDeCompraController.buscarOrdenAbiertaPorArticulo(articulo.getCodArticulo());
+            if(ordenCompra.isEmpty()){
+                Integer stock = articulo.getStockActual();
+                Integer pp = configInventario.getPuntoPedido();
+                if(stock <= pp) {
+                    Proveedor proveedor = artProv.getProveedor();
+                    Long codOrden = ordenDeCompraController.crearOrdenDeCompra(proveedor.getCodProveedor());
+                    ordenDeCompraController.agregarArticuloAOrden(codOrden, artProv.getCodArticuloProveedor(), configInventario.getCantidadPedir());
+                }
+            }
         }
     }
 
