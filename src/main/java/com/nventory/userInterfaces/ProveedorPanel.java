@@ -18,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -526,8 +527,12 @@ public class ProveedorPanel extends BorderPane {
         ComboBox<String> diasEntregaComboBox = new ComboBox<>();
         diasEntregaComboBox.getItems().addAll("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
         diasEntregaComboBox.getSelectionModel().select("Lunes");
+        diasEntregaComboBox.setDisable(true);
 
         SelectorSwitch toggleSwitch = new SelectorSwitch(true);
+        toggleSwitch.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            diasEntregaComboBox.setDisable(toggleSwitch.isLoteFijo());
+        });
 
         txtDemoraEntrega.getStyleClass().add("text-field");
         txtPrecioUnitario.getStyleClass().add("text-field");
@@ -557,6 +562,7 @@ public class ProveedorPanel extends BorderPane {
                         case "SATURDAY" -> diasEntregaComboBox.getSelectionModel().select("Sábado");
                         case "SUNDAY" -> diasEntregaComboBox.getSelectionModel().select("Domingo");
                     }
+                    diasEntregaComboBox.setDisable(false);
                 } else {
                     diasEntregaComboBox.setDisable(true);
                 }
