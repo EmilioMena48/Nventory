@@ -23,8 +23,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.awt.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.List;
@@ -67,6 +65,12 @@ public class OrdenCompraPanel extends BorderPane {
             private final HBox container = new HBox(5, btnEnviar, btnCancelar, btnRecibir, btnVerArticulos);
 
             {
+                btnCancelar.getStyleClass().add("button-cancelar");
+                container.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+                for (Button btn : List.of(btnEnviar, btnRecibir, btnVerArticulos)) {
+                    btn.getStyleClass().add("button-acciones");
+                }
+
                 btnVerArticulos.setOnAction(e -> {
                     OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
                     abrirVentanaEditarArticulos(dto.getCodOrdenDeCompra(), dto.getEstadoOrdenDeCompra(), btnVerArticulos);
@@ -83,6 +87,20 @@ public class OrdenCompraPanel extends BorderPane {
 
                     confirmacion.getButtonTypes().setAll(btnSi, btnNo);
 
+                    // Cargar CSS
+                    DialogPane dialogPane = confirmacion.getDialogPane();
+                    dialogPane.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+                    dialogPane.getStyleClass().add("alerta-personalizada");
+
+                    // Estilizar los botones del Alert
+                    confirmacion.setOnShown(ev -> {
+                        Button btnYes = (Button) confirmacion.getDialogPane().lookupButton(btnSi);
+                        Button btnNoBtn = (Button) confirmacion.getDialogPane().lookupButton(btnNo);
+
+                        btnYes.getStyleClass().add("button-nueva-orden");
+                        btnNoBtn.getStyleClass().add("button-cancelar");
+                    });
+
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
                             OrdenDeCompraDTO dto = getTableView().getItems().get(getIndex());
@@ -91,6 +109,7 @@ public class OrdenCompraPanel extends BorderPane {
                         }
                     });
                 });
+
 
                 btnCancelar.setOnAction(e -> {
                     Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
@@ -102,6 +121,18 @@ public class OrdenCompraPanel extends BorderPane {
                     ButtonType btnNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
 
                     confirmacion.getButtonTypes().setAll(btnSi, btnNo);
+                    DialogPane dialogPane = confirmacion.getDialogPane();
+                    dialogPane.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+                    dialogPane.getStyleClass().add("alerta-personalizada");
+
+                    // Estilizar los botones del Alert
+                    confirmacion.setOnShown(ev -> {
+                        Button btnYes = (Button) confirmacion.getDialogPane().lookupButton(btnSi);
+                        Button btnNoBtn = (Button) confirmacion.getDialogPane().lookupButton(btnNo);
+
+                        btnYes.getStyleClass().add("button-nueva-orden");
+                        btnNoBtn.getStyleClass().add("button-cancelar");
+                    });
 
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
@@ -122,6 +153,18 @@ public class OrdenCompraPanel extends BorderPane {
                     ButtonType btnNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
 
                     confirmacion.getButtonTypes().setAll(btnSi, btnNo);
+                    DialogPane dialogPane = confirmacion.getDialogPane();
+                    dialogPane.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+                    dialogPane.getStyleClass().add("alerta-personalizada");
+
+                    // Estilizar los botones del Alert
+                    confirmacion.setOnShown(ev -> {
+                        Button btnYes = (Button) confirmacion.getDialogPane().lookupButton(btnSi);
+                        Button btnNoBtn = (Button) confirmacion.getDialogPane().lookupButton(btnNo);
+
+                        btnYes.getStyleClass().add("button-nueva-orden");
+                        btnNoBtn.getStyleClass().add("button-cancelar");
+                    });
 
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta == btnSi) {
@@ -156,15 +199,19 @@ public class OrdenCompraPanel extends BorderPane {
         setCenter(tablaOrdenes);
 
         Button btnNuevaOrden = new Button("Nueva Orden de Compra");
+        btnNuevaOrden.getStyleClass().add("button-nueva-orden");
         btnNuevaOrden.setOnAction(e -> seleccionarMetodoCreacion());
 
         Button btnRealizarOrden = new Button("Generar Ordenes del día");
+        btnRealizarOrden.getStyleClass().add("button-generar-ordenes");
         btnRealizarOrden.setOnAction(e -> generarOrdenesDelDia());
 
         HBox barraSuperior = new HBox(10, btnNuevaOrden, btnRealizarOrden);
+        barraSuperior.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
         barraSuperior.setStyle("-fx-padding: 10; -fx-alignment: center_left;");
         setTop(barraSuperior);
     }
+
 
     private void generarOrdenesDelDia() {
         controller.generarOrdenesDelDia();
@@ -311,7 +358,12 @@ public class OrdenCompraPanel extends BorderPane {
 
 
                 try {
-                    int cantidad = (int) Long.parseLong(cantidadField.getText());
+                    int cantidad = (int) Long.parseLong(cantidadField.getText().trim());
+
+                    if (cantidad <= 0) {
+                        mostrarAlerta(Alert.AlertType.ERROR, "La cantidad debe ser un número entero mayor a 0.");
+                        return;
+                    }
                     System.out.println("CodArticulo: " + codArticulo);
                     System.out.println("CodProveedor: " + proveedorSeleccionado.getCodProveedor());
                     System.out.println("Cantidad: " + cantidad);

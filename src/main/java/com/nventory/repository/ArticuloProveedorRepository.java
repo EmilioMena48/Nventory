@@ -45,4 +45,17 @@ public class ArticuloProveedorRepository extends SoftDeletableRepositoryImpl<Art
         query.setParameter("codProveedor", codProveedor);
         return query.getResultList();
     }
+
+    public ArticuloProveedor buscarArticuloProveedorMasBarato(Long codArticulo) {
+        EntityManager em = IndireccionJPA.getEntityManager();
+        String jpql = "SELECT ap FROM ArticuloProveedor ap " +
+                "WHERE ap.articulo.codArticulo = :codArticulo " +
+                "ORDER BY ap.precioUnitario ASC";
+
+        return em.createQuery(jpql, ArticuloProveedor.class)
+                .setParameter("codArticulo", codArticulo)
+                .setMaxResults(1)
+                .getSingleResult();
+    }
+
 }

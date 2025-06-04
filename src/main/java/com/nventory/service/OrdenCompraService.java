@@ -329,24 +329,37 @@ public class OrdenCompraService {
     }
 
     public SugerenciaOrdenDTO obtenerSugerenciaParaArticulo(Long codArticulo) {
-        SugerenciaOrdenDTO sugerenciaOrdenDTO = new SugerenciaOrdenDTO();
         Articulo art = articuloRepo.buscarPorId(codArticulo);
-
         ArticuloProveedor artProv = art.getArticuloProveedor();
-        sugerenciaOrdenDTO.setNombreProveedorSugerido(artProv.getProveedor().getNombreProveedor());
-        sugerenciaOrdenDTO.setCodProveedor(artProv.getProveedor().getCodProveedor());
+
+        if (artProv == null) {
+            artProv = articuloProveedorRepo.buscarArticuloProveedorMasBarato(codArticulo);
+        }
+
+        if (artProv != null) {
+            return construirSugerenciaDesdeArticuloProveedor(artProv);
+        } else {
+            return null;
+        }
+    }
+
+    private SugerenciaOrdenDTO construirSugerenciaDesdeArticuloProveedor(ArticuloProveedor artProv) {
+        SugerenciaOrdenDTO dto = new SugerenciaOrdenDTO();
+        dto.setNombreProveedorSugerido(artProv.getProveedor().getNombreProveedor());
+        dto.setCodProveedor(artProv.getProveedor().getCodProveedor());
 
         ConfiguracionInventario configInventario = artProv.getConfiguracionInventario();
         String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
 
         if ("Modelo Lote Fijo".equals(modelo)) {
-            sugerenciaOrdenDTO.setCantidadSugerida(configInventario.getLoteOptimo());
+            dto.setCantidadSugerida(configInventario.getLoteOptimo());
         } else if ("Modelo Periodo Fijo".equals(modelo)) {
-            sugerenciaOrdenDTO.setCantidadSugerida(configInventario.getCantidadPedir());
+            dto.setCantidadSugerida(configInventario.getCantidadPedir());
         }
-        System.out.println(sugerenciaOrdenDTO.toString());
-        return sugerenciaOrdenDTO;
+
+        return dto;
     }
+
 
 
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {

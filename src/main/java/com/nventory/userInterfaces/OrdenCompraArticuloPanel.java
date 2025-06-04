@@ -38,6 +38,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
     private void inicializarUI() {
         tablaArticulos = new TableView<>();
 
+
         TableColumn<OrdenDeCompraArticuloDTO, String> colArticulo = new TableColumn<>("Artículo");
         colArticulo.setCellValueFactory(new PropertyValueFactory<>("nombreArticulo"));
 
@@ -57,6 +58,9 @@ public class OrdenCompraArticuloPanel extends BorderPane {
             private final HBox hbox = new HBox(5, btnModificar, btnEliminar);
 
             {
+                hbox.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+
+                btnModificar.getStyleClass().add("button-generar-ordenes");
                 btnModificar.setOnAction(e -> {
                     OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
                     TextInputDialog dialog = new TextInputDialog(String.valueOf(dto.getCantidadSolicitadaOCA()));
@@ -79,6 +83,7 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                     });
                 });
 
+                btnEliminar.getStyleClass().add("button-cancelar");
                 btnEliminar.setOnAction(e -> {
                     Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
                     confirmacion.setTitle("Confirmacion");
@@ -89,6 +94,20 @@ public class OrdenCompraArticuloPanel extends BorderPane {
                     ButtonType btnNo = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
 
                     confirmacion.getButtonTypes().setAll(btnSi, btnNo);
+
+                    // Cargar CSS
+                    DialogPane dialogPane = confirmacion.getDialogPane();
+                    dialogPane.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
+                    dialogPane.getStyleClass().add("alerta-personalizada");
+
+                    // Estilizar los botones del Alert
+                    confirmacion.setOnShown(ev -> {
+                        Button btnYes = (Button) confirmacion.getDialogPane().lookupButton(btnSi);
+                        Button btnNoBtn = (Button) confirmacion.getDialogPane().lookupButton(btnNo);
+
+                        btnYes.getStyleClass().add("button-nueva-orden");
+                        btnNoBtn.getStyleClass().add("button-cancelar");
+                    });
                     confirmacion.showAndWait().ifPresent(respuesta -> {
                         if (respuesta.equals(btnSi)) {
                             OrdenDeCompraArticuloDTO dto = getTableView().getItems().get(getIndex());
@@ -143,8 +162,10 @@ public class OrdenCompraArticuloPanel extends BorderPane {
             txtCantidad.setPromptText("Cantidad");
 
             Button btnAgregar = new Button("Agregar");
+            btnAgregar.getStyleClass().add("button-nueva-orden");
 
             form = new HBox(10, comboArticulo, txtCantidad, btnAgregar);
+            form.getStylesheets().add(getClass().getResource("/styles/estilosOrdenCompra.css").toExternalForm());
 
             btnAgregar.setOnAction(e -> {
                 String textoCantidad = txtCantidad.getText();
