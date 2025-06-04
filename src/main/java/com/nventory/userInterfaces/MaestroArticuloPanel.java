@@ -56,19 +56,65 @@ public class MaestroArticuloPanel extends BorderPane {
             Stage ventanaAlta = new Stage();
             ventanaAlta.setTitle("Nuevo Artículo");
             ventanaAlta.initModality(Modality.APPLICATION_MODAL);
-            VBox layout = new VBox(10);
-            layout.setPadding(new Insets(20));
 
-            // Campos vacíos para alta
+            GridPane grid = new GridPane();
+            grid.setPadding(new Insets(20));
+            grid.setHgap(10);
+            grid.setVgap(10);
+
+            // Campos
             TextField txtNombre = new TextField();
+            txtNombre.setPrefColumnCount(20);
+
             TextArea txtDescripcion = new TextArea();
+            txtDescripcion.setWrapText(true);
+            txtDescripcion.setPrefRowCount(2);
+            txtDescripcion.setPrefColumnCount(20);
+
             TextField txtStockActual = new TextField();
+            txtStockActual.setPrefColumnCount(5);
+
             TextField txtCostoAlmacenamiento = new TextField();
+            txtCostoAlmacenamiento.setPrefColumnCount(5);
+
             TextField txtPrecioArticulo = new TextField();
+            txtPrecioArticulo.setPrefColumnCount(5);
+
             TextField txtNivelServicioArticulo = new TextField();
+            txtNivelServicioArticulo.setPrefColumnCount(5);
+
             TextField txtDesviacionEstandarArticulo = new TextField();
+            txtDesviacionEstandarArticulo.setPrefColumnCount(5);
+
             TextField txtDiasEntreRevisiones = new TextField();
+            txtDiasEntreRevisiones.setPrefColumnCount(5);
+
             TextField txtDemanda = new TextField();
+            txtDemanda.setPrefColumnCount(5);
+
+            // Agregar al GridPane
+            grid.add(new Label("Nombre:"), 0, 0);
+            grid.add(txtNombre, 1, 0);
+            grid.add(new Label("Nivel de servicio:"), 2, 0);
+            grid.add(txtNivelServicioArticulo, 3, 0);
+
+            grid.add(new Label("Descripción:"), 0, 1);
+            grid.add(txtDescripcion, 1, 1);
+            grid.add(new Label("Desviación estándar:"), 2, 1);
+            grid.add(txtDesviacionEstandarArticulo, 3, 1);
+
+            grid.add(new Label("Stock actual:"), 0, 2);
+            grid.add(txtStockActual, 1, 2);
+            grid.add(new Label("Días entre revisiones:"), 2, 2);
+            grid.add(txtDiasEntreRevisiones, 3, 2);
+
+            grid.add(new Label("Costo de almacenamiento:"), 0, 3);
+            grid.add(txtCostoAlmacenamiento, 1, 3);
+            grid.add(new Label("Demanda:"), 2, 3);
+            grid.add(txtDemanda, 3, 3);
+
+            grid.add(new Label("Precio del artículo:"), 0, 4);
+            grid.add(txtPrecioArticulo, 1, 4);
 
             // Botones
             Button btnGuardar = new Button("Guardar");
@@ -76,22 +122,11 @@ public class MaestroArticuloPanel extends BorderPane {
 
             HBox botones = new HBox(10, btnGuardar, btnCancelar);
             botones.setAlignment(Pos.CENTER_RIGHT);
+            grid.add(botones, 3, 5);
 
-            layout.getChildren().addAll(
-                    new Label("Nombre:"), txtNombre,
-                    new Label("Descripción:"), txtDescripcion,
-                    new Label("Stock actual:"), txtStockActual,
-                    new Label("Costo de almacenamiento:"), txtCostoAlmacenamiento,
-                    new Label("Precio del artículo:"), txtPrecioArticulo,
-                    new Label("Nivel de servicio del artículo:"), txtNivelServicioArticulo,
-                    new Label("Desviacion estandar del artículo:"), txtDesviacionEstandarArticulo,
-                    new Label("Dias entre revisiones:"), txtDiasEntreRevisiones,
-                    new Label("Demanda del artículo:"), txtDemanda,
-                    botones
-            );
-
-            Scene scene = new Scene(layout);
+            Scene scene = new Scene(grid);
             ventanaAlta.setScene(scene);
+            ventanaAlta.setResizable(false);
             ventanaAlta.show();
 
             btnGuardar.setOnAction(event -> {
@@ -107,7 +142,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
-                    // Acá llamás al controller para guardar el nuevo artículo
                     controller.darDeAltaArticulo(articuloDTO);
                     ventanaAlta.close();
 
@@ -119,8 +153,10 @@ public class MaestroArticuloPanel extends BorderPane {
                     alerta.showAndWait();
                 }
             });
+
             btnCancelar.setOnAction(event -> ventanaAlta.close());
         });
+
 
         //Boton lista a reponer
         btnListarReponer = new Button("Articulos a reponer");
