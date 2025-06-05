@@ -1,10 +1,12 @@
 package com.nventory.repository;
 
+import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ArticuloProveedorRepository extends SoftDeletableRepositoryImpl<ArticuloProveedor, Long> {
@@ -58,4 +60,26 @@ public class ArticuloProveedorRepository extends SoftDeletableRepositoryImpl<Art
                 .getSingleResult();
     }
 
+
+    //-------------------Metodo del repository para obtener todos los objetos ArticuloProveedor relacionados a un articulo en particular---------------------
+    public List<ArticuloProveedor> buscarArticuloProveedorPorArticulo(Articulo articulo) {
+        EntityManager em = getEntityManager();
+        List<ArticuloProveedor> articuloProveedorList = new ArrayList<>();
+
+        try {
+            articuloProveedorList = em.createQuery(
+                            "SELECT ap FROM ArticuloProveedor ap WHERE ap.articulo = :articulo AND ap.fechaHoraBajaArticuloProveedor IS NULL",
+                            ArticuloProveedor.class)
+                    .setParameter("articulo", articulo)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+
+        return articuloProveedorList;
+    }
 }

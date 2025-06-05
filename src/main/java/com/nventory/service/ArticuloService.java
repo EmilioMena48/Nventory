@@ -5,14 +5,21 @@ import com.nventory.DTO.ArticuloProveedorDTO;
 import com.nventory.model.*;
 import com.nventory.repository.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ArticuloService {
 
     private final OrdenDeCompraArticuloRepository ordenDeCompraArticuloRepository = new OrdenDeCompraArticuloRepository();
     private final ArticuloProveedorRepository articuloProveedorRepository = new ArticuloProveedorRepository();
+
+    private final ConfiguracionInventarioService configuracionInventarioService = new ConfiguracionInventarioService();
+
     ArticuloRepository articuloRepository;
+
     public ArticuloService(ArticuloRepository articuloRepository) {this.articuloRepository = articuloRepository;}
     public ArticuloService() {this.articuloRepository = new ArticuloRepository();}
 
@@ -130,5 +137,67 @@ public class ArticuloService {
     }
 
 
+
+    //-----------------Metodo del service crear un artículo-----------------------------
+    public void crearArticulo(ArticuloDTO articuloDTO) {
+        Long codArticulo = articuloDTO.getCodArticulo();
+        BigDecimal costoAlmacenamiento = articuloDTO.getCostoAlmacenamiento();
+        BigDecimal nivelServicioArticulo = articuloDTO.getNivelServicioArticulo();
+        BigDecimal precioArticulo = articuloDTO.getPrecioArticulo();
+        String nombreArticulo = articuloDTO.getNombreArticulo();
+        String descripcionArticulo = articuloDTO.getDescripcionArticulo();
+        int demandaArt = articuloDTO.getDemandaArt();
+        LocalDateTime fechaHoraBajaArticulo = articuloDTO.getFechaHoraBajaArticulo();
+        Integer stockActual = articuloDTO.getStockActual();
+        int diasEntreRevisiones = articuloDTO.getDiasEntreRevisiones();
+        int desviacionEstandarArticulo = articuloDTO.getDesviacionEstandarArticulo();
+
+        Articulo articulo = Articulo.builder()
+                .codArticulo(codArticulo)
+                .costoAlmacenamiento(costoAlmacenamiento)
+                .nivelServicioArticulo(nivelServicioArticulo)
+                .precioArticulo(precioArticulo)
+                .nombreArticulo(nombreArticulo)
+                .descripcionArticulo(descripcionArticulo)
+                .demandaArt(demandaArt)
+                .fechaHoraBajaArticulo(fechaHoraBajaArticulo)
+                .stockActual(stockActual)
+                .diasEntreRevisiones(diasEntreRevisiones)
+                .desviacionEstandarArticulo(desviacionEstandarArticulo)
+                .build();
+        articuloRepository.guardar(articulo);
+    }
+
+    //-----------------Metodo del service modificar un artículo-----------------------------
+    public void modificarArticulo(ArticuloDTO articuloDTO) {
+
+        Long codArticulo = articuloDTO.getCodArticulo();
+        Articulo articuloExistente = articuloRepository.buscarPorId(codArticulo);
+        if (articuloExistente == null) {
+            throw new IllegalArgumentException("El articulo con ID " + codArticulo + " no existe.");
+        }
+
+        if (articuloExistente.getCostoAlmacenamiento().compareTo(articuloDTO.getCostoAlmacenamiento()) != 0
+        || articuloExistente.getNivelServicioArticulo().compareTo(articuloDTO.getNivelServicioArticulo()) != 0
+        || articuloExistente.getDemandaArt() != articuloDTO.getDemandaArt()
+        || articuloExistente.getDesviacionEstandarArticulo() != articuloDTO.getDesviacionEstandarArticulo()
+        || articuloExistente.getDiasEntreRevisiones() != articuloDTO.getDiasEntreRevisiones()
+        || articuloExistente.getStockActual().compareTo(articuloDTO.getStockActual()) != 0){
+            configuracionInventarioService.recalcularFormulas(articuloExistente, articuloDTO);
+        }
+
+        articuloExistente.setCostoAlmacenamiento(articuloDTO.getCostoAlmacenamiento());
+        articuloExistente.setNivelServicioArticulo(articuloDTO.getNivelServicioArticulo());
+        articuloExistente.setPrecioArticulo(articuloDTO.getPrecioArticulo());
+        articuloExistente.setNombreArticulo(articuloDTO.getNombreArticulo());
+        articuloExistente.setDescripcionArticulo(articuloDTO.getDescripcionArticulo());
+        articuloExistente.setDemandaArt(articuloDTO.getDemandaArt());
+        articuloExistente.setFechaHoraBajaArticulo(articuloDTO.getFechaHoraBajaArticulo());
+        articuloExistente.setStockActual(articuloDTO.getStockActual());
+        articuloExistente.setDiasEntreRevisiones(articuloDTO.getDiasEntreRevisiones());
+        articuloExistente.setDesviacionEstandarArticulo(articuloDTO.getDesviacionEstandarArticulo());
+
+        articuloRepository.guardar(articuloExistente);
+    }
 }
 

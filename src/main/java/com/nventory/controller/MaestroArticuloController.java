@@ -29,12 +29,12 @@ public class MaestroArticuloController {
 
     //----------Edicion de campos de articulos---------------------
     public void actualizarArticulo(ArticuloDTO articuloDTO){
-
+        articuloService.modificarArticulo(articuloDTO);
     }
 
     //----------Alta de articulos---------------------
     public void darDeAltaArticulo(ArticuloDTO articuloDTO){
-
+        articuloService.crearArticulo(articuloDTO);
     }
 
     //----------Baja de articulos------------------------

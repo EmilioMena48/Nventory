@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class VentaArticulo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //@Column(name = "ordenVentaArticulo")
+    @Column(name = "ordenVentaArticulo")
     private Long codVentaArticulo;
     private int cantidadVendida;
     private BigDecimal precioVenta;
