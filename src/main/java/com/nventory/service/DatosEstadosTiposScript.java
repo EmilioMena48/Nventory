@@ -24,7 +24,7 @@ public class DatosEstadosTiposScript {
         crearEstadosOrdenCompraIniciales();
         crearTipoModeloInventarioIniciales();
         crearTipoStockMovimientoIniciales();
-        crearArticulosIniciales();
+        //crearArticulosIniciales();
     }
 
     private void crearEstadosOrdenCompraIniciales() {
@@ -45,7 +45,7 @@ public class DatosEstadosTiposScript {
 
     private void crearTipoModeloInventarioIniciales() {
         creatTipoModeloSiNoExiste("Modelo Lote Fijo");
-        creatTipoModeloSiNoExiste("Modelo Inventario Fijo");
+        creatTipoModeloSiNoExiste("Modelo Periodo Fijo");
     }
 
     private void creatTipoModeloSiNoExiste(String modelo) {
