@@ -7,6 +7,10 @@ import com.nventory.controller.MaestroArticuloController;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -56,7 +60,6 @@ public class MaestroArticuloPanel extends BorderPane {
             Stage ventanaAlta = new Stage();
             ventanaAlta.setTitle("Nuevo Artículo");
             ventanaAlta.initModality(Modality.APPLICATION_MODAL);
-
             GridPane grid = new GridPane();
             grid.setPadding(new Insets(20));
             grid.setHgap(10);
@@ -65,65 +68,49 @@ public class MaestroArticuloPanel extends BorderPane {
             // Campos
             TextField txtNombre = new TextField();
             txtNombre.setPrefColumnCount(20);
-
             TextArea txtDescripcion = new TextArea();
             txtDescripcion.setWrapText(true);
             txtDescripcion.setPrefRowCount(2);
             txtDescripcion.setPrefColumnCount(20);
-
             TextField txtStockActual = new TextField();
             txtStockActual.setPrefColumnCount(5);
-
             TextField txtCostoAlmacenamiento = new TextField();
             txtCostoAlmacenamiento.setPrefColumnCount(5);
-
             TextField txtPrecioArticulo = new TextField();
             txtPrecioArticulo.setPrefColumnCount(5);
-
             TextField txtNivelServicioArticulo = new TextField();
             txtNivelServicioArticulo.setPrefColumnCount(5);
-
             TextField txtDesviacionEstandarArticulo = new TextField();
             txtDesviacionEstandarArticulo.setPrefColumnCount(5);
-
             TextField txtDiasEntreRevisiones = new TextField();
             txtDiasEntreRevisiones.setPrefColumnCount(5);
-
             TextField txtDemanda = new TextField();
             txtDemanda.setPrefColumnCount(5);
-
             // Agregar al GridPane
             grid.add(new Label("Nombre:"), 0, 0);
             grid.add(txtNombre, 1, 0);
             grid.add(new Label("Nivel de servicio:"), 2, 0);
             grid.add(txtNivelServicioArticulo, 3, 0);
-
             grid.add(new Label("Descripción:"), 0, 1);
             grid.add(txtDescripcion, 1, 1);
             grid.add(new Label("Desviación estándar:"), 2, 1);
             grid.add(txtDesviacionEstandarArticulo, 3, 1);
-
             grid.add(new Label("Stock actual:"), 0, 2);
             grid.add(txtStockActual, 1, 2);
             grid.add(new Label("Días entre revisiones:"), 2, 2);
             grid.add(txtDiasEntreRevisiones, 3, 2);
-
             grid.add(new Label("Costo de almacenamiento:"), 0, 3);
             grid.add(txtCostoAlmacenamiento, 1, 3);
             grid.add(new Label("Demanda:"), 2, 3);
             grid.add(txtDemanda, 3, 3);
-
             grid.add(new Label("Precio del artículo:"), 0, 4);
             grid.add(txtPrecioArticulo, 1, 4);
-
             // Botones
             Button btnGuardar = new Button("Guardar");
             Button btnCancelar = new Button("Cancelar");
-
             HBox botones = new HBox(10, btnGuardar, btnCancelar);
             botones.setAlignment(Pos.CENTER_RIGHT);
             grid.add(botones, 3, 5);
-
             Scene scene = new Scene(grid);
             ventanaAlta.setScene(scene);
             ventanaAlta.setResizable(false);
@@ -197,23 +184,22 @@ public class MaestroArticuloPanel extends BorderPane {
     //Define las columnas de la tabla de articulos
     private void construirTabla() {
         TableColumn<Articulo, Long> colCodigo = new TableColumn<>("Código");
-        colCodigo.setCellValueFactory(data -> new javafx.beans.property.SimpleLongProperty(data.getValue().getCodArticulo()).asObject());
-
-        TableColumn<Articulo, Integer> colStock = new TableColumn<>("Stock actual");
-        colStock.setCellValueFactory(data -> new javafx.beans.property.SimpleIntegerProperty(data.getValue().getStockActual()).asObject());
+        colCodigo.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getCodArticulo()).asObject());
 
         TableColumn<Articulo, String> colNombre = new TableColumn<>("Nombre");
-        colNombre.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getNombreArticulo()));
+        colNombre.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreArticulo()));
 
-        TableColumn<Articulo, String> colFechaBaja = new TableColumn<>("Fecha Baja");
-        colFechaBaja.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getFechaHoraBajaArticulo() != null ?
-                        data.getValue().getFechaHoraBajaArticulo().toLocalDate().toString() : "--/--/--")); //muestra nulo si no hay valor
+        TableColumn<Articulo, Integer> colStock = new TableColumn<>("Stock actual");
+        colStock.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getStockActual()).asObject());
 
-        TableColumn<Articulo, String> colProveedor = new TableColumn<>("Proveedor determinado");
+        TableColumn<Articulo, BigDecimal> colPrecio = new TableColumn<>("Precio");
+        colPrecio.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getPrecioArticulo()));
+
+        TableColumn<Articulo, String> colProveedor = new TableColumn<>("Proveedor predeterminado");
         colProveedor.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getArticuloProveedor() != null ?
                         data.getValue().getArticuloProveedor().getProveedor().getCodProveedor().toString() : "")); //muestra el proveedor predeterminado si existe
+
 
         TableColumn<Articulo, Void> colAccion = new TableColumn<>("Acción");
         colAccion.setCellFactory(param -> new TableCell<>() {
@@ -222,82 +208,94 @@ public class MaestroArticuloPanel extends BorderPane {
             private final Button btnProveedor = new Button("Seleccionar Proveedor");
 
 
-            {   //BOTON EDITAR ARTICULO
+            {
+                //BOTON PARA LA MODIFICACION
                 btnEditar.setOnAction(e -> {
                     Articulo articulo = getTableView().getItems().get(getIndex());
 
                     Stage ventanaEdicion = new Stage();
                     ventanaEdicion.setTitle("Editar Artículo");
                     ventanaEdicion.initModality(Modality.APPLICATION_MODAL);
-                    VBox layout = new VBox(10);
-                    layout.setPadding(new Insets(20));
+                    GridPane grid = new GridPane();
+                    grid.setVgap(10);
+                    grid.setHgap(10);
+                    grid.setPadding(new Insets(20));
 
-                    // Campos editables
                     TextField txtNombre = new TextField(articulo.getNombreArticulo());
+                    txtNombre.setPrefColumnCount(20);
                     TextArea txtDescripcion = new TextArea(articulo.getDescripcionArticulo());
+                    txtDescripcion.setPrefRowCount(2);
+                    txtDescripcion.setWrapText(true);
+                    txtDescripcion.setPrefColumnCount(20);
                     TextField txtStockActual = new TextField(String.valueOf(articulo.getStockActual()));
+                    txtStockActual.setPrefColumnCount(5);
                     TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articulo.getCostoAlmacenamiento()));
+                    txtCostoAlmacenamiento.setPrefColumnCount(5);
                     TextField txtPrecioArticulo = new TextField(String.valueOf(articulo.getPrecioArticulo()));
+                    txtPrecioArticulo.setPrefColumnCount(5);
                     TextField txtNivelServicioArticulo = new TextField(String.valueOf(articulo.getNivelServicioArticulo()));
+                    txtNivelServicioArticulo.setPrefColumnCount(5);
                     TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articulo.getDesviacionEstandarArticulo()));
+                    txtDesviacionEstandarArticulo.setPrefColumnCount(5);
                     TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articulo.getDiasEntreRevisiones()));
+                    txtDiasEntreRevisiones.setPrefColumnCount(5);
                     TextField txtDemanda = new TextField(String.valueOf(articulo.getDemandaArt()));
-
-                    // Botones
+                    txtDemanda.setPrefColumnCount(5);
+                    // Agregar al gridPane
+                    grid.add(new Label("Nombre:"), 0, 0);
+                    grid.add(txtNombre, 1, 0);
+                    grid.add(new Label("Nivel de servicio:"), 2, 0);
+                    grid.add(txtNivelServicioArticulo, 3, 0);
+                    grid.add(new Label("Descripción:"), 0, 1);
+                    grid.add(txtDescripcion, 1, 1);
+                    grid.add(new Label("Desviación estándar:"), 2, 1);
+                    grid.add(txtDesviacionEstandarArticulo, 3, 1);
+                    grid.add(new Label("Stock actual:"), 0, 2);
+                    grid.add(txtStockActual, 1, 2);
+                    grid.add(new Label("Días entre revisiones:"), 2, 2);
+                    grid.add(txtDiasEntreRevisiones, 3, 2);
+                    grid.add(new Label("Costo de almacenamiento:"), 0, 3);
+                    grid.add(txtCostoAlmacenamiento, 1, 3);
+                    grid.add(new Label("Demanda:"), 2, 3);
+                    grid.add(txtDemanda, 3, 3);
+                    grid.add(new Label("Precio del artículo:"), 0, 4);
+                    grid.add(txtPrecioArticulo, 1, 4);
+                    //Botones
                     Button btnGuardar = new Button("Guardar");
                     Button btnCancelar = new Button("Cancelar");
-
                     HBox botones = new HBox(10, btnGuardar, btnCancelar);
                     botones.setAlignment(Pos.CENTER_RIGHT);
-
-                    layout.getChildren().addAll(
-                            new Label("Nombre:"), txtNombre,
-                            new Label("Descripción:"), txtDescripcion,
-                            new Label("Stock actual:"), txtStockActual,
-                            new Label("Costo de almacenamiento:"), txtCostoAlmacenamiento,
-                            new Label("Precio del artículo:"), txtPrecioArticulo,
-                            new Label("Nivel de servicio del artículo:"), txtNivelServicioArticulo,
-                            new Label("Desviacion estandar del artículo:"), txtDesviacionEstandarArticulo,
-                            new Label("Dias entre revisiones:"), txtDiasEntreRevisiones,
-                            new Label("Demanda del artículo:"), txtDemanda,
-                            botones
-                    );
-
-                    Scene scene = new Scene(layout);
+                    grid.add(botones, 3, 5);
+                    Scene scene = new Scene(grid);
                     ventanaEdicion.setScene(scene);
+                    ventanaEdicion.setResizable(false);
                     ventanaEdicion.show();
 
                     btnGuardar.setOnAction(event -> {
                         try {
-                            ArticuloDTO articuloDTO = new ArticuloDTO();
-                            articuloDTO.setCodArticulo(articulo.getCodArticulo());
-                            articuloDTO.setNombreArticulo(txtNombre.getText());
-                            articuloDTO.setDescripcionArticulo(txtDescripcion.getText());
-                            articuloDTO.setStockActual(Integer.parseInt(txtStockActual.getText()));
-                            articuloDTO.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
-                            articuloDTO.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
-                            articuloDTO.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
-                            articuloDTO.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
-                            articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
-                            articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
+                            ArticuloDTO dto = new ArticuloDTO();
+                            dto.setCodArticulo(articulo.getCodArticulo());
+                            dto.setNombreArticulo(txtNombre.getText());
+                            dto.setDescripcionArticulo(txtDescripcion.getText());
+                            dto.setStockActual(Integer.parseInt(txtStockActual.getText()));
+                            dto.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
+                            dto.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
+                            dto.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
+                            dto.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
+                            dto.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
+                            dto.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
-
+                            controller.actualizarArticulo(dto);
                             ventanaEdicion.close();
-                            //Llama al controller para que actualice los datos
-                            controller.actualizarArticulo(articuloDTO);
-
                         } catch (NumberFormatException ex) {
-                            // Manejo básico de errores
-                            Alert alerta = new Alert(Alert.AlertType.ERROR);
-                            alerta.setTitle("Error de formato");
-                            alerta.setHeaderText("Datos inválidos");
-                            alerta.setContentText("Revisá que todos los campos numéricos tengan valores válidos.");
-                            alerta.showAndWait();
+                            new Alert(Alert.AlertType.ERROR, "Campos numéricos inválidos.").showAndWait();
                         }
                     });
+
                     btnCancelar.setOnAction(event -> ventanaEdicion.close());
                 });
 
+                //---------------------------------------------------------------------------------------------------------
 
                 //BOTON DE DAR DE BAJA
                 btnBorrar.setOnAction(e -> {
@@ -391,7 +389,7 @@ public class MaestroArticuloPanel extends BorderPane {
             }
         });
         //Agrega todas las columnas a la tabla
-        tablaArticulos.getColumns().addAll(colCodigo, colStock, colNombre, colFechaBaja, colProveedor, colAccion);
+        tablaArticulos.getColumns().addAll(colCodigo,  colNombre, colStock, colPrecio, colProveedor, colAccion);
         tablaArticulos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
