@@ -98,8 +98,8 @@ public class OrdenDeCompraController {
         return ordenCompraService.buscarArticuloProveedorPorRelacion(codArticulo, codProveedor);
     }
 
-    public void generarOrdenesDelDia() {
-        ordenCompraService.generarOrdenesDelDia();
+    public List<String> generarOrdenesDelDia() {
+        return ordenCompraService.generarOrdenesDelDia();
     }
 }
 

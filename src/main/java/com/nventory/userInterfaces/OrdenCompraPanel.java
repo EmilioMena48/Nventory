@@ -214,7 +214,15 @@ public class OrdenCompraPanel extends BorderPane {
 
 
     private void generarOrdenesDelDia() {
-        controller.generarOrdenesDelDia();
+        List<String> listaAvisos = controller.generarOrdenesDelDia();
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Aviso informativo");
+        alert.setHeaderText("Avisos de Ordenes Generadas del Dia");
+        alert.setContentText(String.join("\n", listaAvisos));
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE); // Asegura que se vea completo
+        alert.showAndWait();
+
         cargarDatos();
     }
 

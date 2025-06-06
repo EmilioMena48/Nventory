@@ -372,8 +372,9 @@ public class OrdenCompraService {
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
         return articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor).getCodArticuloProveedor();
     }
-    public void generarOrdenesDelDia() {
-       List<Articulo> articulos = articuloRepo.buscarTodos();
+    public List<String> generarOrdenesDelDia() {
+        List<String> listaAvisosOrdenes = new ArrayList<>();
+        List<Articulo> articulos = articuloRepo.buscarTodos();
        for (Articulo art : articulos) {
            ArticuloProveedor articuloProv = art.getArticuloProveedor();
            String modelo = articuloProv.getConfiguracionInventario().getTipoModeloInventario().getNombreModeloInventario();
@@ -382,11 +383,18 @@ public class OrdenCompraService {
                if (cantidadApedir > 0) {
                    Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
                    agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);
+                   listaAvisosOrdenes.add("Orden Generada para el Articulo: " + art.getNombreArticulo());
                }
                int T = art.getDiasEntreRevisiones();
                articuloProv.setFechaProxRevisionAP(LocalDate.now().plusDays(T));
                articuloProveedorRepo.guardar(articuloProv);
            }
        }
+        if (listaAvisosOrdenes.isEmpty()) {
+            listaAvisosOrdenes.add("No se generaron órdenes para los articulos de hoy");
+            return listaAvisosOrdenes;
+        } else {
+            return listaAvisosOrdenes;
+        }
     }
 }
