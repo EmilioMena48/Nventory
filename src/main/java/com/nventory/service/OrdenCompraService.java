@@ -3,17 +3,18 @@ package com.nventory.service;
 import com.nventory.DTO.*;
 import com.nventory.model.*;
 import com.nventory.repository.*;
-import jakarta.transaction.Transactional;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 @AllArgsConstructor
 public class OrdenCompraService {
@@ -27,8 +28,11 @@ public class OrdenCompraService {
     private final TipoStockMovimientoRepository tipoStockMovimientoRepo;
     private final StockMovimientoRepository stockMovimientoRepo;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private final NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("es","AR"));
 
     public List<OrdenDeCompraDTO> obtenerTodasOrdenesDeCompra() {
+        numberFormat.setMaximumFractionDigits(2);
+        numberFormat.setMinimumFractionDigits(2);
 
         List<OrdenDeCompraDTO> ordenesDto = new ArrayList<>();
         List<OrdenDeCompra> ordenesCompra = ordenCompraRepo.buscarTodos();
@@ -39,7 +43,7 @@ public class OrdenCompraService {
             Long codOrd = ordenCompra.getCodOrdenDeCompra();
             ordenCompraDTO.setCodOrdenDeCompra(codOrd);
 
-            String total = ordenCompra.getTotalOrdenDeCompra().toString();
+            String total = numberFormat.format(ordenCompra.getTotalOrdenDeCompra());
             ordenCompraDTO.setTotalOrden(total);
 
             String prov = ordenCompra.getProveedor().getNombreProveedor();
@@ -128,6 +132,9 @@ public class OrdenCompraService {
     }
 
     public List<OrdenDeCompraArticuloDTO> obtenerArticulosDeOrden(Long codOrdenCompra) {
+        numberFormat.setMaximumFractionDigits(2);
+        numberFormat.setMinimumFractionDigits(2);
+
         List<OrdenDeCompraArticuloDTO> articulosOrdDTO = new ArrayList<>();
         List<OrdenDeCompraArticulo> OCarticulos = ordenDeCompraArticuloRepo.buscarOCAdeUnaOC(codOrdenCompra);
 
@@ -135,8 +142,8 @@ public class OrdenCompraService {
             OrdenDeCompraArticuloDTO articuloDTO = new OrdenDeCompraArticuloDTO();
             articuloDTO.setCodOrdenCompraA(OCarticulo.getCodOrdenCompraA());
             articuloDTO.setCantidadSolicitadaOCA(OCarticulo.getCantidadSolicitadaOCA());
-            articuloDTO.setSubTotalOCA(String.valueOf(OCarticulo.getSubTotalOCA()));
-            articuloDTO.setPrecioUnitarioOCA(String.valueOf(OCarticulo.getPrecioUnitarioOCA()));
+            articuloDTO.setSubTotalOCA(numberFormat.format(OCarticulo.getSubTotalOCA()));
+            articuloDTO.setPrecioUnitarioOCA(numberFormat.format(OCarticulo.getPrecioUnitarioOCA()));
             String nombreArticulo = OCarticulo.getArticuloProveedor().getArticulo().getNombreArticulo();
             articuloDTO.setNombreArticulo(nombreArticulo);
             articulosOrdDTO.add(articuloDTO);
@@ -152,8 +159,8 @@ public class OrdenCompraService {
             ArticuloProveedorDTO articuloProveedorDTO = new ArticuloProveedorDTO();
             articuloProveedorDTO.setId(articuloProveedor.getCodArticuloProveedor());
             articuloProveedorDTO.setNombre(articuloProveedor.getArticulo().getNombreArticulo());
-            articuloProveedorDTO.setPrecioUnitario(String.valueOf(articuloProveedor.getPrecioUnitario()));
-            articuloProveedorDTO.setCostoPedido(String.valueOf(articuloProveedor.getCostoPedido()));
+            articuloProveedorDTO.setPrecioUnitario(numberFormat.format(articuloProveedor.getPrecioUnitario()));
+            articuloProveedorDTO.setCostoPedido(numberFormat.format(articuloProveedor.getCostoPedido()));
             articulosOrdDTO.add(articuloProveedorDTO);
         }
         return articulosOrdDTO;
@@ -287,7 +294,7 @@ public class OrdenCompraService {
         if (orden.isPresent()) {
             OrdenDeCompraDTO ordenDTO = new OrdenDeCompraDTO();
             ordenDTO.setCodOrdenDeCompra(orden.get().getCodOrdenDeCompra());
-            ordenDTO.setTotalOrden(String.valueOf(orden.get().getTotalOrdenDeCompra()));
+            ordenDTO.setTotalOrden(numberFormat.format(orden.get().getTotalOrdenDeCompra()));
             ordenDTO.setEstadoOrdenDeCompra(orden.get().getEstadoOrdenDeCompra().getNombreEstadoOC());
             ordenDTO.setProveedor(orden.get().getProveedor().getNombreProveedor());
             return Optional.of(ordenDTO);
@@ -300,7 +307,7 @@ public class OrdenCompraService {
         if (orden.isPresent()) {
             OrdenDeCompraDTO ordenDTO = new OrdenDeCompraDTO();
             ordenDTO.setCodOrdenDeCompra(orden.get().getCodOrdenDeCompra());
-            ordenDTO.setTotalOrden(String.valueOf(orden.get().getTotalOrdenDeCompra()));
+            ordenDTO.setTotalOrden(numberFormat.format(orden.get().getTotalOrdenDeCompra()));
             ordenDTO.setEstadoOrdenDeCompra(orden.get().getEstadoOrdenDeCompra().getNombreEstadoOC());
             ordenDTO.setProveedor(orden.get().getProveedor().getNombreProveedor());
             return Optional.of(ordenDTO);
@@ -320,9 +327,9 @@ public class OrdenCompraService {
             ProveedorArticuloDTO proveedorArticuloDTO = new ProveedorArticuloDTO();
             proveedorArticuloDTO.setCodProveedor(articulo.getProveedor().getCodProveedor());
             proveedorArticuloDTO.setNombreProveedor(articulo.getProveedor().getNombreProveedor());
-            proveedorArticuloDTO.setPrecioUnitario(String.valueOf(articulo.getPrecioUnitario()));
+            proveedorArticuloDTO.setPrecioUnitario(numberFormat.format(articulo.getPrecioUnitario()));
             proveedorArticuloDTO.setDemoraEntregaDias(articulo.getDemoraEntregaDias());
-            proveedorArticuloDTO.setCostoPedido(String.valueOf(articulo.getCostoPedido()));
+            proveedorArticuloDTO.setCostoPedido(numberFormat.format(articulo.getCostoPedido()));
             proveedorArticuloDTOS.add(proveedorArticuloDTO);
         }
         return proveedorArticuloDTOS;
