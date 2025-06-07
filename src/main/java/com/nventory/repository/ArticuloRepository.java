@@ -42,5 +42,14 @@ public class ArticuloRepository extends SoftDeletableRepositoryImpl<Articulo, Lo
         return articuloEncontrado;
     }
 
-
+    //-------------------Metodo del repository para retornar la cantidad de articulos---------------------
+    public Long contarArticulos() {
+        EntityManager em = IndireccionJPA.getEntityManager();
+        try {
+            return em.createQuery("SELECT COUNT(p) FROM Articulo p", Long.class).getSingleResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0L;
+        }
+    }
 }

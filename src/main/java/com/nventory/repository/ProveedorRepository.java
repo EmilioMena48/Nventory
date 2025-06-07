@@ -16,4 +16,15 @@ public class ProveedorRepository extends SoftDeletableRepositoryImpl<Proveedor, 
         em.getTransaction().commit();
         return proveedor.getCodProveedor();
     }
+
+    //-------------------Metodo del repository para retornar la cantidad de proveedores---------------------
+    public Long contarProveedores() {
+        EntityManager em = IndireccionJPA.getEntityManager();
+        try {
+            return em.createQuery("SELECT COUNT(p) FROM Proveedor p", Long.class).getSingleResult();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0L;
+        }
+    }
 }

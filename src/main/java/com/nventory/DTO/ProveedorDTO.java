@@ -1,12 +1,14 @@
 package com.nventory.DTO;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Builder
 public class ProveedorDTO {
     private Long codProveedor;
     private String descripcionProveedor;

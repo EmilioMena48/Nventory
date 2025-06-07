@@ -1,4 +1,5 @@
 package com.nventory.app;
+import com.nventory.controller.DatosInicialesController;
 import com.nventory.service.DatosEstadosTiposScript;
 import com.nventory.userInterfaces.MainViewPanel;
 import javafx.application.Application;
@@ -29,7 +30,9 @@ public class Main extends Application {
         DatosEstadosTiposScript datosIniciales = new DatosEstadosTiposScript();
         datosIniciales.ejecutar();
 
+        DatosInicialesController datosInicialesController = new DatosInicialesController();
+        datosInicialesController.ejecutar();
+
         launch(args);
-        //System.out.println("andando");
     }
 }
