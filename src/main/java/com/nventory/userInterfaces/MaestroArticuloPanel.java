@@ -147,9 +147,35 @@ public class MaestroArticuloPanel extends BorderPane {
 
         //Boton lista a reponer
         btnListarReponer = new Button("Articulos a reponer");
-        btnListarReponer.setOnAction(e ->{
-            //llamar al metodo del controler
+        btnListarReponer.setOnAction(e -> {
+
+            List<ArticuloDTO> articulosAReponer = controller.obtenerArticulosParaReponer();
+
+            Stage popup = new Stage();
+            popup.setTitle("Artículos a Reponer");
+            popup.initModality(Modality.APPLICATION_MODAL);
+
+            ListView<ArticuloDTO> listView = new ListView<>(FXCollections.observableArrayList(articulosAReponer));
+            listView.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(ArticuloDTO item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText("Nombre: " + item.getNombreArticulo());
+                    }
+                }
+            });
+
+            VBox layout = new VBox(10, new Label(), listView);
+            layout.setPadding(new Insets(10));
+
+            Scene scene = new Scene(layout, 600, 400);
+            popup.setScene(scene);
+            popup.showAndWait();
         });
+
 
         //Boton productos faltantes
         btnProductosFaltantes = new Button("Productos Faltantes");

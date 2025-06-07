@@ -51,6 +51,10 @@ public class MaestroArticuloController {
         articuloService.asignarProveedorPredeterminado(codArticuloProveedor);
     }
 
+    public List<ArticuloDTO> obtenerArticulosParaReponer() {
+        return articuloService.obtenerArticulosReponer();
+    }
+
     //--------Metodo para buscar art por nombre, lo uso en venta
     public ArticuloDTO buscarArtPorNombre (String nombre){return articuloService.buscarArtPorNombre(nombre);}
 

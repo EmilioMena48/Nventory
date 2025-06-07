@@ -93,11 +93,55 @@ public class ArticuloService {
         }
     }
 
-    //-----------------Metodo del service para listar todos los articulos-----------------------------
     public List<Articulo> listarArticulos() {
         return articuloRepository.buscarTodos();
     }
 
+    //----------------------------Metodo para traerme todos los articulos a reponer---------------------------------
+    public List<ArticuloDTO> obtenerArticulosReponer() {
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+        List<ArticuloDTO> articulosAReponer = new ArrayList<>();
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
+
+                //Leemos el proveedor predeterminado
+                ArticuloProveedor provPredeterminado = articulo.getArticuloProveedor();
+
+                if (provPredeterminado != null) {
+
+                    int puntoPedido = articulo.getArticuloProveedor().getConfiguracionInventario().getPuntoPedido();
+                    int stockActual = articulo.getStockActual();
+
+                    if (stockActual <= puntoPedido) {
+                        Long codArticuloProveedor = provPredeterminado.getCodArticuloProveedor();
+                        //Buscar ordenesCompraArticulo relacionadas a ese codArticuloProveedor
+                        List<OrdenDeCompraArticulo> ordenesCompraArticulo = ordenDeCompraArticuloRepository.buscarOrdenCompraArticuloDeArticulo(codArticuloProveedor);
+
+                        boolean tieneOrdenPendienteOEnviada = false;
+                        for (OrdenDeCompraArticulo oca : ordenesCompraArticulo) {
+                            OrdenDeCompra orden = oca.getOrdenDeCompra();
+                            EstadoOrdenDeCompra estado = orden.getEstadoOrdenDeCompra();
+                            String nombreEstado = estado.getNombreEstadoOC();
+
+                            if ("Pendiente".equalsIgnoreCase(nombreEstado) || "Enviada".equalsIgnoreCase(nombreEstado)) {
+                                tieneOrdenPendienteOEnviada = true;
+                                break;
+                            }
+                        }
+                        if (tieneOrdenPendienteOEnviada == false) {
+                            ArticuloDTO articuloDTO = new ArticuloDTO();
+                            articuloDTO.setCodArticulo(articulo.getCodArticulo());
+                            articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
+                            articulosAReponer.add(articuloDTO);
+                        }
+                    }
+                }
+            }
+        }
+        return articulosAReponer;
+    }
+
+    //-----------------Metodo del service para buscar articulo por ID---------------------------------
     public Articulo buscarArticuloPorId(Long id) {
         Articulo articulo = articuloRepository.buscarPorId(id);
         if (articulo == null) {
