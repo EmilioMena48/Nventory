@@ -14,12 +14,14 @@ import java.util.stream.Collectors;
 
 public class ArticuloProveedorService {
     ArticuloProveedorRepository repository;
+    ConfiguracionInventarioService configuracionInventarioService;
 
     TipoModeloInventarioRepository tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
     ConfiguracionInventarioRepository configuracionInventarioRepository = new ConfiguracionInventarioRepository();
 
-    public ArticuloProveedorService(ArticuloProveedorRepository repository) {
+    public ArticuloProveedorService(ArticuloProveedorRepository repository, ConfiguracionInventarioService configuracionInventarioService) {
         this.repository = repository;
+        this.configuracionInventarioService = configuracionInventarioService;
     }
 
     public void eliminarArticuloProveedor(Long id) {
@@ -73,24 +75,9 @@ public class ArticuloProveedorService {
         return null;
     }
 
-    public ConfiguracionInventario inicializarModelo(boolean isLoteFijo) {
-        ConfiguracionInventario config = new ConfiguracionInventario();
-        TipoModeloInventario tipoModelo;
-        Long idCI;
-        config.setCantidadPedir(0);
-        config.setLoteOptimo(0);
-        config.setPuntoPedido(0);
-        config.setStockSeguridad(0);
-        config.setInventarioMaximo(0);
-
-        if (isLoteFijo) {
-            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Lote Fijo");
-            config.setTipoModeloInventario(tipoModelo);
-        } else {
-            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Inventario Fijo");
-            config.setTipoModeloInventario(tipoModelo);
-        }
-        idCI = configuracionInventarioRepository.GuardarYRetornarID(config);
-        return configuracionInventarioRepository.buscarPorId(idCI);
+    public ConfiguracionInventario inicializarModelo(ArticuloProveedor articuloProveedor, boolean isLoteFijo) {
+        ConfiguracionInventario configuracionInventario = configuracionInventarioService.crearConfiguracionInventario(articuloProveedor, isLoteFijo);
+        Long configID = configuracionInventarioRepository.GuardarYRetornarID(configuracionInventario);
+        return configuracionInventarioRepository.buscarPorId(configID);
     }
 }

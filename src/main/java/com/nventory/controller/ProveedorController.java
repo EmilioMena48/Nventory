@@ -14,6 +14,7 @@ import com.nventory.repository.OrdenDeCompraRepository;
 import com.nventory.repository.ProveedorRepository;
 import com.nventory.service.ArticuloProveedorService;
 import com.nventory.service.ArticuloService;
+import com.nventory.service.ConfiguracionInventarioService;
 import com.nventory.service.ProveedorService;
 
 import java.util.List;
@@ -22,13 +23,15 @@ public class ProveedorController implements ModuloProveedores {
 
     ProveedorService proveedorService;
     ArticuloProveedorService articuloProveedorService;
+    ConfiguracionInventarioService configuracionInventarioService;
     ArticuloService articuloService;
     ArticuloRepository articuloRepository = new ArticuloRepository();
 
     public ProveedorController() {
         this.proveedorService = new ProveedorService(new ProveedorRepository(),
                 new OrdenDeCompraRepository());
-        this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository());
+        this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository(),
+                new ConfiguracionInventarioService());
         this.articuloService = new ArticuloService(articuloRepository);
     }
 
@@ -73,10 +76,9 @@ public class ProveedorController implements ModuloProveedores {
 
     @Override
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto, Boolean tipoModelo) {
-        ConfiguracionInventario config = articuloProveedorService.inicializarModelo(tipoModelo);
         articuloProveedorService.guardarArticuloProveedor(articulo, proveedor, articuloProveedorDto);
         ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
-        articuloProveedor.setConfiguracionInventario(config);
+        articuloProveedor.setConfiguracionInventario(articuloProveedorService.inicializarModelo(articuloProveedor, tipoModelo));
         articuloProveedorService.guardarArticuloProveedor(articuloProveedor);
     }
 

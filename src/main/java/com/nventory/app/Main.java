@@ -27,8 +27,8 @@ public class Main extends Application {
 
     public static void main(String[] args) {
 
-        DatosEstadosTiposScript datosIniciales = new DatosEstadosTiposScript();
-        datosIniciales.ejecutar();
+        DatosEstadosTiposScript estadosIniciales = new DatosEstadosTiposScript();
+        estadosIniciales.ejecutar();
 
         DatosInicialesController datosInicialesController = new DatosInicialesController();
         datosInicialesController.ejecutar();
