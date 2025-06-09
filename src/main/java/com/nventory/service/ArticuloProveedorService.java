@@ -7,6 +7,7 @@ import com.nventory.repository.ConfiguracionInventarioRepository;
 import com.nventory.repository.TipoModeloInventarioRepository;
 import lombok.NonNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,17 @@ public class ArticuloProveedorService {
         if (articuloProveedorAux != null) {
             articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
             articuloProveedor.setConfiguracionInventario(articuloProveedorAux.getConfiguracionInventario());
+            try {
+                if (articuloProveedorAux.getCostoPedido() != articuloProveedor.getCostoPedido() || articuloProveedorAux.getDemoraEntregaDias() != articuloProveedor.getDemoraEntregaDias()
+                        || articuloProveedorAux.getPrecioUnitario() != articuloProveedor.getPrecioUnitario() || articuloProveedorAux.getFechaProxRevisionAP() != articuloProveedor.getFechaProxRevisionAP()) {
+                    /* *
+                     * Como cambio el artículo proveedor recalcular
+                     */
+                }
+            } catch (Exception e) {
+                System.out.println("[!] Error al guardar articulo proveedor");
+            }
+
         }
 
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
