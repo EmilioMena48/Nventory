@@ -377,9 +377,10 @@ public class OrdenCompraService {
         List<Articulo> articulos = articuloRepo.buscarTodos();
        for (Articulo art : articulos) {
            ArticuloProveedor articuloProv = art.getArticuloProveedor();
-           String modelo = articuloProv.getConfiguracionInventario().getTipoModeloInventario().getNombreModeloInventario();
+           ConfiguracionInventario configInventario = articuloProv.getConfiguracionInventario();
+           String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
            if ("Modelo Periodo Fijo".equals(modelo) && LocalDate.now().equals(articuloProv.getFechaProxRevisionAP())) {
-               int cantidadApedir = articuloProv.getConfiguracionInventario().getCantidadPedir();
+               int cantidadApedir = configInventario.getInventarioMaximo() - art.getStockActual();
                if (cantidadApedir > 0) {
                    Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
                    agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);
