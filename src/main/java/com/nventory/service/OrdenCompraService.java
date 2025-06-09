@@ -359,9 +359,14 @@ public class OrdenCompraService {
         String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
 
         if ("Modelo Lote Fijo".equals(modelo)) {
-            dto.setCantidadSugerida(configInventario.getLoteOptimo());
+            int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(artProv.getArticulo().getCodArticulo());
+            int cantidadFinal = configInventario.getLoteOptimo() - stockPendiente;
+            dto.setCantidadSugerida(Math.max(cantidadFinal, 0));
+
         } else if ("Modelo Periodo Fijo".equals(modelo)) {
-            dto.setCantidadSugerida(configInventario.getCantidadPedir());
+            int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(artProv.getArticulo().getCodArticulo());
+            int cantidadApedir = configInventario.getInventarioMaximo() - artProv.getArticulo().getStockActual() - stockPendiente;
+            dto.setCantidadSugerida(Math.max(cantidadApedir, 0));
         }
 
         return dto;
@@ -372,6 +377,7 @@ public class OrdenCompraService {
     public Long buscarArticuloProveedorPorRelacion(Long codArticulo, Long codProveedor) {
         return articuloProveedorRepo.buscarPorCodArticuloYProveedor(codArticulo, codProveedor).getCodArticuloProveedor();
     }
+
     public List<String> generarOrdenesDelDia() {
         List<String> listaAvisosOrdenes = new ArrayList<>();
         List<Articulo> articulos = articuloRepo.buscarTodos();
@@ -380,7 +386,8 @@ public class OrdenCompraService {
            ConfiguracionInventario configInventario = articuloProv.getConfiguracionInventario();
            String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
            if ("Modelo Periodo Fijo".equals(modelo) && LocalDate.now().equals(articuloProv.getFechaProxRevisionAP())) {
-               int cantidadApedir = configInventario.getInventarioMaximo() - art.getStockActual();
+               int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
+               int cantidadApedir = configInventario.getInventarioMaximo() - art.getStockActual() - stockPendiente;
                if (cantidadApedir > 0) {
                    Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
                    agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);

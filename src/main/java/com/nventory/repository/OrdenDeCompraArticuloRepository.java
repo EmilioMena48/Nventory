@@ -66,5 +66,25 @@ public class OrdenDeCompraArticuloRepository extends HardDeletableRepositoryImpl
         }
     }
 
+    public int buscarStockPendiente(Long codArticulo) {
+        EntityManager em = getEntityManager();
+
+        String jpql = """
+        SELECT COALESCE(SUM(oca.cantidadSolicitadaOCA), 0)
+        FROM OrdenDeCompraArticulo oca
+        JOIN oca.articuloProveedor ap
+        JOIN ap.articulo a
+        JOIN oca.ordenDeCompra oc
+        JOIN oc.estadoOrdenDeCompra e
+        WHERE a.codArticulo = :codArticulo
+        AND e.nombreEstadoOC = 'Enviada'
+    """;
+
+        return em.createQuery(jpql, Long.class)
+                .setParameter("codArticulo", codArticulo)
+                .getSingleResult()
+                .intValue();
+    }
+
 
 }
