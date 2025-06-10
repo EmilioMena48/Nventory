@@ -78,8 +78,9 @@ public class ProveedorController implements ModuloProveedores {
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto, Boolean tipoModelo) {
         articuloProveedorService.guardarArticuloProveedor(articulo, proveedor, articuloProveedorDto);
         ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
-        articuloProveedor.setConfiguracionInventario(articuloProveedorService.inicializarModelo(articuloProveedor, tipoModelo));
+        articuloProveedor.setConfiguracionInventario(articuloProveedorService.inicializarModelo(tipoModelo));
         articuloProveedorService.guardarArticuloProveedor(articuloProveedor);
+        configuracionInventarioService.recalcularFormulas(articuloProveedor);
     }
 
     @Override

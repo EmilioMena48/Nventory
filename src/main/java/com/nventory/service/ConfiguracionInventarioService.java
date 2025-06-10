@@ -4,6 +4,7 @@ import com.nventory.DTO.ArticuloDTO;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.ConfiguracionInventario;
+import com.nventory.model.TipoModeloInventario;
 import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ConfiguracionInventarioRepository;
 import com.nventory.repository.TipoModeloInventarioRepository;
@@ -23,37 +24,29 @@ public class ConfiguracionInventarioService {
         this.configuracionInventarioRepository = new ConfiguracionInventarioRepository();
     }
 
-    public ConfiguracionInventario crearConfiguracionInventario (ArticuloProveedor articuloProveedor, boolean isLoteFijo){
-        ArticuloDTO articuloDTO = new ArticuloDTO(articuloProveedor.getArticulo().getCodArticulo(),
-                articuloProveedor.getArticulo().getCostoAlmacenamiento(),
-                articuloProveedor.getArticulo().getNivelServicioArticulo(),
-                articuloProveedor.getArticulo().getPrecioArticulo(),
-                articuloProveedor.getArticulo().getDemandaArt(),
-                articuloProveedor.getArticulo().getNombreArticulo(),
-                articuloProveedor.getArticulo().getDescripcionArticulo(),
-                articuloProveedor.getArticulo().getFechaHoraBajaArticulo(),
-                articuloProveedor.getArticulo().getStockActual(),
-                articuloProveedor.getArticulo().getDiasEntreRevisiones(),
-                articuloProveedor.getArticulo().getDesviacionEstandarArticulo());
-        ConfiguracionInventario configuracionInventario;
+    public void recalcularFormulas(ArticuloProveedor articuloProveedor) {
+        // Recalcular las Fórmulas de la ConfigurationInventario asociada al ArticuloProveedor
+    }
 
-        if (isLoteFijo){
-            configuracionInventario = ConfiguracionInventario.builder()
-                .loteOptimo(calcularLoteOptimo(articuloDTO, articuloProveedor))
-                .stockSeguridad(calcularStockSeguridadLoteFijo(articuloDTO, articuloProveedor))
-                .puntoPedido(calcularPuntoPedido(articuloDTO, articuloProveedor))
-                .tipoModeloInventario(tipoModeloInventarioRepository.buscarPorNombre("Modelo Lote Fijo"))
-                .build();
-        }else{
-            configuracionInventario = ConfiguracionInventario.builder()
-                    .inventarioMaximo(calcularInventarioMax(articuloDTO, articuloProveedor))
-                    .cantidadPedir(calcularCantidadPedir(articuloDTO, articuloProveedor))
-                    .stockSeguridad(calcularStockSeguridadPeriodoFijo(articuloDTO, articuloProveedor))
-                    .tipoModeloInventario(tipoModeloInventarioRepository.buscarPorNombre("Modelo Periodo Fijo"))
-                    .build();
+    public ConfiguracionInventario crearConfiguracionInventario(boolean isLoteFijo) {
+        ConfiguracionInventario config = new ConfiguracionInventario();
+        TipoModeloInventario tipoModelo;
+        Long idCI;
+        config.setCantidadPedir(0);
+        config.setLoteOptimo(0);
+        config.setPuntoPedido(0);
+        config.setStockSeguridad(0);
+        config.setInventarioMaximo(0);
+
+        if (isLoteFijo) {
+            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Lote Fijo");
+            config.setTipoModeloInventario(tipoModelo);
+        } else {
+            tipoModelo = tipoModeloInventarioRepository.buscarPorNombre("Modelo Periodo Fijo");
+            config.setTipoModeloInventario(tipoModelo);
         }
-
-        return configuracionInventario;
+        idCI = configuracionInventarioRepository.GuardarYRetornarID(config);
+        return configuracionInventarioRepository.buscarPorId(idCI);
     }
 
     public void recalcularFormulas(Articulo articuloExistente, ArticuloDTO articuloNuevo){

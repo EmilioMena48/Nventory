@@ -62,8 +62,6 @@ public class DatosInicialesController {
          */
         Long cantidadProveedores = proveedorRepository.contarProveedores();
         Long cantidadArticulos = articuloRepository.contarArticulos();
-        System.out.println("Cantidad de proveedores: " + cantidadProveedores);
-        System.out.println("Cantidad de artículos: " + cantidadArticulos);
         return cantidadProveedores > 0 || cantidadArticulos > 0;
     }
 
@@ -83,38 +81,6 @@ public class DatosInicialesController {
                 , ProveedorDTO.builder()
                         .nombreProveedor("Bits & Empanadas")
                         .descripcionProveedor("Venta de hardware y delivery de empanadas.")
-                        .build()
-        );
-    }
-
-    private List<Articulo> cargarArticulosIniciales() {
-        /* *
-         * Cargar datos iniciales de artículos, son ejemplos xd
-         */
-        return List.of(
-                Articulo.builder()
-                        .nombreArticulo("Pollo Entero")
-                        .descripcionArticulo("Pollo fresco de alta calidad.")
-                        .precioArticulo(BigDecimal.valueOf(12.99))
-                        .stockActual(12)
-                        .build()
-                , Articulo.builder()
-                        .nombreArticulo("Cable HDMI")
-                        .descripcionArticulo("Cable HDMI de 2 metros, alta velocidad.")
-                        .precioArticulo(BigDecimal.valueOf(5.49))
-                        .stockActual(50)
-                        .build()
-                , Articulo.builder()
-                        .nombreArticulo("Disco Duro Externo")
-                        .descripcionArticulo("Disco duro externo de 1TB, USB 3.0.")
-                        .precioArticulo(BigDecimal.valueOf(59.99))
-                        .stockActual(20)
-                        .build()
-                , Articulo.builder()
-                        .nombreArticulo("Empanada de Pollo")
-                        .descripcionArticulo("Empanada de pollo casera, perfecta para el almuerzo.")
-                        .precioArticulo(BigDecimal.valueOf(2.50))
-                        .stockActual(100)
                         .build()
         );
     }

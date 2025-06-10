@@ -45,11 +45,9 @@ public class ArticuloProveedorService {
             articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
             articuloProveedor.setConfiguracionInventario(articuloProveedorAux.getConfiguracionInventario());
             try {
-                if (articuloProveedorAux.getCostoPedido() != articuloProveedor.getCostoPedido() || articuloProveedorAux.getDemoraEntregaDias() != articuloProveedor.getDemoraEntregaDias()
-                        || articuloProveedorAux.getPrecioUnitario() != articuloProveedor.getPrecioUnitario() || articuloProveedorAux.getFechaProxRevisionAP() != articuloProveedor.getFechaProxRevisionAP()) {
-                    /* *
-                     * Como cambio el artículo proveedor recalcular
-                     */
+                if (!Objects.equals(articuloProveedorAux.getCostoPedido(), articuloProveedor.getCostoPedido()) || articuloProveedorAux.getDemoraEntregaDias() != articuloProveedor.getDemoraEntregaDias()
+                        || !Objects.equals(articuloProveedorAux.getPrecioUnitario(), articuloProveedor.getPrecioUnitario()) || articuloProveedorAux.getFechaProxRevisionAP() != articuloProveedor.getFechaProxRevisionAP()) {
+                    recalcularFormulas(articuloProveedor);
                 }
             } catch (Exception e) {
                 System.out.println("[!] Error al guardar articulo proveedor");
@@ -62,6 +60,10 @@ public class ArticuloProveedorService {
         articuloProveedor.setDemoraEntregaDias(articuloProveedorDto.getDemoraEntregaDias());
         articuloProveedor.setFechaProxRevisionAP(articuloProveedorDto.getFechaProxRevisionAP());
         repository.guardar(articuloProveedor);
+    }
+
+    private void recalcularFormulas(ArticuloProveedor articuloProveedor) {
+        configuracionInventarioService.recalcularFormulas(articuloProveedor);
     }
 
     public void guardarArticuloProveedor(@NonNull ArticuloProveedor articuloProveedor) {
@@ -87,9 +89,7 @@ public class ArticuloProveedorService {
         return null;
     }
 
-    public ConfiguracionInventario inicializarModelo(ArticuloProveedor articuloProveedor, boolean isLoteFijo) {
-        ConfiguracionInventario configuracionInventario = configuracionInventarioService.crearConfiguracionInventario(articuloProveedor, isLoteFijo);
-        Long configID = configuracionInventarioRepository.GuardarYRetornarID(configuracionInventario);
-        return configuracionInventarioRepository.buscarPorId(configID);
+    public ConfiguracionInventario inicializarModelo(boolean isLoteFijo) {
+        return configuracionInventarioService.crearConfiguracionInventario(isLoteFijo);
     }
 }
