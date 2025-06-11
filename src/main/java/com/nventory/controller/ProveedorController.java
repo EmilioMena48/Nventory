@@ -25,13 +25,19 @@ public class ProveedorController implements ModuloProveedores {
     ArticuloProveedorService articuloProveedorService;
     ConfiguracionInventarioService configuracionInventarioService;
     ArticuloService articuloService;
-    ArticuloRepository articuloRepository = new ArticuloRepository();
+    ArticuloRepository articuloRepository;
+    ArticuloProveedorRepository articuloProveedorRepository;
+    ProveedorRepository proveedorRepository;
+    OrdenDeCompraRepository ordenDeCompraRepository;
 
     public ProveedorController() {
-        this.proveedorService = new ProveedorService(new ProveedorRepository(),
-                new OrdenDeCompraRepository());
-        this.articuloProveedorService = new ArticuloProveedorService(new ArticuloProveedorRepository(),
-                new ConfiguracionInventarioService());
+        this.configuracionInventarioService = new ConfiguracionInventarioService();
+        this.articuloProveedorRepository = new ArticuloProveedorRepository();
+        this.articuloRepository = new ArticuloRepository();
+        this.proveedorRepository = new ProveedorRepository();
+        this.ordenDeCompraRepository = new OrdenDeCompraRepository();
+        this.proveedorService = new ProveedorService(proveedorRepository, ordenDeCompraRepository);
+        this.articuloProveedorService = new ArticuloProveedorService(articuloProveedorRepository, configuracionInventarioService);
         this.articuloService = new ArticuloService(articuloRepository);
     }
 

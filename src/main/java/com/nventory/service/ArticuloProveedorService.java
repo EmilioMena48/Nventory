@@ -52,7 +52,6 @@ public class ArticuloProveedorService {
             } catch (Exception e) {
                 System.out.println("[!] Error al guardar articulo proveedor");
             }
-
         }
 
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());

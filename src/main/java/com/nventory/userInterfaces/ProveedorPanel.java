@@ -27,7 +27,6 @@ import javafx.util.Duration;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -520,24 +519,20 @@ public class ProveedorPanel extends BorderPane {
     private void mostrarFormularioAsociarArticulo(Articulo articuloSeleccionado) {
         areaContenido.getChildren().clear();
         boolean asignarModelo;
-
+        final boolean[] asignoFecha = {false};
+        final LocalDate[] fechaProxRevision = {null};
         TextField txtDemoraEntrega = new TextField();
         TextField txtPrecioUnitario = new TextField();
         TextField txtCostoPedido = new TextField();
-        ComboBox<String> diasEntregaComboBox = new ComboBox<>();
-        diasEntregaComboBox.getItems().addAll("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo");
-        diasEntregaComboBox.getSelectionModel().select("Lunes");
-        diasEntregaComboBox.setDisable(true);
+        Button btnSeleccionarDia = new Button("Seleccionar Día de Entrega");
+        btnSeleccionarDia.setDisable(true);
 
         SelectorSwitch toggleSwitch = new SelectorSwitch(true);
-        toggleSwitch.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-            diasEntregaComboBox.setDisable(toggleSwitch.isLoteFijo());
-        });
 
         txtDemoraEntrega.getStyleClass().add("text-field");
         txtPrecioUnitario.getStyleClass().add("text-field");
         txtCostoPedido.getStyleClass().add("text-field");
-        diasEntregaComboBox.getStyleClass().add("text-field");
+        btnSeleccionarDia.getStyleClass().add("btn-seleccionar-dia");
 
         HBox toggleContainer = new HBox(toggleSwitch);
         toggleContainer.setMinHeight(15);
@@ -550,21 +545,13 @@ public class ProveedorPanel extends BorderPane {
                 txtDemoraEntrega.setText(String.valueOf(articuloProveedor.getDemoraEntregaDias()));
                 txtPrecioUnitario.setText(articuloProveedor.getPrecioUnitario().toString());
                 txtCostoPedido.setText(articuloProveedor.getCostoPedido().toString());
-                LocalDate fechaProxRevision = articuloProveedor.getFechaProxRevisionAP();
-                if (fechaProxRevision != null) {
-                    String fechaProxRevisionString = fechaProxRevision.getDayOfWeek().name();
-                    switch (fechaProxRevisionString) {
-                        case "MONDAY" -> diasEntregaComboBox.getSelectionModel().select("Lunes");
-                        case "TUESDAY" -> diasEntregaComboBox.getSelectionModel().select("Martes");
-                        case "WEDNESDAY" -> diasEntregaComboBox.getSelectionModel().select("Miércoles");
-                        case "THURSDAY" -> diasEntregaComboBox.getSelectionModel().select("Jueves");
-                        case "FRIDAY" -> diasEntregaComboBox.getSelectionModel().select("Viernes");
-                        case "SATURDAY" -> diasEntregaComboBox.getSelectionModel().select("Sábado");
-                        case "SUNDAY" -> diasEntregaComboBox.getSelectionModel().select("Domingo");
-                    }
-                    diasEntregaComboBox.setDisable(false);
+                LocalDate fechaProxRevisionDB = articuloProveedor.getFechaProxRevisionAP();
+                if (fechaProxRevisionDB != null) {
+                    btnSeleccionarDia.setText(getNombreDia(fechaProxRevisionDB));
+                    btnSeleccionarDia.setDisable(false);
+                    fechaProxRevision[0] = fechaProxRevisionDB;
                 } else {
-                    diasEntregaComboBox.setDisable(true);
+                    btnSeleccionarDia.setDisable(true);
                 }
             } else {
                 asignarModelo = true;
@@ -583,12 +570,26 @@ public class ProveedorPanel extends BorderPane {
         Button btnGuardar = new Button("Guardar Asociación");
         btnGuardar.getStyleClass().add("button-guardar");
 
+        toggleSwitch.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
+            btnSeleccionarDia.setDisable(toggleSwitch.isLoteFijo());
+            btnGuardar.setDisable(!toggleSwitch.isLoteFijo());
+        });
+
+        btnSeleccionarDia.setOnAction( e -> {
+            LocalDate fecha = CalendarioPopup.seleccionarDia(fechaProxRevision[0]);
+            if (fecha != null) {
+                fechaProxRevision[0] = fecha;
+                btnSeleccionarDia.setText(getNombreDia(fecha));
+                asignoFecha[0] = true;
+                btnGuardar.setDisable(false);
+            }
+        });
+
         btnGuardar.setOnAction(e -> {
             try {
                 int demora = 0;
                 BigDecimal precio = BigDecimal.ZERO;
                 BigDecimal costoPedido = BigDecimal.ZERO;
-                String diaSeleccionado = "";
                 try {
                     if (!txtDemoraEntrega.getText().isBlank()) {
                         demora = Integer.parseInt(txtDemoraEntrega.getText());
@@ -599,7 +600,6 @@ public class ProveedorPanel extends BorderPane {
                     if (!txtCostoPedido.getText().isBlank()) {
                         costoPedido = new BigDecimal(txtCostoPedido.getText());
                     }
-                    diaSeleccionado = diasEntregaComboBox.getSelectionModel().getSelectedItem();
 
                 } catch (NumberFormatException ex) {
                     mostrarAlerta("Por favor ingrese solo números válidos en los campos numéricos.", 2, null);
@@ -610,27 +610,8 @@ public class ProveedorPanel extends BorderPane {
                 ap.setDemoraEntregaDias(demora);
                 ap.setPrecioUnitario(precio);
                 ap.setCostoPedido(costoPedido);
-
-                if (!diasEntregaComboBox.isDisable()) {
-                    switch (diaSeleccionado) {
-                        case "Lunes" -> diaSeleccionado = "MONDAY";
-                        case "Martes" -> diaSeleccionado = "TUESDAY";
-                        case "Miércoles" -> diaSeleccionado = "WEDNESDAY";
-                        case "Jueves" -> diaSeleccionado = "THURSDAY";
-                        case "Viernes" -> diaSeleccionado = "FRIDAY";
-                        case "Sábado" -> diaSeleccionado = "SATURDAY";
-                        case "Domingo" -> diaSeleccionado = "SUNDAY";
-                        default -> {
-                            mostrarAlerta("Día de entrega no válido.", 2, null);
-                            return;
-                        }
-                    }
-                    DayOfWeek diaEntrega = DayOfWeek.valueOf(diaSeleccionado);
-                    LocalDate fechaProxRevision = LocalDate.now().with(diaEntrega);
-                    if (fechaProxRevision.isBefore(LocalDate.now())) {
-                        fechaProxRevision = fechaProxRevision.plusWeeks(1);
-                    }
-                    ap.setFechaProxRevisionAP(fechaProxRevision);
+                if (!btnSeleccionarDia.isDisable()) {
+                    ap.setFechaProxRevisionAP(fechaProxRevision[0]);
                 } else {
                     ap.setFechaProxRevisionAP(null);
                 }
@@ -681,7 +662,7 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(txtCostoPedido, 1, 4);
 
         formulario.add(new Label("Día de entrega:"), 0, 5);
-        formulario.add(diasEntregaComboBox, 1, 5);
+        formulario.add(btnSeleccionarDia, 1, 5);
 
         if(asignarModelo) {
             formulario.add(toggleContainer, 0, 6, 2, 1);
@@ -692,6 +673,21 @@ public class ProveedorPanel extends BorderPane {
 
         animarFormulario(formulario);
         areaContenido.getChildren().add(formulario);
+    }
+
+    private String getNombreDia(LocalDate fecha) {
+        String dia = fecha.getDayOfWeek().toString();
+        // convertir a español
+        switch (dia) {
+            case "MONDAY" -> dia = "Lunes";
+            case "TUESDAY" -> dia = "Martes";
+            case "WEDNESDAY" -> dia = "Miércoles";
+            case "THURSDAY" -> dia = "Jueves";
+            case "FRIDAY" -> dia = "Viernes";
+            case "SATURDAY" -> dia = "Sábado";
+            case "SUNDAY" -> dia = "Domingo";
+        }
+        return dia + " (" + fecha.getDayOfMonth() + "/" + fecha.getMonthValue() + ")";
     }
 }
 
@@ -826,5 +822,51 @@ class SelectorSwitch extends StackPane {
         transition.setToX(targetX);
         transition.play();
         isLoteFijo = !isLoteFijo;
+    }
+}
+
+
+class CalendarioPopup {
+
+    public static LocalDate seleccionarDia(LocalDate fechaInicial) {
+        final LocalDate[] resultado = new LocalDate[1];
+
+        Stage popup = new Stage();
+        popup.initStyle(StageStyle.UTILITY);
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Seleccionar fecha");
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setValue(fechaInicial != null ? fechaInicial : LocalDate.now());
+
+        Button btnAceptar = new Button("Aceptar");
+        Button btnCancelar = new Button("Cancelar");
+
+        btnCancelar.setStyle("-fx-min-width: 90px; -fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 8 20; -fx-cursor: hand; -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2); -fx-transition: background-color 0.3s ease;");
+        btnAceptar.setStyle("-fx-min-width: 90px; -fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 8 20; -fx-cursor: hand; -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2); -fx-transition: background-color 0.3s ease;");
+
+        btnAceptar.setOnAction(e -> {
+            resultado[0] = datePicker.getValue();
+            popup.close();
+        });
+
+        btnCancelar.setOnAction(e -> {
+            resultado[0] = null;
+            popup.close();
+        });
+
+        HBox botones = new HBox(10, btnAceptar, btnCancelar);
+        botones.setAlignment(Pos.CENTER);
+
+        VBox root = new VBox(15, datePicker, botones);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(root, 300, 150);
+        popup.setScene(scene);
+        popup.centerOnScreen();
+        popup.showAndWait();
+
+        return resultado[0];
     }
 }

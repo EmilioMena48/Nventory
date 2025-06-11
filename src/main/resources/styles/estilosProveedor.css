@@ -99,6 +99,21 @@
     -fx-background-color: #2980b9;
 }
 
+.btn-seleccionar-dia {
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.btn-seleccionar-dia:hover {
+    -fx-background-color: #27ae60;
+}
+
 .button-guardar {
     -fx-min-width: 90px;
     -fx-background-color: #3498db;
