@@ -107,6 +107,7 @@ public class VentaPanel extends BorderPane {
 
         tablaVentas = new TableView<>();
         tablaVentas.getStyleClass().add("tablaProveedor");
+        tablaVentas.getStyleClass().add("table-view");
         tablaVentas.setMaxWidth(364);
 
         tablaVentas.getColumns().addAll(
@@ -200,7 +201,7 @@ public class VentaPanel extends BorderPane {
             Label lb3Mensaje = new Label("Órden de Linea: "+ventaArticuloDTO.getOrdenVentaArticulo().toString());
             Label lb4Mensaje = new Label("Cantidad: "+ventaArticuloDTO.getCantidadVendida());
             Label lb5Mensaje = new Label("Precio de Venta: $"+ventaArticuloDTO.getPrecioVenta().toString());
-            VBox bloque = new VBox(lblMensaje, lb2Mensaje, lb3Mensaje, lb4Mensaje, lb5Mensaje);
+            VBox bloque = new VBox(lb3Mensaje, lblMensaje, lb2Mensaje, lb4Mensaje, lb5Mensaje);
             bloque.setStyle("-fx-border-color: gray; -fx-padding: 5;");
             vbox.getChildren().add(bloque);
         }
@@ -253,6 +254,8 @@ public class VentaPanel extends BorderPane {
         });
 
         cantidadLineasField.getStyleClass().add("campo-cantidad");
+
+        guardarButton.setDisable(true);
 
         guardarButton.getStyleClass().add("boton-guardar");
         cancelarButton.getStyleClass().add("boton-cancelar");
@@ -323,6 +326,7 @@ public class VentaPanel extends BorderPane {
             }
             crearLineasButton.setDisable(true);
             cantidadLineasField.setDisable(true);
+            guardarButton.setDisable(false);
 
         } catch (NumberFormatException ex) {
             mostrarAlerta("Error", "Ingrese una cantidad válida de líneas.");
@@ -364,10 +368,8 @@ public class VentaPanel extends BorderPane {
         venta.setFechaHoraVenta(fechaHoraVenta);
 
         List<VentaArticuloDTO> vList = new ArrayList<>();
-        //long orden = 1;
         for (LineaVentaUI linea : lineasVenta) {
             VentaArticuloDTO dto = new VentaArticuloDTO();
-            //dto.setOrdenVentaArticulo(orden++);
             dto.setNombreArticulo(linea.getNombreArticulo());
             dto.setCantidadVendida(linea.getCantidad());
             dto.setPrecioVenta(linea.getPrecio());
@@ -391,6 +393,11 @@ public class VentaPanel extends BorderPane {
     private void mostrarConfirmacion(VentaDTO venta) {
         Stage confirmStage = new Stage();
         TableView<VentaArticuloDTO> table = new TableView<>();
+        table.setPrefHeight(146);
+        table.setMaxHeight(146);
+
+        table.setPrefWidth(255);
+        table.setMaxWidth(255);
 
         TableColumn<VentaArticuloDTO, String> nombreCol = new TableColumn<>("Artículo");
         nombreCol.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombreArticulo()));
@@ -398,18 +405,21 @@ public class VentaPanel extends BorderPane {
         TableColumn<VentaArticuloDTO, Integer> cantCol = new TableColumn<>("Cantidad");
         cantCol.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCantidadVendida()).asObject());
 
-        TableColumn<VentaArticuloDTO, BigDecimal> precioCol = new TableColumn<>("Precio");
-        precioCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getPrecioVenta()));
+        TableColumn<VentaArticuloDTO, String> precioCol = new TableColumn<>("Precio");
+        precioCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$"+c.getValue().getPrecioVenta()));
 
-        TableColumn<VentaArticuloDTO, BigDecimal> subTotalCol = new TableColumn<>("Subtotal");
-        subTotalCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().getSubTotalVenta()));
+        TableColumn<VentaArticuloDTO, String> subTotalCol = new TableColumn<>("Subtotal");
+        subTotalCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$"+c.getValue().getSubTotalVenta()));
 
         table.getColumns().addAll(nombreCol, cantCol, precioCol, subTotalCol);
         table.getItems().addAll(venta.getVentaArticuloDTO());
 
-        Label totalLabel = new Label("Total: " + venta.getMontoTotalVenta());
+        Label totalLabel = new Label("Total: $" + venta.getMontoTotalVenta());
         Button confirmar = new Button("Confirmar");
         Button cancelar = new Button("Cancelar");
+
+        confirmar.getStyleClass().add("boton-guardar-confirmacion");
+        cancelar.getStyleClass().add("boton-cancelar-confirmacion");
 
         confirmar.setOnAction(e -> {
             try {
@@ -453,7 +463,7 @@ public class VentaPanel extends BorderPane {
         alert.showAndWait();
     }
 
-    private List<Integer> generarRango(int inicio, int fin) {
+   private List<Integer> generarRango(int inicio, int fin) {
         return java.util.stream.IntStream.rangeClosed(inicio, fin).boxed().collect(Collectors.toList());
     }
 

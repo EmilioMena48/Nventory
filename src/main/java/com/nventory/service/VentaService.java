@@ -73,7 +73,7 @@ public class VentaService {
             ventaArticulo.setSubTotalVenta(calcularSubtotalVenta(ventaArticuloDTO));
             ArticuloDTO articuloDTO = articuloService.buscarArtPorNombre(ventaArticuloDTO.getNombreArticulo());
             if (!comprobarStockArticulo(ventaArticulo.getCantidadVendida(), articuloDTO.getStockActual())) {
-                throw new IllegalArgumentException("No hay stock suficiente para el artículo con ID: " + articuloDTO.getCodArticulo());
+                throw new IllegalArgumentException("No hay stock suficiente para el artículo: " + articuloDTO.getNombreArticulo());
             }
             Articulo articulo = articuloService.buscarArticuloPorId(articuloDTO.getCodArticulo());
             ventaArticulo.setArticulo(articulo);

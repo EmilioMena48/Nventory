@@ -75,4 +75,27 @@
     -fx-transition: background-color 0.3s ease;
 }
 
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+}
+
+.boton-guardar-confirmacion {
+    -fx-font-size: 8px;
+    -fx-background-color: #2196f3;
+    -fx-text-fill: white;
+    -fx-padding: 10 20 10 20;
+    -fx-border-radius: 5;
+}
+
+.boton-cancelar-confirmacion {
+    -fx-font-size: 8px;
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-padding: 10 20 10 20;
+    -fx-border-radius: 5;
+}
+
 
