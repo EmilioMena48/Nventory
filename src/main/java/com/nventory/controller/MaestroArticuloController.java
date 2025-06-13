@@ -2,6 +2,8 @@ package com.nventory.controller;
 
 import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorDTO;
+import com.nventory.DTO.CGIDTO;
+import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.model.Articulo;
 import com.nventory.service.ArticuloService;
 import javafx.collections.FXCollections;
@@ -79,4 +81,16 @@ public class MaestroArticuloController {
 
         listaArticulos.addAll(a1);
     }*/
+
+    //----------Buscar Articulos en stock de seguridad---------------------
+    public List<Articulo> listarArticulosEnStockSeg () {return articuloService.listarArticulosEnStockSeg();}
+
+    //----------Calcular CGI de artículos---------------------
+    public List<CGIDTO> calcularCGI () {return articuloService.calcularCGI();}
+
+    public Integer obtenerStockActual (String nombre) {return articuloService.obtenerStockActual(nombre);}
+
+    //----------Realizar ajuste de inventario---------------------
+    public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {articuloService.realizarAjusteInventario(stockMovimientoDTO);}
+
 }

@@ -166,7 +166,7 @@ public class MainViewPanel  extends BorderPane {
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
     private void mostrarVentas() {
-        contenidoBody.getChildren().setAll(botonVolver, new VentaPanel(ventaController));
+        contenidoBody.getChildren().setAll(botonVolver, new VentaPanel());
         botonVolver.setAlignment(Pos.TOP_LEFT);
     }
 

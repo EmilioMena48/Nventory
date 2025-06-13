@@ -1,7 +1,78 @@
-.l1estilo {
-    -fx-font-size: 20px;
-    -fx-text-fill: #2c3e50;
-    -fx-font-family: "Arial";
+.contenedor-formulario {
+    -fx-alignment: center;
+    -fx-padding: 30;
+    -fx-spacing: 20;
+    -fx-border-color: #ccc;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-background-color: #f9f9f9;
+    -fx-max-width: 600px;
+    -fx-margin: auto;
+}
+
+.linea-venta {
+    -fx-background-color: #ffffff;
+    -fx-padding: 10;
+    -fx-spacing: 5;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+}
+
+.boton-guardar {
+    -fx-font-size: 14px;
+    -fx-background-color: #2196f3;
+    -fx-text-fill: white;
+    -fx-padding: 10 20 10 20;
+    -fx-border-radius: 5;
+}
+
+.boton-cancelar {
+    -fx-font-size: 14px;
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+    -fx-padding: 10 20 10 20;
+    -fx-border-radius: 5;
+}
+
+.campo-cantidad {
+    -fx-pref-width: 60px;
+}
+
+.botonNuevaVenta {
+    -fx-min-width: 90px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.btnVerDetalle {
+    -fx-max-width: 80px;
+    -fx-max-height: 15px;
+    -fx-background-color: #13c268;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.btnAceptar {
+    -fx-min-width: 90px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
 }
 
 

@@ -3,6 +3,8 @@ package com.nventory.userInterfaces;
 
 import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorDTO;
+import com.nventory.DTO.CGIDTO;
+import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.controller.MaestroArticuloController;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
@@ -34,6 +36,7 @@ public class MaestroArticuloPanel extends BorderPane {
     private Button btnListarReponer;
     private Button btnProductosFaltantes;
     private Button btnAjusteInventario;
+    private Button btnCalcularCGI;
     private final MaestroArticuloController controller;
 
     public MaestroArticuloPanel(MaestroArticuloController controller) {
@@ -180,19 +183,163 @@ public class MaestroArticuloPanel extends BorderPane {
         //Boton productos faltantes
         btnProductosFaltantes = new Button("Productos Faltantes");
         btnProductosFaltantes.setOnAction(e ->{
-            //llamar al metodo del controller
+            List<Articulo> articulosEnSS = controller.listarArticulosEnStockSeg();
+
+            Stage popup = new Stage();
+            popup.setTitle("Artículos en Stock de Seguridad");
+            popup.initModality(Modality.APPLICATION_MODAL);
+
+            ListView<Articulo> listView = new ListView<>(FXCollections.observableArrayList(articulosEnSS));
+            listView.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(Articulo item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        Integer stockSeg = item.getArticuloProveedor().getConfiguracionInventario().getStockSeguridad();
+                        setText("Nombre: " + item.getNombreArticulo()
+                                + " | Stock Actual: " + item.getStockActual()
+                                + " | Stock Seguridad: " + stockSeg);
+                    }
+                }
+            });
+
+            VBox layout = new VBox(10, new Label(), listView);
+            layout.setPadding(new Insets(10));
+
+            Scene scene = new Scene(layout, 600, 400);
+            popup.setScene(scene);
+            popup.showAndWait();
         });
 
         btnAjusteInventario = new Button("Ajuste inventario");
         btnAjusteInventario.setOnAction(e ->{
-            //llamar al metodo del controller
+
+            Stage popup = new Stage();
+            popup.setTitle("Artículos en Stock de Seguridad");
+            popup.initModality(Modality.APPLICATION_MODAL);
+
+            ComboBox<String> comboArticulos = new ComboBox<>();
+
+            List<ArticuloDTO> articulos = controller.listarArticulosDisponibles();
+            for (ArticuloDTO articulo : articulos) {
+                comboArticulos.getItems().add(articulo.getNombreArticulo());
+            }
+
+            TextField campoCantidadActual = new TextField();
+            campoCantidadActual.setPromptText("Cantidad actual");
+            campoCantidadActual.setEditable(false);
+
+            TextField campoNuevaCantidad = new TextField();
+            campoNuevaCantidad.setPromptText("Nueva cantidad");
+
+            TextArea campoComentario = new TextArea();
+            campoComentario.setPromptText("Comentario (opcional)");
+            campoComentario.setPrefRowCount(3);
+
+            comboArticulos.setOnAction(ev -> {
+                String seleccionado = comboArticulos.getValue();
+                if (seleccionado != null) {
+                    Integer cantidadActual = controller.obtenerStockActual(seleccionado);
+                    campoCantidadActual.setText(cantidadActual != null ? cantidadActual.toString() : "0");
+                }
+            });
+
+            Button btnAceptar = new Button("Aceptar");
+            Button btnCancelar = new Button("Cancelar");
+
+            btnAceptar.setOnAction(ev -> {
+                String articulo = comboArticulos.getValue();
+                String nuevaCantidadStr = campoNuevaCantidad.getText();
+                String comentario = campoComentario.getText();
+
+                if (articulo == null || nuevaCantidadStr.isEmpty()) {
+                    Alert alerta = new Alert(Alert.AlertType.WARNING);
+                    alerta.setTitle("Advertencia");
+                    alerta.setHeaderText(null);
+                    alerta.setContentText("Debes seleccionar un artículo y una nueva cantidad.");
+                    alerta.showAndWait();
+                    return;
+                }
+
+                try {
+                    int nuevaCantidad = Integer.parseInt(nuevaCantidadStr);
+                    StockMovimientoDTO stockMovDto = new StockMovimientoDTO();
+                    ArticuloDTO articuloDTO = controller.buscarArtPorNombre(articulo);
+                    stockMovDto.setArticuloID(articuloDTO.getCodArticulo());
+                    stockMovDto.setCantidad(nuevaCantidad);
+                    stockMovDto.setComentario(comentario);
+                    stockMovDto.setFechaHoraMovimiento(LocalDateTime.now());
+                    controller.realizarAjusteInventario(stockMovDto);
+                    popup.close();
+                } catch (NumberFormatException ex) {
+                    Alert alerta = new Alert(Alert.AlertType.WARNING);
+                    alerta.setTitle("Advertencia");
+                    alerta.setHeaderText(null);
+                    alerta.setContentText("La nueva cantidad debe ser un número válido.");
+                    alerta.showAndWait();
+                }
+            });
+
+            btnCancelar.setOnAction(ev -> popup.close());
+
+            // Layout
+            VBox layout = new VBox(10,
+                    new Label("Artículo:"),
+                    comboArticulos,
+                    new Label("Cantidad actual:"),
+                    campoCantidadActual,
+                    new Label("Nueva cantidad:"),
+                    campoNuevaCantidad,
+                    new Label("Comentario (opcional):"),
+                    campoComentario,
+                    new HBox(10, btnAceptar, btnCancelar)
+            );
+            layout.setPadding(new Insets(20));
+            layout.setAlignment(Pos.CENTER);
+
+            Scene scene = new Scene(layout, 400, 300);
+            popup.setScene(scene);
+            popup.showAndWait();
+        });
+
+        btnCalcularCGI = new Button("Calcular CGI");
+        btnCalcularCGI.setOnAction(e ->{
+            List<CGIDTO> articulosCGI = controller.calcularCGI();
+
+            Stage popup = new Stage();
+            popup.setTitle("Costo General de Inventario");
+            popup.initModality(Modality.APPLICATION_MODAL);
+
+            ListView<CGIDTO> listView = new ListView<>(FXCollections.observableArrayList(articulosCGI));
+            listView.setCellFactory(lv -> new ListCell<>() {
+                @Override
+                protected void updateItem(CGIDTO item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText("Nombre: " + item.getNombreArticulo()
+                                + " | Costo Gral Inventario: $" + item.getCgi());
+                    }
+                }
+            });
+
+            VBox layout = new VBox(10, new Label(), listView);
+            layout.setPadding(new Insets(10));
+
+            Scene scene = new Scene(layout, 600, 400);
+            popup.setScene(scene);
+            popup.showAndWait();
         });
 
         btnListarReponer.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
         btnProductosFaltantes.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
         btnAjusteInventario.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+        btnCalcularCGI.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
 
-        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnAjusteInventario);
+        HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnAjusteInventario, btnCalcularCGI);
         contenedorFiltros.setPadding(new Insets(10));
 
         HBox contenedorBoton = new HBox(btnAgregar);

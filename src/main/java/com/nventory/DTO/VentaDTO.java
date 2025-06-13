@@ -9,6 +9,7 @@ public class VentaDTO {
     private Long numeroVenta;
     private LocalDateTime fechaHoraVenta;
     private BigDecimal montoTotalVenta;
+    private List<VentaArticuloDTO> ventasArticuloDTO = new ArrayList<>();
 
     public Long getNumeroVenta() {
         return numeroVenta;
@@ -45,7 +46,7 @@ public class VentaDTO {
         this.ventasArticuloDTO.add(v);
     }
 
-    private List<VentaArticuloDTO> ventasArticuloDTO = new ArrayList<>();
+
 
     public VentaDTO(Long numeroVenta, LocalDateTime fechaHoraVenta, BigDecimal montoTotalVenta) {
         this.numeroVenta = numeroVenta;

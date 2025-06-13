@@ -2,10 +2,13 @@ package com.nventory.service;
 
 import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorDTO;
+import com.nventory.DTO.CGIDTO;
+import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.model.*;
 import com.nventory.repository.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +20,9 @@ public class ArticuloService {
     private final ArticuloProveedorRepository articuloProveedorRepository = new ArticuloProveedorRepository();
 
     private final ConfiguracionInventarioService configuracionInventarioService = new ConfiguracionInventarioService();
+
+    private StockMovimientoRepository stockMovimientoRepository;
+    private TipoStockMovimientoRepository tipoStockMovimientoRepository;
 
     ArticuloRepository articuloRepository;
 
@@ -180,8 +186,6 @@ public class ArticuloService {
         return articulosDisponibles;
     }
 
-
-
     //-----------------Metodo del service crear un artículo-----------------------------
     public void crearArticulo(ArticuloDTO articuloDTO) {
         Long codArticulo = articuloDTO.getCodArticulo();
@@ -242,6 +246,83 @@ public class ArticuloService {
         articuloExistente.setDesviacionEstandarArticulo(articuloDTO.getDesviacionEstandarArticulo());
 
         articuloRepository.guardar(articuloExistente);
+    }
+
+    //-----------------Metodo del service para articulos en stock de seguridad-----------------------------
+    public List<Articulo> listarArticulosEnStockSeg () {
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+        List<Articulo> articulosEnStockSeg = new ArrayList<>();
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
+                Integer stockActual = articulo.getStockActual();
+                ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
+                ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
+                Integer stockSeg = configuracionInventario.getStockSeguridad();
+                if(stockActual <= stockSeg){
+                    articulosEnStockSeg.add(articulo);
+                }
+            }
+        }
+        return articulosEnStockSeg;
+    }
+
+    //-----------------Metodo del service para calcular CGI-----------------------------
+    public List<CGIDTO> calcularCGI () {
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+        List<CGIDTO> cgiDtoList = new ArrayList<>();
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
+                ArticuloProveedor artProv = articulo.getArticuloProveedor();
+                ConfiguracionInventario confInv = artProv.getConfiguracionInventario();
+                BigDecimal D = new BigDecimal(articulo.getDemandaArt());
+                BigDecimal C = artProv.getPrecioUnitario();
+                BigDecimal Q = new BigDecimal(confInv.getCantidadPedir());
+                BigDecimal S = artProv.getCostoPedido();
+                BigDecimal H = articulo.getCostoAlmacenamiento();
+
+                BigDecimal parte1 = C.multiply(D);
+                BigDecimal parte2 = S.multiply(D.divide(Q, 2, RoundingMode.HALF_UP));
+                BigDecimal parte3 = H.multiply(Q.divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP));
+
+                BigDecimal cgi = parte1.add(parte2).add(parte3).setScale(2, RoundingMode.HALF_UP);
+
+                CGIDTO cgiDto = new CGIDTO();
+                cgiDto.setNombreArticulo(articulo.getNombreArticulo());
+                cgiDto.setCgi(cgi);
+
+                cgiDtoList.add(cgiDto);
+            }
+        }
+        return cgiDtoList;
+    }
+
+    //-----------------Metodo del service para obtener stock actual de un articulo-----------------------------
+    public Integer obtenerStockActual (String nombreArticulo) {
+        ArticuloDTO articuloDTO = buscarArtPorNombre(nombreArticulo);
+        Integer stockActual = articuloDTO.getStockActual();
+
+        return stockActual;
+    }
+
+    //-----------------Metodo del service para ajuste de inventario-----------------------------
+    public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {
+        Articulo articulo = buscarArticuloPorId(stockMovimientoDTO.getArticuloID());
+
+        articulo.setStockActual(stockMovimientoDTO.getCantidad());
+        articuloRepository.guardar(articulo);
+
+        tipoStockMovimientoRepository = new TipoStockMovimientoRepository();
+        stockMovimientoRepository = new StockMovimientoRepository();
+
+        TipoStockMovimiento tipoStockMovimiento = tipoStockMovimientoRepository.buscarPorId(3L);
+
+        StockMovimiento stockMovimiento = new StockMovimiento();
+        stockMovimiento.setCantidad(stockMovimientoDTO.getCantidad());
+        stockMovimiento.setComentario(stockMovimientoDTO.getComentario());
+        stockMovimiento.setFechaHoraMovimiento(stockMovimientoDTO.getFechaHoraMovimiento());
+        stockMovimiento.setTipoStockMovimiento(tipoStockMovimiento);
+
+        stockMovimientoRepository.guardar(stockMovimiento);
     }
 }
 

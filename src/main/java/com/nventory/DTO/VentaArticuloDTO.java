@@ -8,6 +8,7 @@ public class VentaArticuloDTO {
     private BigDecimal precioVenta;
     private BigDecimal subTotalVenta;
     private Long codArticulo;
+    private String nombreArticulo;
 
     public Long getCodArticulo() {
         return codArticulo;
@@ -17,7 +18,7 @@ public class VentaArticuloDTO {
         this.codArticulo = codArticulo;
     }
 
-    private String nombreArticulo;
+
 
     public Long getOrdenVentaArticulo() {
         return ordenVentaArticulo;
