@@ -41,17 +41,22 @@ public class OrdenCompraArticuloPanel extends BorderPane {
 
         TableColumn<OrdenDeCompraArticuloDTO, String> colArticulo = new TableColumn<>("Artículo");
         colArticulo.setCellValueFactory(new PropertyValueFactory<>("nombreArticulo"));
+        colArticulo.prefWidthProperty().bind(tablaArticulos.widthProperty().multiply(0.15));
 
         TableColumn<OrdenDeCompraArticuloDTO, BigDecimal> colPrecio = new TableColumn<>("Precio");
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precioUnitarioOCA"));
+        colPrecio.prefWidthProperty().bind(tablaArticulos.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraArticuloDTO, Integer> colCantidad = new TableColumn<>("Cantidad");
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidadSolicitadaOCA"));
+        colCantidad.prefWidthProperty().bind(tablaArticulos.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraArticuloDTO, String> colSubtotal = new TableColumn<>("Subtotal");
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subTotalOCA"));
+        colSubtotal.prefWidthProperty().bind(tablaArticulos.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraArticuloDTO, Void> colAcciones = new TableColumn<>("Acciones");
+        colAcciones.prefWidthProperty().bind(tablaArticulos.widthProperty().multiply(0.55));
         colAcciones.setCellFactory(param -> new TableCell<>(){
             private final Button btnModificar = new Button("Modificar");
             private final Button btnEliminar = new Button("Eliminar");

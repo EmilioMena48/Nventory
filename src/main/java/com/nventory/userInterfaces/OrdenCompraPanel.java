@@ -43,20 +43,26 @@ public class OrdenCompraPanel extends BorderPane {
 
         TableColumn<OrdenDeCompraDTO, Long> colId = new TableColumn<>("Código");
         colId.setCellValueFactory(new PropertyValueFactory<>("codOrdenDeCompra"));
+        colId.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.05));
 
         TableColumn<OrdenDeCompraDTO, String> colEstado = new TableColumn<>("Estado");
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estadoOrdenDeCompra"));
+        colEstado.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraDTO, String> colProveedor = new TableColumn<>("Proveedor");
         colProveedor.setCellValueFactory(new PropertyValueFactory<>("proveedor"));
+        colProveedor.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraDTO, String> colFecha = new TableColumn<>("Fecha de Creación");
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaHoraCreacion"));
+        colFecha.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.10));
 
         TableColumn<OrdenDeCompraDTO, String> colTotal = new TableColumn<>("Total");
         colTotal.setCellValueFactory(new PropertyValueFactory<>("totalOrden"));
+        colTotal.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.05));
 
         TableColumn<OrdenDeCompraDTO, Void> colAcciones = new TableColumn<>("Acciones");
+        colAcciones.prefWidthProperty().bind(tablaOrdenes.widthProperty().multiply(0.60));
         colAcciones.setCellFactory(param -> new TableCell<>() {
             private final Button btnEnviar = new Button("Enviar al Proveedor");
             private final Button btnCancelar = new Button("Cancelar");
@@ -241,7 +247,7 @@ public class OrdenCompraPanel extends BorderPane {
     private void abrirVentanaEditarArticulos(Long codigo, String estado, Node origen) {
         Stage ventana = new Stage();
         OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codigo, estado);
-        Scene escena = new Scene(panelArt, 400, 500);
+        Scene escena = new Scene(panelArt, 854, 480);
         ventana.setScene(escena);
         ventana.setTitle("Artículos de la Orden de Compra");
 
@@ -430,7 +436,7 @@ public class OrdenCompraPanel extends BorderPane {
         String estadoOrden =  controller.obtenerEstadoDeUnaOrden(codOrdenCompra);
         Stage ventana = new Stage();
         OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codOrdenCompra, estadoOrden);
-        Scene escena = new Scene(panelArt, 1280, 720);
+        Scene escena = new Scene(panelArt, 854, 480);
         ventana.setScene(escena);
         ventana.setTitle("Editar Artículos de la Orden de Compra");
 
