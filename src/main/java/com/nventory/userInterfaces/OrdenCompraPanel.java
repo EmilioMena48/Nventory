@@ -241,7 +241,7 @@ public class OrdenCompraPanel extends BorderPane {
     private void abrirVentanaEditarArticulos(Long codigo, String estado, Node origen) {
         Stage ventana = new Stage();
         OrdenCompraArticuloPanel panelArt = new OrdenCompraArticuloPanel(controller, codigo, estado);
-        Scene escena = new Scene(panelArt, 1280, 720);
+        Scene escena = new Scene(panelArt, 400, 500);
         ventana.setScene(escena);
         ventana.setTitle("Artículos de la Orden de Compra");
 

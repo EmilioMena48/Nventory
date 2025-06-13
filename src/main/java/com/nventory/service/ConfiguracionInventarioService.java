@@ -24,8 +24,33 @@ public class ConfiguracionInventarioService {
         this.configuracionInventarioRepository = new ConfiguracionInventarioRepository();
     }
 
-    public void recalcularFormulas(ArticuloProveedor articuloProveedor) {
-        // Recalcular las Fórmulas de la ConfigurationInventario asociada al ArticuloProveedor
+    public void recalcularFormulasArticuloProveedor(ArticuloProveedor articuloProveedor) {
+        ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
+        String nombreModeloInventario = configuracionInventario.getTipoModeloInventario().getNombreModeloInventario();
+
+        ArticuloDTO articuloDTO = new ArticuloDTO(articuloProveedor.getArticulo().getCodArticulo(),
+                articuloProveedor.getArticulo().getCostoAlmacenamiento(),
+                articuloProveedor.getArticulo().getNivelServicioArticulo(),
+                articuloProveedor.getArticulo().getPrecioArticulo(),
+                articuloProveedor.getArticulo().getDemandaArt(),
+                articuloProveedor.getArticulo().getNombreArticulo(),
+                articuloProveedor.getArticulo().getDescripcionArticulo(),
+                articuloProveedor.getArticulo().getFechaHoraBajaArticulo(),
+                articuloProveedor.getArticulo().getStockActual(),
+                articuloProveedor.getArticulo().getDiasEntreRevisiones(),
+                articuloProveedor.getArticulo().getDesviacionEstandarArticulo());
+
+        if (nombreModeloInventario.compareTo("Modelo Lote Fijo") == 0){
+            configuracionInventario.setLoteOptimo(calcularLoteOptimo(articuloDTO, articuloProveedor));
+            configuracionInventario.setStockSeguridad(calcularStockSeguridadLoteFijo(articuloDTO, articuloProveedor));
+            configuracionInventario.setPuntoPedido(calcularPuntoPedido(articuloDTO, articuloProveedor));
+        }else {
+            configuracionInventario.setStockSeguridad(calcularStockSeguridadPeriodoFijo(articuloDTO, articuloProveedor));
+            configuracionInventario.setInventarioMaximo(calcularInventarioMax(articuloDTO, articuloProveedor));
+            configuracionInventario.setCantidadPedir(calcularCantidadPedir(articuloDTO, articuloProveedor));
+        }
+
+        configuracionInventarioRepository.guardar(configuracionInventario);
     }
 
     public ConfiguracionInventario crearConfiguracionInventario(boolean isLoteFijo) {
@@ -49,7 +74,7 @@ public class ConfiguracionInventarioService {
         return configuracionInventarioRepository.buscarPorId(idCI);
     }
 
-    public void recalcularFormulas(Articulo articuloExistente, ArticuloDTO articuloNuevo){
+    public void recalcularFormulasArticulo(Articulo articuloExistente, ArticuloDTO articuloNuevo){
         List<ArticuloProveedor> articuloProveedorList = articuloProveedorRepository.buscarArticuloProveedorPorArticulo(articuloExistente);
 
         for (ArticuloProveedor articuloProveedor : articuloProveedorList) {

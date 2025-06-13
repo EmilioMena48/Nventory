@@ -6,7 +6,6 @@ import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.interfaces.ModuloProveedores;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
-import com.nventory.model.ConfiguracionInventario;
 import com.nventory.model.Proveedor;
 import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ArticuloRepository;
@@ -86,7 +85,7 @@ public class ProveedorController implements ModuloProveedores {
         ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
         articuloProveedor.setConfiguracionInventario(articuloProveedorService.inicializarModelo(tipoModelo));
         articuloProveedorService.guardarArticuloProveedor(articuloProveedor);
-        configuracionInventarioService.recalcularFormulas(articuloProveedor);
+        configuracionInventarioService.recalcularFormulasArticuloProveedor(articuloProveedor);
     }
 
     @Override

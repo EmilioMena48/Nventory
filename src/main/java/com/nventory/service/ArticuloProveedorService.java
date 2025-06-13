@@ -7,7 +7,6 @@ import com.nventory.repository.ConfiguracionInventarioRepository;
 import com.nventory.repository.TipoModeloInventarioRepository;
 import lombok.NonNull;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,7 @@ public class ArticuloProveedorService {
     }
 
     private void recalcularFormulas(ArticuloProveedor articuloProveedor) {
-        configuracionInventarioService.recalcularFormulas(articuloProveedor);
+        configuracionInventarioService.recalcularFormulasArticuloProveedor(articuloProveedor);
     }
 
     public void guardarArticuloProveedor(@NonNull ArticuloProveedor articuloProveedor) {

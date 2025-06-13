@@ -12,7 +12,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class ArticuloService {
 
@@ -251,7 +250,7 @@ public class ArticuloService {
         || articuloExistente.getDesviacionEstandarArticulo() != articuloDTO.getDesviacionEstandarArticulo()
         || articuloExistente.getDiasEntreRevisiones() != articuloDTO.getDiasEntreRevisiones()
         || articuloExistente.getStockActual().compareTo(articuloDTO.getStockActual()) != 0){
-            configuracionInventarioService.recalcularFormulas(articuloExistente, articuloDTO);
+            configuracionInventarioService.recalcularFormulasArticulo(articuloExistente, articuloDTO);
         }
 
         articuloExistente.setCostoAlmacenamiento(articuloDTO.getCostoAlmacenamiento());
@@ -296,7 +295,7 @@ public class ArticuloService {
                 ConfiguracionInventario confInv = artProv.getConfiguracionInventario();
                 BigDecimal D = new BigDecimal(articulo.getDemandaArt());
                 BigDecimal C = artProv.getPrecioUnitario();
-                BigDecimal Q = new BigDecimal(confInv.getCantidadPedir());
+                BigDecimal Q = new BigDecimal(confInv.getLoteOptimo());
                 BigDecimal S = artProv.getCostoPedido();
                 BigDecimal H = articulo.getCostoAlmacenamiento();
 
