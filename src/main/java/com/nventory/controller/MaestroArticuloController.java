@@ -23,6 +23,11 @@ public class MaestroArticuloController {
 
     }
 
+    //-------------Obtener el articulo por id---------------------------------------------
+    public ArticuloDTO obtenerArticuloPorId(Long codArticulo) {
+        return articuloService.obtenerArticuloPorId(codArticulo);
+    }
+
     //----------Edicion de campos de articulos---------------------
     public void actualizarArticulo(ArticuloDTO articuloDTO){
         articuloService.modificarArticulo(articuloDTO);

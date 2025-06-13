@@ -47,6 +47,23 @@ public class ArticuloService {
         return articulosDisponibles;
     }
 
+    //------------------Obtener el articulo por ID--------------------------------
+    public ArticuloDTO obtenerArticuloPorId(Long codArticulo) {
+        Articulo articulo = articuloRepository.buscarPorId(codArticulo);
+        ArticuloDTO articuloDTO = new ArticuloDTO();
+
+        articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
+        articuloDTO.setDescripcionArticulo(articulo.getDescripcionArticulo());
+        articuloDTO.setStockActual(articulo.getStockActual());
+        articuloDTO.setCostoAlmacenamiento(articulo.getCostoAlmacenamiento());
+        articuloDTO.setPrecioArticulo(articulo.getPrecioArticulo());
+        articuloDTO.setNivelServicioArticulo(articulo.getNivelServicioArticulo());
+        articuloDTO.setDesviacionEstandarArticulo(articulo.getDesviacionEstandarArticulo());
+        articuloDTO.setDiasEntreRevisiones(articulo.getDiasEntreRevisiones());
+        articuloDTO.setDemandaArt(articulo.getDemandaArt());
+
+        return articuloDTO;
+    }
 
     public void actualizarStock(Long idArticulo, Integer cantidad) {
        Articulo articulo = articuloRepository.buscarPorId(idArticulo);

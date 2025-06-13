@@ -385,7 +385,8 @@ public class MaestroArticuloPanel extends BorderPane {
             {
                 //BOTON PARA LA MODIFICACION
                 btnEditar.setOnAction(e -> {
-                    ArticuloDTO articuloDTO = getTableView().getItems().get(getIndex());
+                    ArticuloDTO artdto = getTableView().getItems().get(getIndex());
+                    ArticuloDTO articuloTraido = controller.obtenerArticuloPorId(artdto.getCodArticulo());
 
                     Stage ventanaEdicion = new Stage();
                     ventanaEdicion.setTitle("Editar Artículo");
@@ -395,25 +396,26 @@ public class MaestroArticuloPanel extends BorderPane {
                     grid.setHgap(10);
                     grid.setPadding(new Insets(20));
 
-                    TextField txtNombre = new TextField(articuloDTO.getNombreArticulo());
+
+                    TextField txtNombre = new TextField(articuloTraido.getNombreArticulo());
                     txtNombre.setPrefColumnCount(20);
-                    TextArea txtDescripcion = new TextArea(articuloDTO.getDescripcionArticulo());
+                    TextArea txtDescripcion = new TextArea(articuloTraido.getDescripcionArticulo());
                     txtDescripcion.setPrefRowCount(2);
                     txtDescripcion.setWrapText(true);
                     txtDescripcion.setPrefColumnCount(20);
-                    TextField txtStockActual = new TextField(String.valueOf(articuloDTO.getStockActual()));
+                    TextField txtStockActual = new TextField(String.valueOf(articuloTraido.getStockActual()));
                     txtStockActual.setPrefColumnCount(5);
-                    TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articuloDTO.getCostoAlmacenamiento()));
+                    TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articuloTraido.getCostoAlmacenamiento()));
                     txtCostoAlmacenamiento.setPrefColumnCount(5);
-                    TextField txtPrecioArticulo = new TextField(String.valueOf(articuloDTO.getPrecioArticulo()));
+                    TextField txtPrecioArticulo = new TextField(String.valueOf(articuloTraido.getPrecioArticulo()));
                     txtPrecioArticulo.setPrefColumnCount(5);
-                    TextField txtNivelServicioArticulo = new TextField(String.valueOf(articuloDTO.getNivelServicioArticulo()));
+                    TextField txtNivelServicioArticulo = new TextField(String.valueOf(articuloTraido.getNivelServicioArticulo()));
                     txtNivelServicioArticulo.setPrefColumnCount(5);
-                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articuloDTO.getDesviacionEstandarArticulo()));
+                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articuloTraido.getDesviacionEstandarArticulo()));
                     txtDesviacionEstandarArticulo.setPrefColumnCount(5);
-                    TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articuloDTO.getDiasEntreRevisiones()));
+                    TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articuloTraido.getDiasEntreRevisiones()));
                     txtDiasEntreRevisiones.setPrefColumnCount(5);
-                    TextField txtDemanda = new TextField(String.valueOf(articuloDTO.getDemandaArt()));
+                    TextField txtDemanda = new TextField(String.valueOf(articuloTraido.getDemandaArt()));
                     txtDemanda.setPrefColumnCount(5);
                     // Agregar al gridPane
                     grid.add(new Label("Nombre:"), 0, 0);
@@ -448,7 +450,7 @@ public class MaestroArticuloPanel extends BorderPane {
                     btnGuardar.setOnAction(event -> {
                         try {
                             ArticuloDTO dto = new ArticuloDTO();
-                            dto.setCodArticulo(articuloDTO.getCodArticulo());
+                            dto.setCodArticulo(artdto.getCodArticulo());
                             dto.setNombreArticulo(txtNombre.getText());
                             dto.setDescripcionArticulo(txtDescripcion.getText());
                             dto.setStockActual(Integer.parseInt(txtStockActual.getText()));
