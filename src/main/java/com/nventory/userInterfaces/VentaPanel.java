@@ -412,11 +412,16 @@ public class VentaPanel extends BorderPane {
         Button cancelar = new Button("Cancelar");
 
         confirmar.setOnAction(e -> {
-            controller.AltaVenta(venta);
-            confirmStage.close();
-            resetearFormulario();
-            cargarTablaVentas();
+            try {
+                controller.AltaVenta(venta);
+                confirmStage.close();
+                resetearFormulario();
+                cargarTablaVentas();
+            } catch (Exception ex) {
+                mostrarAlerta(ERROR_CARGAR_VENTAS + ex.getMessage(), 2, null);
+            }
         });
+
 
         cancelar.setOnAction(e -> confirmStage.close());
 

@@ -172,12 +172,12 @@ public class ArticuloService {
         return artDTO;
     }
 
-    //-----------------Metodo para buscar art que no estén dados de baja------------------------------------------
+    //-----------------Metodo para buscar art que no estén dados de baja y estén asociados a artProveedor------------------------------------------
     public List<ArticuloDTO> listarArticulosDisponibles () {
         List<Articulo> articulos = articuloRepository.buscarTodos();
         List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
         for (Articulo articulo : articulos) {
-            if (articulo.getFechaHoraBajaArticulo() == null) {
+            if (articulo.getFechaHoraBajaArticulo() == null && articulo.getArticuloProveedor() != null) {
                 ArticuloDTO articuloDTO = new ArticuloDTO();
                 articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
                 articulosDisponibles.add(articuloDTO);

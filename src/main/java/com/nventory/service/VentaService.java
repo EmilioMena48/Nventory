@@ -44,15 +44,15 @@ public class VentaService {
     public List<VentaArticuloDTO> mostrarVentasArticulo(Long idVenta) {
         List<VentaArticuloDTO> ventaArticuloDTOList = new ArrayList<>();
         List<VentaArticulo> ventasArticulo = ventaArticuloRepositori.buscarVentasArticuloPorId(idVenta);
+        Long numeroLinea = 1L;
         for (VentaArticulo ventaArticulo : ventasArticulo) {
-            VentaArticuloDTO ventaArticuloDTO = new VentaArticuloDTO(
-                    ventaArticulo.getCodVentaArticulo(),
-                    ventaArticulo.getCantidadVendida(),
-                    ventaArticulo.getPrecioVenta(),
-                    ventaArticulo.getSubTotalVenta(),
-                    ventaArticulo.getArticulo().getNombreArticulo(),
-                    ventaArticulo.getArticulo().getCodArticulo()
-            );
+            VentaArticuloDTO ventaArticuloDTO = new VentaArticuloDTO();
+            ventaArticuloDTO.setCantidadVendida(ventaArticulo.getCantidadVendida());
+            ventaArticuloDTO.setPrecioVenta(ventaArticulo.getPrecioVenta());
+            ventaArticuloDTO.setSubTotalVenta(ventaArticulo.getSubTotalVenta());
+            ventaArticuloDTO.setNombreArticulo(ventaArticulo.getArticulo().getNombreArticulo());
+            ventaArticuloDTO.setCodArticulo(ventaArticulo.getArticulo().getCodArticulo());
+            ventaArticuloDTO.setOrdenVentaArticulo(numeroLinea++);
             ventaArticuloDTOList.add(ventaArticuloDTO);
         }
         return ventaArticuloDTOList;
