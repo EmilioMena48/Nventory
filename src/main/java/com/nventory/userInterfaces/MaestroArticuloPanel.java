@@ -14,10 +14,12 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -31,18 +33,21 @@ import java.util.Optional;
 
 public class MaestroArticuloPanel extends BorderPane {
 
-    private TableView<Articulo> tablaArticulos;
+    private TableView<ArticuloDTO> tablaArticulos;
     private Button btnAgregar;
     private Button btnListarReponer;
     private Button btnProductosFaltantes;
     private Button btnAjusteInventario;
     private Button btnCalcularCGI;
     private final MaestroArticuloController controller;
+    private final ObservableList<ArticuloDTO> listaArticulos = FXCollections.observableArrayList();
+
 
     public MaestroArticuloPanel(MaestroArticuloController controller) {
         this.controller = controller;
         construirUI();
-        controller.setTablaArticulos(tablaArticulos);
+        construirTabla();
+        cargarArticulos();
     }
 
     //Se crea la estructura de la pantalla
@@ -53,7 +58,7 @@ public class MaestroArticuloPanel extends BorderPane {
         setTop(titulo);
 
         tablaArticulos = new TableView<>();
-        construirTabla();
+        tablaArticulos.setItems(listaArticulos);
 
         btnAgregar = new Button("+ AÑADIR");
         btnAgregar.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
@@ -133,6 +138,7 @@ public class MaestroArticuloPanel extends BorderPane {
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
                     controller.darDeAltaArticulo(articuloDTO);
+                    cargarArticulos();
                     ventanaAlta.close();
 
                 } catch (NumberFormatException ex) {
@@ -272,6 +278,7 @@ public class MaestroArticuloPanel extends BorderPane {
                     stockMovDto.setComentario(comentario);
                     stockMovDto.setFechaHoraMovimiento(LocalDateTime.now());
                     controller.realizarAjusteInventario(stockMovDto);
+                    cargarArticulos();
                     popup.close();
                 } catch (NumberFormatException ex) {
                     Alert alerta = new Alert(Alert.AlertType.WARNING);
@@ -356,25 +363,19 @@ public class MaestroArticuloPanel extends BorderPane {
 
     //Define las columnas de la tabla de articulos
     private void construirTabla() {
-        TableColumn<Articulo, Long> colCodigo = new TableColumn<>("Código");
-        colCodigo.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getCodArticulo()).asObject());
+        TableColumn<ArticuloDTO, Long> colCodigo = new TableColumn<>("Código");
+        colCodigo.setCellValueFactory(cellData -> new SimpleLongProperty(cellData.getValue().getCodArticulo()).asObject());
 
-        TableColumn<Articulo, String> colNombre = new TableColumn<>("Nombre");
-        colNombre.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreArticulo()));
+        TableColumn<ArticuloDTO, String> colNombre = new TableColumn<>("Nombre");
+        colNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombreArticulo()));
 
-        TableColumn<Articulo, Integer> colStock = new TableColumn<>("Stock actual");
-        colStock.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getStockActual()).asObject());
+        TableColumn<ArticuloDTO, Integer> colStock = new TableColumn<>("Stock");
+        colStock.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getStockActual()).asObject());
 
-        TableColumn<Articulo, BigDecimal> colPrecio = new TableColumn<>("Precio");
-        colPrecio.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getPrecioArticulo()));
+        TableColumn<ArticuloDTO, BigDecimal> colPrecio = new TableColumn<>("Precio");
+        colPrecio.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getPrecioArticulo()));
 
-        TableColumn<Articulo, String> colProveedor = new TableColumn<>("Proveedor predeterminado");
-        colProveedor.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getArticuloProveedor() != null ?
-                        data.getValue().getArticuloProveedor().getProveedor().getCodProveedor().toString() : "")); //muestra el proveedor predeterminado si existe
-
-
-        TableColumn<Articulo, Void> colAccion = new TableColumn<>("Acción");
+        TableColumn<ArticuloDTO, Void> colAccion = new TableColumn<>("Acciones");
         colAccion.setCellFactory(param -> new TableCell<>() {
             private final Button btnEditar = new Button("Modificar");
             private final Button btnBorrar = new Button("Eliminar");
@@ -384,7 +385,7 @@ public class MaestroArticuloPanel extends BorderPane {
             {
                 //BOTON PARA LA MODIFICACION
                 btnEditar.setOnAction(e -> {
-                    Articulo articulo = getTableView().getItems().get(getIndex());
+                    ArticuloDTO articuloDTO = getTableView().getItems().get(getIndex());
 
                     Stage ventanaEdicion = new Stage();
                     ventanaEdicion.setTitle("Editar Artículo");
@@ -394,25 +395,25 @@ public class MaestroArticuloPanel extends BorderPane {
                     grid.setHgap(10);
                     grid.setPadding(new Insets(20));
 
-                    TextField txtNombre = new TextField(articulo.getNombreArticulo());
+                    TextField txtNombre = new TextField(articuloDTO.getNombreArticulo());
                     txtNombre.setPrefColumnCount(20);
-                    TextArea txtDescripcion = new TextArea(articulo.getDescripcionArticulo());
+                    TextArea txtDescripcion = new TextArea(articuloDTO.getDescripcionArticulo());
                     txtDescripcion.setPrefRowCount(2);
                     txtDescripcion.setWrapText(true);
                     txtDescripcion.setPrefColumnCount(20);
-                    TextField txtStockActual = new TextField(String.valueOf(articulo.getStockActual()));
+                    TextField txtStockActual = new TextField(String.valueOf(articuloDTO.getStockActual()));
                     txtStockActual.setPrefColumnCount(5);
-                    TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articulo.getCostoAlmacenamiento()));
+                    TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articuloDTO.getCostoAlmacenamiento()));
                     txtCostoAlmacenamiento.setPrefColumnCount(5);
-                    TextField txtPrecioArticulo = new TextField(String.valueOf(articulo.getPrecioArticulo()));
+                    TextField txtPrecioArticulo = new TextField(String.valueOf(articuloDTO.getPrecioArticulo()));
                     txtPrecioArticulo.setPrefColumnCount(5);
-                    TextField txtNivelServicioArticulo = new TextField(String.valueOf(articulo.getNivelServicioArticulo()));
+                    TextField txtNivelServicioArticulo = new TextField(String.valueOf(articuloDTO.getNivelServicioArticulo()));
                     txtNivelServicioArticulo.setPrefColumnCount(5);
-                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articulo.getDesviacionEstandarArticulo()));
+                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articuloDTO.getDesviacionEstandarArticulo()));
                     txtDesviacionEstandarArticulo.setPrefColumnCount(5);
-                    TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articulo.getDiasEntreRevisiones()));
+                    TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articuloDTO.getDiasEntreRevisiones()));
                     txtDiasEntreRevisiones.setPrefColumnCount(5);
-                    TextField txtDemanda = new TextField(String.valueOf(articulo.getDemandaArt()));
+                    TextField txtDemanda = new TextField(String.valueOf(articuloDTO.getDemandaArt()));
                     txtDemanda.setPrefColumnCount(5);
                     // Agregar al gridPane
                     grid.add(new Label("Nombre:"), 0, 0);
@@ -447,7 +448,7 @@ public class MaestroArticuloPanel extends BorderPane {
                     btnGuardar.setOnAction(event -> {
                         try {
                             ArticuloDTO dto = new ArticuloDTO();
-                            dto.setCodArticulo(articulo.getCodArticulo());
+                            dto.setCodArticulo(articuloDTO.getCodArticulo());
                             dto.setNombreArticulo(txtNombre.getText());
                             dto.setDescripcionArticulo(txtDescripcion.getText());
                             dto.setStockActual(Integer.parseInt(txtStockActual.getText()));
@@ -459,6 +460,7 @@ public class MaestroArticuloPanel extends BorderPane {
                             dto.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
                             controller.actualizarArticulo(dto);
+                            cargarArticulos();
                             ventanaEdicion.close();
                         } catch (NumberFormatException ex) {
                             new Alert(Alert.AlertType.ERROR, "Campos numéricos inválidos.").showAndWait();
@@ -472,7 +474,7 @@ public class MaestroArticuloPanel extends BorderPane {
 
                 //BOTON DE DAR DE BAJA
                 btnBorrar.setOnAction(e -> {
-                    Articulo articulo = getTableView().getItems().get(getIndex());
+                    ArticuloDTO articuloDTO = getTableView().getItems().get(getIndex());
 
                     Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
                     confirmacion.setTitle("Confirmar baja");
@@ -481,14 +483,15 @@ public class MaestroArticuloPanel extends BorderPane {
 
                     Optional<ButtonType> resultado = confirmacion.showAndWait();
                     if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
-                        ArticuloDTO articuloDTO = new ArticuloDTO();
-                        articuloDTO.setCodArticulo(articulo.getCodArticulo());
-                        articuloDTO.setFechaHoraBajaArticulo(LocalDateTime.now()); //Se setea la fecha actual para la baja
+                        ArticuloDTO dto = new ArticuloDTO();
+                        dto.setCodArticulo(articuloDTO.getCodArticulo());
+                        dto.setFechaHoraBajaArticulo(LocalDateTime.now()); //Se setea la fecha actual para la baja
 
 
                         try {
                             //Llamamos al controller pasandole el dto que contiene la fecha de baja
-                            controller.darDeBajaArticulo(articuloDTO);
+                            controller.darDeBajaArticulo(dto);
+                            cargarArticulos();
 
                             Alert exito = new Alert(Alert.AlertType.INFORMATION);
                             exito.setTitle("Baja exitosa");
@@ -508,15 +511,15 @@ public class MaestroArticuloPanel extends BorderPane {
 
                 //BOTON DE MOSTRAR TODOS LOS PROVEEDORES DEL ARTICULO SELECCIONADO
                 btnProveedor.setOnAction(e ->{
-                    Articulo articulo = getTableView().getItems().get(getIndex());
+                    ArticuloDTO articuloDTO = getTableView().getItems().get(getIndex());
                     //Obtener el código del artículo
-                    Long codArticulo = articulo.getCodArticulo();
+                    Long codArticulo = articuloDTO.getCodArticulo();
 
                     //Obtener los proveedores desde el controller
                     List<ArticuloProveedorDTO> proveedoresDisponiblesDTO = controller.obtenerProveedoresDeEseArticulo(codArticulo);
 
                     Stage stage = new Stage();
-                    stage.setTitle("Seleccionar proveedor para " + articulo.getNombreArticulo());
+                    stage.setTitle("Seleccionar proveedor para " + articuloDTO.getNombreArticulo());
                     stage.initModality(Modality.APPLICATION_MODAL);
 
                     ListView<ArticuloProveedorDTO> listView = new ListView<>(FXCollections.observableArrayList(proveedoresDisponiblesDTO));
@@ -562,8 +565,13 @@ public class MaestroArticuloPanel extends BorderPane {
             }
         });
         //Agrega todas las columnas a la tabla
-        tablaArticulos.getColumns().addAll(colCodigo,  colNombre, colStock, colPrecio, colProveedor, colAccion);
+        tablaArticulos.getColumns().addAll(colCodigo,  colNombre, colStock, colPrecio, colAccion);
         tablaArticulos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    }
+
+    private void cargarArticulos() {
+        listaArticulos.clear();
+        listaArticulos.addAll(controller.obtenerTodosArticulos());
     }
 
 

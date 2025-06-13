@@ -16,17 +16,11 @@ import java.util.List;
 
 public class MaestroArticuloController {
     private final ArticuloService articuloService = new ArticuloService();
-    private TableView<Articulo> tablaArticulos;
-    private final ObservableList<Articulo> listaArticulos = FXCollections.observableArrayList();
 
+    //-----------Obtener todos los articulos para mostrar en pantalla------------------------------
+    public List<ArticuloDTO> obtenerTodosArticulos(){
+        return articuloService.obtenerTodosArticulos();
 
-    /*public MaestroArticuloController() {
-        cargarArticulosDummy(); // o cargar desde base de datos
-    }*/
-
-    public void setTablaArticulos(TableView<Articulo> tablaArticulos) {
-        this.tablaArticulos = tablaArticulos;
-        this.tablaArticulos.setItems(listaArticulos);
     }
 
     //----------Edicion de campos de articulos---------------------
@@ -63,24 +57,6 @@ public class MaestroArticuloController {
     //----------Buscar Articulos que no estén dados de baja---------------------
     public List<ArticuloDTO> listarArticulosDisponibles(){ return articuloService.listarArticulosDisponibles(); }
 
-
-    //Metodo de ejemplo para mostrar en pantalla
-    /*private void cargarArticulosDummy() {
-        Articulo a1 = new Articulo();
-        a1.setCodArticulo(1L);
-        a1.setNombreArticulo("Shampoo revitalizante");
-        a1.setDescripcionArticulo("Shampoo de uso diario");
-        a1.setStockActual(50);
-        a1.setCostoAlmacenamiento(new BigDecimal("12.5"));
-        a1.setPrecioArticulo(new BigDecimal("30.0"));
-        a1.setNivelServicioArticulo(new BigDecimal("0.95"));
-        a1.setDesviacionEstandarArticulo(3);
-        a1.setDiasEntreRevisiones(20);
-        a1.setDemandaArt(100);
-        a1.setFechaHoraBajaArticulo(null);
-
-        listaArticulos.addAll(a1);
-    }*/
 
     //----------Buscar Articulos en stock de seguridad---------------------
     public List<Articulo> listarArticulosEnStockSeg () {return articuloService.listarArticulosEnStockSeg();}

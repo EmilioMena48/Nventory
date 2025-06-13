@@ -29,6 +29,26 @@ public class ArticuloService {
     public ArticuloService(ArticuloRepository articuloRepository) {this.articuloRepository = articuloRepository;}
     public ArticuloService() {this.articuloRepository = new ArticuloRepository();}
 
+    //--------------------Obtener todos los articulos--------------------------
+
+    public List<ArticuloDTO> obtenerTodosArticulos(){
+        List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
+                ArticuloDTO articuloDTO = new ArticuloDTO();
+                articuloDTO.setCodArticulo(articulo.getCodArticulo());
+                articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
+                articuloDTO.setStockActual(articulo.getStockActual());
+                articuloDTO.setPrecioArticulo(articulo.getPrecioArticulo());
+                articulosDisponibles.add(articuloDTO);
+            }
+        }
+        return articulosDisponibles;
+    }
+
+
     public void actualizarStock(Long idArticulo, Integer cantidad) {
        Articulo articulo = articuloRepository.buscarPorId(idArticulo);
        Integer cantidadVieja = articulo.getStockActual();
@@ -172,12 +192,12 @@ public class ArticuloService {
         return artDTO;
     }
 
-    //-----------------Metodo para buscar art que no estén dados de baja y estén asociados a artProveedor------------------------------------------
+    //-----------------Metodo para buscar art que no estén dados de baja------------------------------------------
     public List<ArticuloDTO> listarArticulosDisponibles () {
         List<Articulo> articulos = articuloRepository.buscarTodos();
         List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
         for (Articulo articulo : articulos) {
-            if (articulo.getFechaHoraBajaArticulo() == null && articulo.getArticuloProveedor() != null) {
+            if (articulo.getFechaHoraBajaArticulo() == null) {
                 ArticuloDTO articuloDTO = new ArticuloDTO();
                 articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
                 articulosDisponibles.add(articuloDTO);
