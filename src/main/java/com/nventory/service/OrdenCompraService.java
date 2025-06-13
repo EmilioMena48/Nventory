@@ -113,11 +113,20 @@ public class OrdenCompraService {
 
                 //Emitir avisos
                 ConfiguracionInventario configInv = OCarticulo.getArticuloProveedor().getConfiguracionInventario();
-                if (configInv.getTipoModeloInventario().getNombreModeloInventario().equals("Modelo Lote Fijo")){
-                    if (configInv.getPuntoPedido() >= art.getStockActual()){
-                        avisosArticulos.add("Artículo: " + art.getNombreArticulo() + " Stock actual: " + art.getStockActual() + " Punto de pedido: " + configInv.getPuntoPedido());
+                TipoModeloInventario tipoModelo = configInv.getTipoModeloInventario();
+
+                if (tipoModelo != null && "Modelo Lote Fijo".equals(tipoModelo.getNombreModeloInventario())) {
+                    int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
+                    int stockTotalEsperado = stockActual + stockPendiente;
+
+                    if (stockTotalEsperado <= configInv.getPuntoPedido()) {
+                        avisosArticulos.add("Artículo: " + art.getNombreArticulo()
+                                + " | Stock actual: " + stockActual
+                                + " | En tránsito: " + stockPendiente
+                                + " | Punto de pedido: " + configInv.getPuntoPedido());
                     }
                 }
+
             }
             //Cambiar estado de la Orden
             EstadoOrdenDeCompra finalizada = estadoOrdenDeCompraRepo.buscarEstadoPorNombre("Finalizada");
@@ -383,19 +392,21 @@ public class OrdenCompraService {
         List<Articulo> articulos = articuloRepo.buscarTodos();
        for (Articulo art : articulos) {
            ArticuloProveedor articuloProv = art.getArticuloProveedor();
-           ConfiguracionInventario configInventario = articuloProv.getConfiguracionInventario();
-           String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
-           if ("Modelo Periodo Fijo".equals(modelo) && LocalDate.now().equals(articuloProv.getFechaProxRevisionAP())) {
-               int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
-               int cantidadApedir = configInventario.getInventarioMaximo() - art.getStockActual() - stockPendiente;
-               if (cantidadApedir > 0) {
-                   Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
-                   agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);
-                   listaAvisosOrdenes.add("Orden Generada para el Articulo: " + art.getNombreArticulo());
+           if (articuloProv != null) {
+               ConfiguracionInventario configInventario = articuloProv.getConfiguracionInventario();
+               String modelo = configInventario.getTipoModeloInventario().getNombreModeloInventario();
+               if ("Modelo Periodo Fijo".equals(modelo) && LocalDate.now().equals(articuloProv.getFechaProxRevisionAP())) {
+                   int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
+                   int cantidadApedir = configInventario.getInventarioMaximo() - art.getStockActual() - stockPendiente;
+                   if (cantidadApedir > 0) {
+                       Long codOC = crearOrdenDeCompra(articuloProv.getProveedor().getCodProveedor());
+                       agregarArticuloAOrden(codOC, articuloProv.getCodArticuloProveedor(),cantidadApedir);
+                       listaAvisosOrdenes.add("Orden Generada para el Articulo: " + art.getNombreArticulo());
+                   }
+                   int T = art.getDiasEntreRevisiones();
+                   articuloProv.setFechaProxRevisionAP(LocalDate.now().plusDays(T));
+                   articuloProveedorRepo.guardar(articuloProv);
                }
-               int T = art.getDiasEntreRevisiones();
-               articuloProv.setFechaProxRevisionAP(LocalDate.now().plusDays(T));
-               articuloProveedorRepo.guardar(articuloProv);
            }
        }
         if (listaAvisosOrdenes.isEmpty()) {
