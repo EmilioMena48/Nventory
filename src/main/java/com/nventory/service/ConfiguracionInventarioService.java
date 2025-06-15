@@ -1,6 +1,7 @@
 package com.nventory.service;
 
 import com.nventory.DTO.ArticuloDTO;
+import com.nventory.DTO.ConfigInvDTO;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.ConfiguracionInventario;
@@ -95,7 +96,16 @@ public class ConfiguracionInventarioService {
         }
     }
 
-
+    public ConfigInvDTO convertirAConfigInvDTO(ConfiguracionInventario configuracionInventario) {
+        return new ConfigInvDTO(
+                configuracionInventario.getInventarioMaximo(),
+                configuracionInventario.getLoteOptimo(),
+                configuracionInventario.getPuntoPedido(),
+                configuracionInventario.getStockSeguridad(),
+                configuracionInventario.getCantidadPedir(),
+                configuracionInventario.getTipoModeloInventario().getNombreModeloInventario()
+        );
+    }
 
     public int calcularLoteOptimo(ArticuloDTO articuloNuevo, ArticuloProveedor articuloProveedor){
         BigDecimal dos = BigDecimal.valueOf(2);

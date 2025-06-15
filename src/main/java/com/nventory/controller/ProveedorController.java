@@ -1,6 +1,7 @@
 package com.nventory.controller;
 
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
+import com.nventory.DTO.ConfigInvDTO;
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.interfaces.ModuloProveedores;
@@ -113,6 +114,16 @@ public class ProveedorController implements ModuloProveedores {
                     .demoraEntregaDias(articuloProveedor.getDemoraEntregaDias())
                     .fechaProxRevisionAP(articuloProveedor.getFechaProxRevisionAP())
                     .build();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public ConfigInvDTO BuscarConfigInventario(Long articuloId, Long proveedorId) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(articuloId, proveedorId);
+        if (articuloProveedor != null && articuloProveedor.getConfiguracionInventario() != null) {
+            return configuracionInventarioService.convertirAConfigInvDTO(articuloProveedor.getConfiguracionInventario());
         } else {
             return null;
         }

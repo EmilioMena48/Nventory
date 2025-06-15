@@ -1,6 +1,7 @@
 package com.nventory.userInterfaces;
 
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
+import com.nventory.DTO.ConfigInvDTO;
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.controller.ArticuloController;
@@ -671,8 +672,49 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(btnGuardar, 1, 7);
         formulario.add(btnCancelar, 0, 7);
 
+        if (asignarModelo) {
+            animarFormulario(formulario);
+            areaContenido.getChildren().add(formulario);
+        } else {
+            VBox vbox = infoConfigInventario(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
+            HBox mainContainer = new HBox();
+            mainContainer.getChildren().add(formulario);
+            mainContainer.getChildren().add(vbox);
+            animarFormulario(formulario);
+            areaContenido.getChildren().add(mainContainer);
+        }
+    }
+
+    private VBox infoConfigInventario(Long codArticulo, Long codProveedor) {
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(0, 10, 0, 10));
+        ConfigInvDTO configInvDTO = controller.BuscarConfigInventario(codArticulo, codProveedor);
+
+        GridPane formulario = new GridPane();
+        formulario.getStyleClass().add("formulario");
+        formulario.setVgap(10);
+        formulario.setHgap(10);
+
+        Label lblModelo = new Label(configInvDTO.getNombreModeloInventario());
+        formulario.add(lblModelo, 0, 0);
+        formulario.add(new Label("Inventario Máximo: "), 0, 1);
+        Label lblMaximo = new Label(String.valueOf(configInvDTO.getInventarioMaximo()));
+        formulario.add(lblMaximo, 1, 1);
+        formulario.add(new Label("Lote Óptimo: "), 0, 2);
+        Label lblLoteOptimo = new Label(String.valueOf(configInvDTO.getLoteOptimo()));
+        formulario.add(lblLoteOptimo, 1, 2);
+        formulario.add(new Label("Punto de Pedido: "), 0, 3);
+        Label lblPuntoPedido = new Label(String.valueOf(configInvDTO.getPuntoPedido()));
+        formulario.add(lblPuntoPedido, 1, 3);
+        formulario.add(new Label("Stock de Seguridad: "), 0, 4);
+        Label lblStockSeguridad = new Label(String.valueOf(configInvDTO.getStockSeguridad()));
+        formulario.add(lblStockSeguridad, 1, 4);
+        formulario.add(new Label("Cantidad a Pedir: "), 0, 5);
+        Label lblCantidadPedir = new Label(String.valueOf(configInvDTO.getCantidadPedir()));
+        formulario.add(lblCantidadPedir, 1, 5);
         animarFormulario(formulario);
-        areaContenido.getChildren().add(formulario);
+        vbox.getChildren().add(formulario);
+        return vbox;
     }
 
     private String getNombreDia(LocalDate fecha) {

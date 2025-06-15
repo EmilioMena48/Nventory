@@ -1,6 +1,7 @@
 package com.nventory.interfaces;
 
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
+import com.nventory.DTO.ConfigInvDTO;
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.DTO.ProveedorEliminadoDTO;
 import com.nventory.model.Articulo;
@@ -30,4 +31,5 @@ public interface ModuloProveedores  {
     void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto, Boolean tipoModelo);
     void EliminarArticuloProveedor(Long articuloId, Long proveedorId);
     boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId);
+    ConfigInvDTO BuscarConfigInventario(Long articuloId, Long proveedorId);
 }
