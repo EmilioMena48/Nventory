@@ -478,7 +478,7 @@ public class ProveedorPanel extends BorderPane {
         try {
             List<Articulo> articulos = articuloController.listarArticulos();
             if (proveedorDTO.getCodProveedor() != 0L) {
-                articulos.removeIf(articulo -> articulo.getArticuloProveedor() != null &&
+                articulos.removeIf(articulo ->
                         ((controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null) &&
                                 (!(controller.EstaEliminadoArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor())))));
             }
