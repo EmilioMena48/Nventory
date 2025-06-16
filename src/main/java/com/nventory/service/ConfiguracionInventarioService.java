@@ -39,7 +39,8 @@ public class ConfiguracionInventarioService {
                 articuloProveedor.getArticulo().getFechaHoraBajaArticulo(),
                 articuloProveedor.getArticulo().getStockActual(),
                 articuloProveedor.getArticulo().getDiasEntreRevisiones(),
-                articuloProveedor.getArticulo().getDesviacionEstandarArticulo());
+                articuloProveedor.getArticulo().getDesviacionEstandarArticulo(),
+                articuloProveedor.getArticulo().getArticuloProveedor().getProveedor().getNombreProveedor());
 
         if (nombreModeloInventario.compareTo("Modelo Lote Fijo") == 0){
             configuracionInventario.setLoteOptimo(calcularLoteOptimo(articuloDTO, articuloProveedor));

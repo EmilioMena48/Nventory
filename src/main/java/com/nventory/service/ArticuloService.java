@@ -135,6 +135,21 @@ public class ArticuloService {
         }
     }
 
+    //----------------Metodo del service para obtener el predeterminado------------------------
+    public ArticuloProveedorDTO obtenerProveedorPredeterminado(Long codArticulo){
+        Articulo articulo = articuloRepository.buscarPorId(codArticulo);
+        ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
+        if(articuloProveedor != null){
+            ArticuloProveedorDTO articuloProveedorDTO = new ArticuloProveedorDTO();
+            articuloProveedorDTO.setId(articuloProveedor.getCodArticuloProveedor());
+            articuloProveedorDTO.setNombre(articuloProveedor.getProveedor().getNombreProveedor());
+
+            return articuloProveedorDTO;
+        }
+        return null;
+
+    }
+
     public List<Articulo> listarArticulos() {
         return articuloRepository.buscarTodos();
     }

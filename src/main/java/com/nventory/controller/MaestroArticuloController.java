@@ -52,6 +52,11 @@ public class MaestroArticuloController {
         articuloService.asignarProveedorPredeterminado(codArticuloProveedor);
     }
 
+    //---------Metodo del controller para obtener el proveedor predeterminado de un articulo para mostrar en pantalla----
+    public ArticuloProveedorDTO obtenerProveedorPredeterminado(Long codArticulo){
+        return articuloService.obtenerProveedorPredeterminado(codArticulo);
+    }
+
     public List<ArticuloDTO> obtenerArticulosParaReponer() {
         return articuloService.obtenerArticulosReponer();
     }

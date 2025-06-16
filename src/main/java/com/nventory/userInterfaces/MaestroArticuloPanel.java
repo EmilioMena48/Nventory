@@ -375,6 +375,14 @@ public class MaestroArticuloPanel extends BorderPane {
         TableColumn<ArticuloDTO, BigDecimal> colPrecio = new TableColumn<>("Precio");
         colPrecio.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getPrecioArticulo()));
 
+        TableColumn<ArticuloDTO, String> colProveedorPredeterminado = new TableColumn<>("Proveedor Predeterminado");
+        colProveedorPredeterminado.setCellValueFactory(data -> {
+            String nombreProveedor = data.getValue().getProveedorPredeterminado();
+            return new SimpleStringProperty(nombreProveedor != null ? nombreProveedor : "Sin proveedor");
+        });
+
+
+
         TableColumn<ArticuloDTO, Void> colAccion = new TableColumn<>("Acciones");
         colAccion.setCellFactory(param -> new TableCell<>() {
             private final Button btnEditar = new Button("Modificar");
@@ -542,7 +550,9 @@ public class MaestroArticuloPanel extends BorderPane {
 
                             // Acá se actualiza el proveedor predeterminado
                             controller.asignarProveedorPredeterminado(codArticuloProveedor);
+                            cargarArticulos();
                             stage.close(); // Cierra la ventana
+
                         }
                     });
 
@@ -567,14 +577,25 @@ public class MaestroArticuloPanel extends BorderPane {
             }
         });
         //Agrega todas las columnas a la tabla
-        tablaArticulos.getColumns().addAll(colCodigo,  colNombre, colStock, colPrecio, colAccion);
+        tablaArticulos.getColumns().addAll(colCodigo,  colNombre, colStock, colPrecio, colProveedorPredeterminado,colAccion);
         tablaArticulos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     private void cargarArticulos() {
         listaArticulos.clear();
-        listaArticulos.addAll(controller.obtenerTodosArticulos());
+        List<ArticuloDTO> articulos = controller.obtenerTodosArticulos();
+
+        for (ArticuloDTO articulo : articulos) {
+            ArticuloProveedorDTO articuloProveedor = controller.obtenerProveedorPredeterminado(articulo.getCodArticulo());
+            if (articuloProveedor != null) {
+                articulo.setProveedorPredeterminado(articuloProveedor.getNombre());
+            } else {
+                articulo.setProveedorPredeterminado("Sin proveedor");
+            }
+        }
+        listaArticulos.addAll(articulos);
     }
+
 
 
 }

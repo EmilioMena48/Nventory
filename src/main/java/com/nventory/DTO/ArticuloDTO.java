@@ -24,5 +24,6 @@ public class ArticuloDTO {
     private Integer stockActual;
     private int diasEntreRevisiones;
     private int desviacionEstandarArticulo;
+    private String proveedorPredeterminado;
 
 }
