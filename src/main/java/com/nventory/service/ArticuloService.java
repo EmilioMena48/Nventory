@@ -218,9 +218,13 @@ public class ArticuloService {
         artDTO.setDescripcionArticulo(art.getDescripcionArticulo());
         artDTO.setCostoAlmacenamiento(art.getCostoAlmacenamiento());
         artDTO.setPrecioArticulo(art.getPrecioArticulo());
-
-
         return artDTO;
+    }
+
+    //-----------------Metodo para buscar art por nombre, lo uso en ventas--------------------------------
+    public Articulo buscarArticuloPorNombre(String nombre) {
+        Articulo art = articuloRepository.buscarArticuloPorNombre(nombre);
+        return art;
     }
 
     //-----------------Metodo para buscar art que no estén dados de baja------------------------------------------
@@ -229,6 +233,20 @@ public class ArticuloService {
         List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
         for (Articulo articulo : articulos) {
             if (articulo.getFechaHoraBajaArticulo() == null) {
+                ArticuloDTO articuloDTO = new ArticuloDTO();
+                articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
+                articulosDisponibles.add(articuloDTO);
+            }
+        }
+        return articulosDisponibles;
+    }
+
+    //-----------------Metodo para buscar art que no estén dados de baja y que estén asociados a artProv------------------------------------------
+    public List<ArticuloDTO> listarArticulosConfigurados () {
+        List<Articulo> articulos = articuloRepository.buscarTodos();
+        List<ArticuloDTO> articulosDisponibles = new ArrayList<>();
+        for (Articulo articulo : articulos) {
+            if (articulo.getFechaHoraBajaArticulo() == null && articulo.getStockActual() > 0) {
                 ArticuloDTO articuloDTO = new ArticuloDTO();
                 articuloDTO.setNombreArticulo(articulo.getNombreArticulo());
                 articulosDisponibles.add(articuloDTO);
@@ -305,12 +323,14 @@ public class ArticuloService {
         List<Articulo> articulosEnStockSeg = new ArrayList<>();
         for (Articulo articulo : articulos) {
             if (articulo.getFechaHoraBajaArticulo() == null) {
-                Integer stockActual = articulo.getStockActual();
-                ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
-                ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
-                Integer stockSeg = configuracionInventario.getStockSeguridad();
-                if(stockActual <= stockSeg){
-                    articulosEnStockSeg.add(articulo);
+                if(articulo.getArticuloProveedor() != null){
+                    ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
+                    ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
+                    Integer stockSeg = configuracionInventario.getStockSeguridad();
+                    Integer stockActual = articulo.getStockActual();
+                    if(stockActual <= stockSeg){
+                        articulosEnStockSeg.add(articulo);
+                    }
                 }
             }
         }
@@ -322,14 +342,24 @@ public class ArticuloService {
         List<Articulo> articulos = articuloRepository.buscarTodos();
         List<CGIDTO> cgiDtoList = new ArrayList<>();
         for (Articulo articulo : articulos) {
-            if (articulo.getFechaHoraBajaArticulo() == null) {
+            if (articulo.getFechaHoraBajaArticulo() == null && articulo.getArticuloProveedor() != null) {
                 ArticuloProveedor artProv = articulo.getArticuloProveedor();
                 ConfiguracionInventario confInv = artProv.getConfiguracionInventario();
+                TipoModeloInventario modelo = confInv.getTipoModeloInventario();
+
                 BigDecimal D = new BigDecimal(articulo.getDemandaArt());
                 BigDecimal C = artProv.getPrecioUnitario();
-                BigDecimal Q = new BigDecimal(confInv.getLoteOptimo());
                 BigDecimal S = artProv.getCostoPedido();
                 BigDecimal H = articulo.getCostoAlmacenamiento();
+                BigDecimal Q = new BigDecimal(confInv.getLoteOptimo());
+
+                if (modelo.getCodTipoModeloI() == 2) {
+                    float d = (float) articulo.getDemandaArt() /365;
+                    float T = articulo.getDiasEntreRevisiones();
+                    float L = artProv.getDemoraEntregaDias();
+                    float I = articulo.getStockActual();
+                    Q = new BigDecimal(d*(T+L)-I);
+                }
 
                 BigDecimal parte1 = C.multiply(D);
                 BigDecimal parte2 = S.multiply(D.divide(Q, 2, RoundingMode.HALF_UP));
@@ -359,7 +389,23 @@ public class ArticuloService {
     public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {
         Articulo articulo = buscarArticuloPorId(stockMovimientoDTO.getArticuloID());
 
-        articulo.setStockActual(stockMovimientoDTO.getCantidad());
+        Integer inventarioMaximo = null;
+
+        if(articulo.getArticuloProveedor() != null) {
+            inventarioMaximo  = articulo.getArticuloProveedor()
+                    .getConfiguracionInventario()
+                    .getInventarioMaximo();
+        }
+
+        int nuevaCantidad = stockMovimientoDTO.getCantidad();
+
+        if(inventarioMaximo != null) {
+            if (nuevaCantidad < 0 || nuevaCantidad > inventarioMaximo) {
+                throw new IllegalArgumentException("La cantidad debe estar entre 0 y " + inventarioMaximo);
+            }
+        }
+
+        articulo.setStockActual(nuevaCantidad);
         articuloRepository.guardar(articulo);
 
         tipoStockMovimientoRepository = new TipoStockMovimientoRepository();
@@ -368,12 +414,19 @@ public class ArticuloService {
         TipoStockMovimiento tipoStockMovimiento = tipoStockMovimientoRepository.buscarPorId(3L);
 
         StockMovimiento stockMovimiento = new StockMovimiento();
-        stockMovimiento.setCantidad(stockMovimientoDTO.getCantidad());
+        stockMovimiento.setCantidad(nuevaCantidad);
         stockMovimiento.setComentario(stockMovimientoDTO.getComentario());
         stockMovimiento.setFechaHoraMovimiento(stockMovimientoDTO.getFechaHoraMovimiento());
         stockMovimiento.setTipoStockMovimiento(tipoStockMovimiento);
 
         stockMovimientoRepository.guardar(stockMovimiento);
     }
+
+    public int obtenerInventarioMax (Long idArticulo) {
+        Articulo articulo = buscarArticuloPorId(idArticulo);
+        return articulo.getArticuloProveedor().getConfiguracionInventario().getInventarioMaximo();
+    }
 }
+
+
 

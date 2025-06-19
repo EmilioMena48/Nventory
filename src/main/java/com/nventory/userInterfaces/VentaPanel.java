@@ -4,9 +4,13 @@ import com.nventory.DTO.VentaArticuloDTO;
 import com.nventory.DTO.VentaDTO;
 import com.nventory.controller.MaestroArticuloController;
 import com.nventory.controller.VentaController;
+import com.nventory.model.Articulo;
 import com.nventory.model.Venta;
+import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 public class VentaPanel extends BorderPane {
 
     private static final String ERROR_CARGAR_VENTAS = "No se pudo cargar el historial de ventas: ";
+    private static final String ERROR_REGISTRAR_VENTA = "No se pudo guardar la venta: ";
 
     private static final String CSS = "/styles/estilosVenta.css";
     private final DatePicker datePicker = new DatePicker(LocalDate.now());
@@ -232,6 +237,11 @@ public class VentaPanel extends BorderPane {
         hourComboBox.setItems(FXCollections.observableArrayList(generarRango(0, 23)));
         minuteComboBox.setItems(FXCollections.observableArrayList(generarRango(0, 59)));
 
+        // Establecer valores actuales
+        LocalTime ahora = LocalTime.now();
+        hourComboBox.setValue(ahora.getHour());
+        minuteComboBox.setValue(ahora.getMinute());
+
         VBox fechaBox = new VBox(5, new Label("Fecha:"), datePicker);
         VBox horaBox = new VBox(5, new Label("Hora:"), hourComboBox);
         VBox minutoBox = new VBox(5, new Label("Minuto:"), minuteComboBox);
@@ -295,7 +305,7 @@ public class VentaPanel extends BorderPane {
             lineasVenta.clear();
             articulosSeleccionados.clear();
 
-            List<ArticuloDTO> articulos = maestroArticuloController.listarArticulosDisponibles();
+            List<ArticuloDTO> articulos = maestroArticuloController.listarArticulosConfigurados();
 
             List<String> nombresArticulos = new ArrayList<>();
             for (ArticuloDTO articulo : articulos) {
@@ -338,7 +348,7 @@ public class VentaPanel extends BorderPane {
             if (!linea.getComboArticulo().isDisabled()) {
                 String valorActual = linea.getComboArticulo().getValue();
                 linea.getComboArticulo().getItems().setAll(
-                        maestroArticuloController.listarArticulosDisponibles().stream()
+                        maestroArticuloController.listarArticulosConfigurados().stream()
                                 .map(ArticuloDTO::getNombreArticulo)
                                 .filter(nombre -> !articulosSeleccionados.contains(nombre) || nombre.equals(valorActual))
                                 .collect(Collectors.toList())
@@ -396,8 +406,8 @@ public class VentaPanel extends BorderPane {
         table.setPrefHeight(146);
         table.setMaxHeight(146);
 
-        table.setPrefWidth(255);
-        table.setMaxWidth(255);
+        table.setPrefWidth(600); // Aumentar para más columnas
+        table.setMaxWidth(600);
 
         TableColumn<VentaArticuloDTO, String> nombreCol = new TableColumn<>("Artículo");
         nombreCol.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().getNombreArticulo()));
@@ -406,12 +416,21 @@ public class VentaPanel extends BorderPane {
         cantCol.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().getCantidadVendida()).asObject());
 
         TableColumn<VentaArticuloDTO, String> precioCol = new TableColumn<>("Precio");
-        precioCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$"+c.getValue().getPrecioVenta()));
+        precioCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$" + c.getValue().getPrecioVenta()));
 
         TableColumn<VentaArticuloDTO, String> subTotalCol = new TableColumn<>("Subtotal");
-        subTotalCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$"+c.getValue().getSubTotalVenta()));
+        subTotalCol.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>("$" + c.getValue().getSubTotalVenta()));
 
-        table.getColumns().addAll(nombreCol, cantCol, precioCol, subTotalCol);
+        TableColumn<VentaArticuloDTO, String> comentarioCol = new TableColumn<>("Comentario");
+        comentarioCol.setCellValueFactory(c -> {
+            Articulo art = maestroArticuloController.buscarArticuloPorNombre(c.getValue().getNombreArticulo());
+            String mensaje = (art.getArticuloProveedor() == null)
+                    ? "No se generarán órdenes de compra porque no tiene un proveedor asociado"
+                    : "";
+            return new SimpleStringProperty(mensaje);
+        });
+
+        table.getColumns().addAll(nombreCol, cantCol, precioCol, subTotalCol, comentarioCol);
         table.getItems().addAll(venta.getVentaArticuloDTO());
 
         Label totalLabel = new Label("Total: $" + venta.getMontoTotalVenta());
@@ -428,10 +447,9 @@ public class VentaPanel extends BorderPane {
                 resetearFormulario();
                 cargarTablaVentas();
             } catch (Exception ex) {
-                mostrarAlerta(ERROR_CARGAR_VENTAS + ex.getMessage(), 2, null);
+                mostrarAlerta(ERROR_REGISTRAR_VENTA + ex.getMessage(), 2, null);
             }
         });
-
 
         cancelar.setOnAction(e -> confirmStage.close());
 
@@ -442,6 +460,7 @@ public class VentaPanel extends BorderPane {
         confirmStage.setTitle("Confirmación de Venta");
         confirmStage.show();
     }
+
 
     private void resetearFormulario() {
         datePicker.setValue(LocalDate.now());
@@ -474,6 +493,7 @@ public class VentaPanel extends BorderPane {
         private final TextField precio;
         private final Spinner<Integer> cantidad;
         private final HBox contenedor;
+        private final Label labelMensajeStock;
 
         public LineaVentaUI(List<String> nombresArticulosDisponibles, MaestroArticuloController maestroArticuloController) {
             comboArticulo = new ComboBox<>(FXCollections.observableArrayList(nombresArticulosDisponibles));
@@ -487,9 +507,13 @@ public class VentaPanel extends BorderPane {
             cantidad.setEditable(true);
             cantidad.setPrefWidth(80);
 
+            labelMensajeStock = new Label();
+            labelMensajeStock.setStyle("-fx-font-size: 11; -fx-text-fill: #c0392b;"); // color rojo o gris según prefieras
+            labelMensajeStock.setVisible(false);
+
             VBox articuloBox = new VBox(5, new Label("Nombre de Artículo"), comboArticulo);
             VBox precioBox = new VBox(5, new Label("Precio"), precio);
-            VBox cantidadBox = new VBox(5, new Label("Cantidad"), cantidad);
+            VBox cantidadBox = new VBox(5, new Label("Cantidad"), cantidad, labelMensajeStock);
 
             contenedor = new HBox(15, articuloBox, precioBox, cantidadBox);
 
@@ -497,7 +521,6 @@ public class VentaPanel extends BorderPane {
             contenedor.getStyleClass().add("linea-venta");
 
 
-            // Listener para actualizar el precio al seleccionar un artículo
             comboArticulo.setOnAction(e -> {
                 String articuloSeleccionado = comboArticulo.getValue();
                 if (articuloSeleccionado != null && !articuloSeleccionado.isBlank()) {
@@ -505,6 +528,27 @@ public class VentaPanel extends BorderPane {
                     if (artDTO != null) {
                         BigDecimal precioArticulo = artDTO.getPrecioArticulo();
                         precio.setText(precioArticulo.toPlainString());
+
+                        int stockDisponible = artDTO.getStockActual();
+
+                        if (stockDisponible > 0) {
+                            SpinnerValueFactory<Integer> valueFactory =
+                                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, stockDisponible, 1);
+                            cantidad.setValueFactory(valueFactory);
+                            cantidad.setDisable(false);
+
+                            // Validar cambios manuales en la cantidad
+                            cantidad.valueProperty().addListener((obs, oldVal, newVal) -> {
+                                if (newVal != null && newVal > stockDisponible) {
+                                    mostrarMensajeTemporal("Límite: " + stockDisponible + " unidades");
+                                    cantidad.getValueFactory().setValue(stockDisponible);
+                                }
+                            });
+
+                        } else {
+                            cantidad.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0));
+                            cantidad.setDisable(true);
+                        }
 
                     } else {
                         precio.setText("");
@@ -515,6 +559,18 @@ public class VentaPanel extends BorderPane {
             });
 
         }
+
+        private void mostrarMensajeTemporal(String mensaje) {
+            labelMensajeStock.setText(mensaje);
+            labelMensajeStock.setVisible(true);
+
+            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), evt -> {
+                labelMensajeStock.setVisible(false);
+            }));
+            timeline.setCycleCount(1);
+            timeline.play();
+        }
+
 
         public HBox getContenedor() {
             return contenedor;

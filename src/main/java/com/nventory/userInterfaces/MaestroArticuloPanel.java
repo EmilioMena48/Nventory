@@ -186,14 +186,17 @@ public class MaestroArticuloPanel extends BorderPane {
         });
 
 
-        //Boton productos faltantes
+        // Botón productos faltantes
         btnProductosFaltantes = new Button("Productos Faltantes");
-        btnProductosFaltantes.setOnAction(e ->{
+        btnProductosFaltantes.setOnAction(e -> {
             List<Articulo> articulosEnSS = controller.listarArticulosEnStockSeg();
 
             Stage popup = new Stage();
             popup.setTitle("Artículos en Stock de Seguridad");
             popup.initModality(Modality.APPLICATION_MODAL);
+
+            Label mensaje = new Label("No se muestran artículos que no tengan una configuración de inventario");
+            mensaje.setStyle("-fx-font-weight: bold; -fx-text-fill: #cc0000;");
 
             ListView<Articulo> listView = new ListView<>(FXCollections.observableArrayList(articulosEnSS));
             listView.setCellFactory(lv -> new ListCell<>() {
@@ -211,7 +214,7 @@ public class MaestroArticuloPanel extends BorderPane {
                 }
             });
 
-            VBox layout = new VBox(10, new Label(), listView);
+            VBox layout = new VBox(10, mensaje, listView);
             layout.setPadding(new Insets(10));
 
             Scene scene = new Scene(layout, 600, 400);
@@ -219,8 +222,9 @@ public class MaestroArticuloPanel extends BorderPane {
             popup.showAndWait();
         });
 
+
         btnAjusteInventario = new Button("Ajuste inventario");
-        btnAjusteInventario.setOnAction(e ->{
+        btnAjusteInventario.setOnAction(e -> {
 
             Stage popup = new Stage();
             popup.setTitle("Artículos en Stock de Seguridad");
@@ -232,6 +236,14 @@ public class MaestroArticuloPanel extends BorderPane {
             for (ArticuloDTO articulo : articulos) {
                 comboArticulos.getItems().add(articulo.getNombreArticulo());
             }
+
+            Label lblAdvertencia = new Label("Este artículo no tiene límite de stock porque no tiene una configuración establecida.");
+            lblAdvertencia.setStyle("-fx-text-fill: red;");
+            lblAdvertencia.setWrapText(true);
+            lblAdvertencia.setVisible(false);
+
+            lblAdvertencia.setMaxWidth(Double.MAX_VALUE);
+            lblAdvertencia.setPrefWidth(500);
 
             TextField campoCantidadActual = new TextField();
             campoCantidadActual.setPromptText("Cantidad actual");
@@ -249,6 +261,13 @@ public class MaestroArticuloPanel extends BorderPane {
                 if (seleccionado != null) {
                     Integer cantidadActual = controller.obtenerStockActual(seleccionado);
                     campoCantidadActual.setText(cantidadActual != null ? cantidadActual.toString() : "0");
+
+                    Articulo art = controller.buscarArticuloPorNombre(seleccionado);
+                    if (art.getArticuloProveedor() == null) {
+                        lblAdvertencia.setVisible(true);
+                    } else {
+                        lblAdvertencia.setVisible(false);
+                    }
                 }
             });
 
@@ -277,22 +296,31 @@ public class MaestroArticuloPanel extends BorderPane {
                     stockMovDto.setCantidad(nuevaCantidad);
                     stockMovDto.setComentario(comentario);
                     stockMovDto.setFechaHoraMovimiento(LocalDateTime.now());
+
                     controller.realizarAjusteInventario(stockMovDto);
                     cargarArticulos();
                     popup.close();
+
                 } catch (NumberFormatException ex) {
                     Alert alerta = new Alert(Alert.AlertType.WARNING);
                     alerta.setTitle("Advertencia");
                     alerta.setHeaderText(null);
                     alerta.setContentText("La nueva cantidad debe ser un número válido.");
                     alerta.showAndWait();
+
+                } catch (IllegalArgumentException ex) {
+                    Alert alerta = new Alert(Alert.AlertType.ERROR);
+                    alerta.setTitle("Error de Validación");
+                    alerta.setHeaderText("Cantidad inválida");
+                    alerta.setContentText(ex.getMessage());
+                    alerta.showAndWait();
                 }
             });
 
             btnCancelar.setOnAction(ev -> popup.close());
 
-            // Layout
             VBox layout = new VBox(10,
+                    new HBox(100, lblAdvertencia),
                     new Label("Artículo:"),
                     comboArticulos,
                     new Label("Cantidad actual:"),
@@ -306,18 +334,23 @@ public class MaestroArticuloPanel extends BorderPane {
             layout.setPadding(new Insets(20));
             layout.setAlignment(Pos.CENTER);
 
-            Scene scene = new Scene(layout, 400, 300);
+            Scene scene = new Scene(layout, 500, 320);
             popup.setScene(scene);
             popup.showAndWait();
         });
 
+
+
         btnCalcularCGI = new Button("Calcular CGI");
-        btnCalcularCGI.setOnAction(e ->{
+        btnCalcularCGI.setOnAction(e -> {
             List<CGIDTO> articulosCGI = controller.calcularCGI();
 
             Stage popup = new Stage();
             popup.setTitle("Costo General de Inventario");
             popup.initModality(Modality.APPLICATION_MODAL);
+
+            Label mensaje = new Label("No se calcula el CGI para artículos que no tengan una configuración de inventario");
+            mensaje.setStyle("-fx-font-weight: bold; -fx-text-fill: #cc0000;");
 
             ListView<CGIDTO> listView = new ListView<>(FXCollections.observableArrayList(articulosCGI));
             listView.setCellFactory(lv -> new ListCell<>() {
@@ -333,13 +366,14 @@ public class MaestroArticuloPanel extends BorderPane {
                 }
             });
 
-            VBox layout = new VBox(10, new Label(), listView);
+            VBox layout = new VBox(10, mensaje, listView);
             layout.setPadding(new Insets(10));
 
             Scene scene = new Scene(layout, 600, 400);
             popup.setScene(scene);
             popup.showAndWait();
         });
+
 
         btnListarReponer.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
         btnProductosFaltantes.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");

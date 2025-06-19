@@ -67,6 +67,8 @@ public class MaestroArticuloController {
     //----------Buscar Articulos que no estén dados de baja---------------------
     public List<ArticuloDTO> listarArticulosDisponibles(){ return articuloService.listarArticulosDisponibles(); }
 
+    //----------Buscar Articulos que no estén dados de baja y que estén asociados a ArtProv---------------------
+    public List<ArticuloDTO> listarArticulosConfigurados(){ return articuloService.listarArticulosConfigurados(); }
 
     //----------Buscar Articulos en stock de seguridad---------------------
     public List<Articulo> listarArticulosEnStockSeg () {return articuloService.listarArticulosEnStockSeg();}
@@ -78,5 +80,11 @@ public class MaestroArticuloController {
 
     //----------Realizar ajuste de inventario---------------------
     public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {articuloService.realizarAjusteInventario(stockMovimientoDTO);}
+
+    //--------Metodo para buscar art por id
+    public Articulo buscarArticuloPorId (Long id){return articuloService.buscarArticuloPorId(id);}
+
+    //--------Metodo para buscar art por nombre
+    public Articulo buscarArticuloPorNombre (String nombre){return articuloService.buscarArticuloPorNombre(nombre);}
 
 }

@@ -85,7 +85,6 @@ public class VentaService {
 
         List<VentaArticulo> ventaArticuloList = ventaGuardada.getVentaArticulo();
         for(VentaArticulo vA : ventaArticuloList) {
-            System.out.println("orden ventaArt"+vA.getCodVentaArticulo());
             StockMovimientoDTO smDTO = new StockMovimientoDTO();
             smDTO.setCantidad(vA.getCantidadVendida());
             smDTO.setComentario(null);
@@ -100,7 +99,9 @@ public class VentaService {
         for (VentaArticuloDTO ventaArticuloDTO : ventasArticuloDTO) {
             ArticuloDTO articuloDTO = articuloService.buscarArtPorNombre(ventaArticuloDTO.getNombreArticulo());
             Articulo articulo = articuloService.buscarArticuloPorId(articuloDTO.getCodArticulo());
-            generarOrdenCompra(articulo);
+            if(articulo.getArticuloProveedor() != null) {
+                generarOrdenCompra(articulo);
+            }
         }
     }
 
