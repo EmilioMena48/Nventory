@@ -128,7 +128,7 @@ public class VentaService {
                 if(stock <= pp) {
                     Proveedor proveedor = artProv.getProveedor();
                     Long codOrden = ordenDeCompraController.crearOrdenDeCompra(proveedor.getCodProveedor());
-                    ordenDeCompraController.agregarArticuloAOrden(codOrden, artProv.getCodArticuloProveedor(), configInventario.getCantidadPedir());
+                    ordenDeCompraController.agregarArticuloAOrden(codOrden, artProv.getCodArticuloProveedor(), configInventario.getLoteOptimo());
                 }
             }
         }

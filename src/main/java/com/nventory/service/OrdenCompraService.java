@@ -117,12 +117,13 @@ public class OrdenCompraService {
 
                 if (tipoModelo != null && "Modelo Lote Fijo".equals(tipoModelo.getNombreModeloInventario())) {
                     int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
-                    int stockTotalEsperado = stockActual + stockPendiente;
+                    int stockPendienteReal = stockPendiente - stockReposicion;
+                    int stockTotalEsperado = stockActual + stockPendienteReal;
 
                     if (stockTotalEsperado <= configInv.getPuntoPedido()) {
                         avisosArticulos.add("Artículo: " + art.getNombreArticulo()
-                                + " | Stock actual: " + stockActual
-                                + " | En tránsito: " + stockPendiente
+                                + " | Stock actual: " + (stockActual + stockReposicion)
+                                + " | En tránsito: " + stockPendienteReal
                                 + " | Punto de pedido: " + configInv.getPuntoPedido());
                     }
                 }
