@@ -6,7 +6,6 @@ import com.nventory.DTO.CGIDTO;
 import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.model.*;
 import com.nventory.repository.*;
-import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -265,7 +264,9 @@ public class ArticuloService {
 
     //-----------------Metodo del service crear un artículo-----------------------------
     public void crearArticulo(ArticuloDTO articuloDTO) {
-        Long codArticulo = articuloDTO.getCodArticulo();
+
+        validarArticulo(articuloDTO);
+
         BigDecimal costoAlmacenamiento = articuloDTO.getCostoAlmacenamiento();
         BigDecimal nivelServicioArticulo = articuloDTO.getNivelServicioArticulo();
         BigDecimal precioArticulo = articuloDTO.getPrecioArticulo();
@@ -277,7 +278,6 @@ public class ArticuloService {
         int diasEntreRevisiones = articuloDTO.getDiasEntreRevisiones();
 
         Articulo articulo = Articulo.builder()
-                .codArticulo(codArticulo)
                 .costoAlmacenamiento(costoAlmacenamiento)
                 .nivelServicioArticulo(nivelServicioArticulo)
                 .precioArticulo(precioArticulo)
@@ -296,9 +296,16 @@ public class ArticuloService {
 
         Long codArticulo = articuloDTO.getCodArticulo();
         Articulo articuloExistente = articuloRepository.buscarPorId(codArticulo);
+
         if (articuloExistente == null) {
             throw new IllegalArgumentException("El articulo con ID " + codArticulo + " no existe.");
         }
+
+        if (articuloExistente.getFechaHoraBajaArticulo() != null) {
+            throw new IllegalArgumentException("El articulo con ID " + codArticulo + " no puede ser modificado porque está dado de baja.");
+        }
+
+        validarArticulo(articuloDTO);
 
         if (articuloExistente.getCostoAlmacenamiento().compareTo(articuloDTO.getCostoAlmacenamiento()) != 0
         || articuloExistente.getNivelServicioArticulo().compareTo(articuloDTO.getNivelServicioArticulo()) != 0
@@ -447,6 +454,35 @@ public class ArticuloService {
         Articulo articulo = buscarArticuloPorId(idArticulo);
         return articulo.getArticuloProveedor().getConfiguracionInventario().getInventarioMaximo();
     }
+
+    //-----------------Metodo del service para Validar el Articulo-----------------------------
+    public void validarArticulo(ArticuloDTO articuloDTO) {
+
+        BigDecimal nivelServicio = articuloDTO.getNivelServicioArticulo();
+        if (nivelServicio == null || nivelServicio.compareTo(BigDecimal.ZERO) < 0 || nivelServicio.compareTo(BigDecimal.ONE) > 0) {
+            throw new IllegalArgumentException("El nivel de servicio debe estar entre 0 y 1.");
+        }
+
+        BigDecimal precio = articuloDTO.getPrecioArticulo();
+        if (precio == null || precio.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El precio del artículo debe ser mayor que 0.");
+        }
+
+        Integer diasRev = articuloDTO.getDiasEntreRevisiones();
+        if (diasRev == null || diasRev <= 0) {
+            throw new IllegalArgumentException("Los días entre revisiones deben ser mayores a 0.");
+        }
+
+        Integer stock = articuloDTO.getStockActual();
+        if (stock == null || stock < 0) {
+            throw new IllegalArgumentException("El stock actual no puede ser negativo.");
+        }
+
+        if (articuloDTO.getFechaHoraBajaArticulo() != null) {
+            throw new IllegalStateException("Este Artículo no debe tener fecha de baja para la acción que intenta realizar.");
+        }
+    }
+
 }
 
 

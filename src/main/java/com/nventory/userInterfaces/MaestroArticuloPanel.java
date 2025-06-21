@@ -132,17 +132,20 @@ public class MaestroArticuloPanel extends BorderPane {
                     articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
-                    controller.darDeAltaArticulo(articuloDTO);
-                    cargarArticulos();
-                    ventanaAlta.close();
+                    try {
+                        controller.darDeAltaArticulo(articuloDTO);
+                        cargarArticulos();
+                        ventanaAlta.close();
+                    } catch (IllegalArgumentException | IllegalStateException ex) {
+                        mostrarError("Error al dar de alta el artículo: " + ex.getMessage());
+                    }
 
                 } catch (NumberFormatException ex) {
                     Alert alerta = new Alert(Alert.AlertType.ERROR);
                     alerta.setTitle("Error de formato");
                     alerta.setHeaderText("Datos inválidos");
                     alerta.setContentText("Revisá que todos los campos numéricos tengan valores válidos.");
-                    alerta.showAndWait();
-                }
+                    alerta.showAndWait();                }
             });
 
             btnCancelar.setOnAction(event -> ventanaAlta.close());
@@ -493,9 +496,14 @@ public class MaestroArticuloPanel extends BorderPane {
                             dto.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                             dto.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
-                            controller.actualizarArticulo(dto);
-                            cargarArticulos();
-                            ventanaEdicion.close();
+                            try {
+                                controller.actualizarArticulo(dto);
+                                cargarArticulos();
+                                ventanaEdicion.close();
+                            } catch (IllegalArgumentException | IllegalStateException ex) {
+                                mostrarError("Error al modificar el artículo: " + ex.getMessage());
+                            }
+
                         } catch (NumberFormatException ex) {
                             new Alert(Alert.AlertType.ERROR, "Campos numéricos inválidos.").showAndWait();
                         }
@@ -620,6 +628,12 @@ public class MaestroArticuloPanel extends BorderPane {
         listaArticulos.addAll(articulos);
     }
 
-
+    private void mostrarError(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Error");
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
+    }
 
 }

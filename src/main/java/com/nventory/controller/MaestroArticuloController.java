@@ -34,7 +34,7 @@ public class MaestroArticuloController {
     }
 
     //----------Alta de articulos---------------------
-    public void darDeAltaArticulo(ArticuloDTO articuloDTO){
+    public void darDeAltaArticulo(ArticuloDTO articuloDTO) {
         articuloService.crearArticulo(articuloDTO);
     }
 
