@@ -36,9 +36,9 @@ public class ProveedorController implements ModuloProveedores {
         this.articuloRepository = new ArticuloRepository();
         this.proveedorRepository = new ProveedorRepository();
         this.ordenDeCompraRepository = new OrdenDeCompraRepository();
-        this.proveedorService = new ProveedorService(proveedorRepository, ordenDeCompraRepository);
         this.articuloProveedorService = new ArticuloProveedorService(articuloProveedorRepository, configuracionInventarioService);
         this.articuloService = new ArticuloService(articuloRepository);
+        this.proveedorService = new ProveedorService(proveedorRepository, ordenDeCompraRepository, articuloProveedorService, configuracionInventarioService);
     }
 
     @Override

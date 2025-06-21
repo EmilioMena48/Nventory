@@ -25,6 +25,10 @@ public class ConfiguracionInventarioService {
         this.configuracionInventarioRepository = new ConfiguracionInventarioRepository();
     }
 
+    public void guardarConfigInventario(ArticuloProveedor articuloProveedor) {
+        configuracionInventarioRepository.guardar(articuloProveedor.getConfiguracionInventario());
+    }
+
     public void recalcularFormulasArticuloProveedor(ArticuloProveedor articuloProveedor) {
         ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
         String nombreModeloInventario = configuracionInventario.getTipoModeloInventario().getNombreModeloInventario();
@@ -40,7 +44,7 @@ public class ConfiguracionInventarioService {
                 articuloProveedor.getArticulo().getStockActual(),
                 articuloProveedor.getArticulo().getDiasEntreRevisiones(),
                 articuloProveedor.getArticulo().getDesviacionEstandarArticulo(),
-                articuloProveedor.getArticulo().getArticuloProveedor().getProveedor().getNombreProveedor());
+                articuloProveedor.getArticulo().getArticuloProveedor() == null ? "" : articuloProveedor.getArticulo().getArticuloProveedor().getProveedor().getNombreProveedor());
 
         if (nombreModeloInventario.compareTo("Modelo Lote Fijo") == 0){
             configuracionInventario.setLoteOptimo(calcularLoteOptimo(articuloDTO, articuloProveedor));
@@ -103,7 +107,6 @@ public class ConfiguracionInventarioService {
                 configuracionInventario.getLoteOptimo(),
                 configuracionInventario.getPuntoPedido(),
                 configuracionInventario.getStockSeguridad(),
-                configuracionInventario.getCantidadPedir(),
                 configuracionInventario.getTipoModeloInventario().getNombreModeloInventario()
         );
     }

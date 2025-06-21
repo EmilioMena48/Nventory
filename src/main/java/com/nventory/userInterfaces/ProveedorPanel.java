@@ -636,6 +636,7 @@ public class ProveedorPanel extends BorderPane {
                 });
             } catch (Exception ex) {
                 mostrarAlerta("Error guardando asociación: " + ex.getMessage(), 2, null);
+                controller.EliminarArticuloProveedor(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
             }
         });
 
@@ -709,9 +710,6 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Stock de Seguridad: "), 0, 4);
         Label lblStockSeguridad = new Label(String.valueOf(configInvDTO.getStockSeguridad()));
         formulario.add(lblStockSeguridad, 1, 4);
-        formulario.add(new Label("Cantidad a Pedir: "), 0, 5);
-        Label lblCantidadPedir = new Label(String.valueOf(configInvDTO.getCantidadPedir()));
-        formulario.add(lblCantidadPedir, 1, 5);
         animarFormulario(formulario);
         vbox.getChildren().add(formulario);
         return vbox;

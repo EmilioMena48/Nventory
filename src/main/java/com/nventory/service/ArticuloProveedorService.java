@@ -16,9 +16,6 @@ public class ArticuloProveedorService {
     ArticuloProveedorRepository repository;
     ConfiguracionInventarioService configuracionInventarioService;
 
-    TipoModeloInventarioRepository tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
-    ConfiguracionInventarioRepository configuracionInventarioRepository = new ConfiguracionInventarioRepository();
-
     public ArticuloProveedorService(ArticuloProveedorRepository repository, ConfiguracionInventarioService configuracionInventarioService) {
         this.repository = repository;
         this.configuracionInventarioService = configuracionInventarioService;
@@ -28,6 +25,8 @@ public class ArticuloProveedorService {
         ArticuloProveedor articuloProveedor = repository.buscarPorId(id);
         if (articuloProveedor != null) {
             articuloProveedor.setFechaHoraBajaArticuloProveedor(LocalDateTime.now());
+            articuloProveedor.getConfiguracionInventario().setFechaHoraBajaConfiguracionInventario(LocalDateTime.now());
+            configuracionInventarioService.guardarConfigInventario(articuloProveedor);
             repository.guardar(articuloProveedor);
         } else {
             throw new IllegalArgumentException("El Articulo Proveedor no existe");
@@ -51,8 +50,9 @@ public class ArticuloProveedorService {
             } catch (Exception e) {
                 System.out.println("[!] Error al guardar articulo proveedor");
             }
+            articuloProveedor.getConfiguracionInventario().setFechaHoraBajaConfiguracionInventario(null);
+            configuracionInventarioService.guardarConfigInventario(articuloProveedor);
         }
-
         articuloProveedor.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
         articuloProveedor.setCostoPedido(articuloProveedorDto.getCostoPedido());
         articuloProveedor.setDemoraEntregaDias(articuloProveedorDto.getDemoraEntregaDias());
@@ -73,6 +73,13 @@ public class ArticuloProveedorService {
                 .filter(Objects::nonNull)
                 .filter(articuloProveedor -> articuloProveedor.getFechaHoraBajaArticuloProveedor() == null)
                 .map(ArticuloProveedor::getArticulo)
+                .collect(Collectors.toList());
+    }
+
+    public List<ArticuloProveedor> obtenerArtProvDeEseProveedor(Long idProveedor) {
+        return repository.buscarTodosArticulosDelProveedor(idProveedor).stream()
+                .filter(Objects::nonNull)
+                .filter(articuloProveedor -> articuloProveedor.getFechaHoraBajaArticuloProveedor() == null)
                 .collect(Collectors.toList());
     }
 

@@ -12,6 +12,5 @@ public class ConfigInvDTO {
     private int loteOptimo;
     private int puntoPedido;
     private int stockSeguridad;
-    private int cantidadPedir;
     private String nombreModeloInventario;
 }

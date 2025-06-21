@@ -2,6 +2,7 @@ package com.nventory.service;
 
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.DTO.ProveedorEliminadoDTO;
+import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.OrdenDeCompra;
 import com.nventory.model.Proveedor;
 import com.nventory.repository.OrdenDeCompraRepository;
@@ -14,11 +15,17 @@ import java.util.List;
 public class ProveedorService {
     ProveedorRepository proveedorRepository;
     OrdenDeCompraRepository ordenDeCompraRepository;
+    ArticuloProveedorService articuloProveedorService;
+    ConfiguracionInventarioService configuracionInventarioService;
 
     public ProveedorService(ProveedorRepository proveedorRepository,
-                            OrdenDeCompraRepository ordenDeCompraRepository) {
+                            OrdenDeCompraRepository ordenDeCompraRepository,
+                            ArticuloProveedorService articuloProveedorService,
+                            ConfiguracionInventarioService configuracionInventarioService) {
         this.proveedorRepository = proveedorRepository;
         this.ordenDeCompraRepository = ordenDeCompraRepository;
+        this.articuloProveedorService = articuloProveedorService;
+        this.configuracionInventarioService = configuracionInventarioService;
     }
 
     public List<ProveedorDTO> listarProveedores() {
@@ -55,6 +62,15 @@ public class ProveedorService {
         if (proveedor != null) {
             proveedor.setActivo(false);
             proveedor.setFechaHoraBajaProveedor(LocalDateTime.now());
+            List<ArticuloProveedor> artProv = articuloProveedorService.obtenerArtProvDeEseProveedor(codProveedor);
+            for (ArticuloProveedor articuloProveedor : artProv) {
+                articuloProveedor.setFechaHoraBajaArticuloProveedor(LocalDateTime.now());
+                if (articuloProveedor.getConfiguracionInventario() != null) {
+                    articuloProveedor.getConfiguracionInventario().setFechaHoraBajaConfiguracionInventario(LocalDateTime.now());
+                }
+                configuracionInventarioService.guardarConfigInventario(articuloProveedor);
+                articuloProveedorService.guardarArticuloProveedor(articuloProveedor);
+            }
             proveedorRepository.guardar(proveedor);
         } else {
             throw new IllegalArgumentException("El proveedor no existe");
