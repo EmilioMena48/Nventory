@@ -108,6 +108,14 @@ public class ArticuloService {
         // Si pasa las validaciones, dar de baja
         articulo.setFechaHoraBajaArticulo(articuloDTO.getFechaHoraBajaArticulo());
         articuloRepository.guardar(articulo);
+
+
+        //Dar de baja todos los articulosProveedor asociado a ese articulo
+        List<ArticuloProveedor> articuloProveedores = articuloProveedorRepository.buscarTodosArticuloProveedor(articulo.getCodArticulo());
+        for (ArticuloProveedor ap : articuloProveedores) {
+            ap.setFechaHoraBajaArticuloProveedor(articuloDTO.getFechaHoraBajaArticulo());
+            articuloProveedorRepository.guardar(ap);
+        }
     }
 
     //-----------------Metodo del service para obtener Proveedores del articulo seleccionado------------------------
