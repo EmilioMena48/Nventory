@@ -6,6 +6,7 @@ import com.nventory.DTO.CGIDTO;
 import com.nventory.DTO.StockMovimientoDTO;
 import com.nventory.model.*;
 import com.nventory.repository.*;
+import org.apache.commons.math3.random.RandomDataGenerator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -353,25 +354,42 @@ public class ArticuloService {
                 BigDecimal H = articulo.getCostoAlmacenamiento();
                 BigDecimal Q = new BigDecimal(confInv.getLoteOptimo());
 
-                if (modelo.getCodTipoModeloI() == 2) {
-                    float d = (float) articulo.getDemandaArt() /365;
-                    float T = articulo.getDiasEntreRevisiones();
-                    float L = artProv.getDemoraEntregaDias();
-                    float I = articulo.getStockActual();
-                    Q = new BigDecimal(d*(T+L)-I);
+                if (modelo.getCodTipoModeloI() == 1) {
+                    BigDecimal parte1 = C.multiply(D);
+                    BigDecimal parte2 = S.multiply(D.divide(Q, 2, RoundingMode.HALF_UP));
+                    BigDecimal parte3 = H.multiply(Q.divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP));
+
+                    BigDecimal cgi = parte1.add(parte2).add(parte3).setScale(2, RoundingMode.HALF_UP);
+
+                    CGIDTO cgiDto = new CGIDTO();
+                    cgiDto.setNombreArticulo(articulo.getNombreArticulo());
+                    cgiDto.setCgi(cgi);
+
+                    cgiDtoList.add(cgiDto);
+
+                } else if (modelo.getCodTipoModeloI() == 2) {
+                    ArticuloDTO artDto = new ArticuloDTO();
+                    artDto.setStockActual(articulo.getStockActual());
+                    artDto.setDemandaArt(articulo.getDemandaArt());
+                    artDto.setDiasEntreRevisiones(articulo.getDiasEntreRevisiones());
+                    artDto.setNivelServicioArticulo(articulo.getNivelServicioArticulo());
+
+                    BigDecimal T = new BigDecimal(articulo.getDiasEntreRevisiones());
+                    BigDecimal SS = new BigDecimal(configuracionInventarioService.calcularStockSeguridadPeriodoFijo(artDto, artProv));
+                    BigDecimal d = new BigDecimal(articulo.getDemandaArt()).divide(new BigDecimal("365"), 4, RoundingMode.HALF_UP);
+                    BigDecimal L = new BigDecimal(artProv.getDemoraEntregaDias());
+                    BigDecimal parte1 = C.multiply(D);
+                    BigDecimal parte2 = S.multiply(D.divide(T, 2, RoundingMode.HALF_UP));
+                    BigDecimal parte3 = H.multiply(SS.add(d.multiply((T.add(L))).divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP)));
+
+                    BigDecimal cgi = parte1.add(parte2).add(parte3).setScale(2, RoundingMode.HALF_UP);
+
+                    CGIDTO cgiDto = new CGIDTO();
+                    cgiDto.setNombreArticulo(articulo.getNombreArticulo());
+                    cgiDto.setCgi(cgi);
+
+                    cgiDtoList.add(cgiDto);
                 }
-
-                BigDecimal parte1 = C.multiply(D);
-                BigDecimal parte2 = S.multiply(D.divide(Q, 2, RoundingMode.HALF_UP));
-                BigDecimal parte3 = H.multiply(Q.divide(new BigDecimal("2"), 2, RoundingMode.HALF_UP));
-
-                BigDecimal cgi = parte1.add(parte2).add(parte3).setScale(2, RoundingMode.HALF_UP);
-
-                CGIDTO cgiDto = new CGIDTO();
-                cgiDto.setNombreArticulo(articulo.getNombreArticulo());
-                cgiDto.setCgi(cgi);
-
-                cgiDtoList.add(cgiDto);
             }
         }
         return cgiDtoList;

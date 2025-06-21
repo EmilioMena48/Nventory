@@ -155,7 +155,7 @@ public class ConfiguracionInventarioService {
         int d = (int) Math.round((double) D / 365);
         int L = articuloProveedor.getDemoraEntregaDias();
         int T = articuloNuevo.getDiasEntreRevisiones();
-        int stockSeguridad = calcularStockSeguridadLoteFijo(articuloNuevo, articuloProveedor);
+        int stockSeguridad = calcularStockSeguridadPeriodoFijo(articuloNuevo, articuloProveedor);
 
         return d * (L + T) + stockSeguridad;
     }
