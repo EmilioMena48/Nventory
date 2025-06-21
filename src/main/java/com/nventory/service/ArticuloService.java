@@ -59,7 +59,6 @@ public class ArticuloService {
         articuloDTO.setCostoAlmacenamiento(articulo.getCostoAlmacenamiento());
         articuloDTO.setPrecioArticulo(articulo.getPrecioArticulo());
         articuloDTO.setNivelServicioArticulo(articulo.getNivelServicioArticulo());
-        articuloDTO.setDesviacionEstandarArticulo(articulo.getDesviacionEstandarArticulo());
         articuloDTO.setDiasEntreRevisiones(articulo.getDiasEntreRevisiones());
         articuloDTO.setDemandaArt(articulo.getDemandaArt());
 
@@ -268,7 +267,6 @@ public class ArticuloService {
         LocalDateTime fechaHoraBajaArticulo = articuloDTO.getFechaHoraBajaArticulo();
         Integer stockActual = articuloDTO.getStockActual();
         int diasEntreRevisiones = articuloDTO.getDiasEntreRevisiones();
-        int desviacionEstandarArticulo = articuloDTO.getDesviacionEstandarArticulo();
 
         Articulo articulo = Articulo.builder()
                 .codArticulo(codArticulo)
@@ -281,7 +279,6 @@ public class ArticuloService {
                 .fechaHoraBajaArticulo(fechaHoraBajaArticulo)
                 .stockActual(stockActual)
                 .diasEntreRevisiones(diasEntreRevisiones)
-                .desviacionEstandarArticulo(desviacionEstandarArticulo)
                 .build();
         articuloRepository.guardar(articulo);
     }
@@ -298,7 +295,6 @@ public class ArticuloService {
         if (articuloExistente.getCostoAlmacenamiento().compareTo(articuloDTO.getCostoAlmacenamiento()) != 0
         || articuloExistente.getNivelServicioArticulo().compareTo(articuloDTO.getNivelServicioArticulo()) != 0
         || articuloExistente.getDemandaArt() != articuloDTO.getDemandaArt()
-        || articuloExistente.getDesviacionEstandarArticulo() != articuloDTO.getDesviacionEstandarArticulo()
         || articuloExistente.getDiasEntreRevisiones() != articuloDTO.getDiasEntreRevisiones()
         || articuloExistente.getStockActual().compareTo(articuloDTO.getStockActual()) != 0){
             configuracionInventarioService.recalcularFormulasArticulo(articuloExistente, articuloDTO);
@@ -313,7 +309,6 @@ public class ArticuloService {
         articuloExistente.setFechaHoraBajaArticulo(articuloDTO.getFechaHoraBajaArticulo());
         articuloExistente.setStockActual(articuloDTO.getStockActual());
         articuloExistente.setDiasEntreRevisiones(articuloDTO.getDiasEntreRevisiones());
-        articuloExistente.setDesviacionEstandarArticulo(articuloDTO.getDesviacionEstandarArticulo());
 
         articuloRepository.guardar(articuloExistente);
     }

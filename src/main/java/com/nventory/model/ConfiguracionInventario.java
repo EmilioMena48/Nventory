@@ -21,7 +21,6 @@ public class ConfiguracionInventario {
     private int loteOptimo;
     private int puntoPedido;
     private int stockSeguridad;
-    private int cantidadPedir;
 
     //Relacion ConfiguracionInventario - TipoModeloInventario
     @ManyToOne(fetch = FetchType.EAGER)

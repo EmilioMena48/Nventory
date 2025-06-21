@@ -24,7 +24,6 @@ public class Articulo {
     private String descripcionArticulo;
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
-    private int desviacionEstandarArticulo;
     private int diasEntreRevisiones;
     private BigDecimal nivelServicioArticulo;
     private BigDecimal precioArticulo;

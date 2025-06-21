@@ -23,7 +23,6 @@ public class ArticuloDTO {
     private LocalDateTime fechaHoraBajaArticulo;
     private Integer stockActual;
     private int diasEntreRevisiones;
-    private int desviacionEstandarArticulo;
     private String proveedorPredeterminado;
 
 }

@@ -88,8 +88,6 @@ public class MaestroArticuloPanel extends BorderPane {
             txtPrecioArticulo.setPrefColumnCount(5);
             TextField txtNivelServicioArticulo = new TextField();
             txtNivelServicioArticulo.setPrefColumnCount(5);
-            TextField txtDesviacionEstandarArticulo = new TextField();
-            txtDesviacionEstandarArticulo.setPrefColumnCount(5);
             TextField txtDiasEntreRevisiones = new TextField();
             txtDiasEntreRevisiones.setPrefColumnCount(5);
             TextField txtDemanda = new TextField();
@@ -97,12 +95,12 @@ public class MaestroArticuloPanel extends BorderPane {
             // Agregar al GridPane
             grid.add(new Label("Nombre:"), 0, 0);
             grid.add(txtNombre, 1, 0);
-            grid.add(new Label("Nivel de servicio:"), 2, 0);
-            grid.add(txtNivelServicioArticulo, 3, 0);
+            grid.add(new Label("Precio del artículo:"), 2, 0);
+            grid.add(txtPrecioArticulo, 3, 0);
             grid.add(new Label("Descripción:"), 0, 1);
             grid.add(txtDescripcion, 1, 1);
-            grid.add(new Label("Desviación estándar:"), 2, 1);
-            grid.add(txtDesviacionEstandarArticulo, 3, 1);
+            grid.add(new Label("Nivel de servicio:"), 2, 1);
+            grid.add(txtNivelServicioArticulo, 3, 1);
             grid.add(new Label("Stock actual:"), 0, 2);
             grid.add(txtStockActual, 1, 2);
             grid.add(new Label("Días entre revisiones:"), 2, 2);
@@ -111,8 +109,6 @@ public class MaestroArticuloPanel extends BorderPane {
             grid.add(txtCostoAlmacenamiento, 1, 3);
             grid.add(new Label("Demanda:"), 2, 3);
             grid.add(txtDemanda, 3, 3);
-            grid.add(new Label("Precio del artículo:"), 0, 4);
-            grid.add(txtPrecioArticulo, 1, 4);
             // Botones
             Button btnGuardar = new Button("Guardar");
             Button btnCancelar = new Button("Cancelar");
@@ -133,7 +129,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     articuloDTO.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
                     articuloDTO.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
                     articuloDTO.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
-                    articuloDTO.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
                     articuloDTO.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                     articuloDTO.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 
@@ -453,8 +448,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     txtPrecioArticulo.setPrefColumnCount(5);
                     TextField txtNivelServicioArticulo = new TextField(String.valueOf(articuloTraido.getNivelServicioArticulo()));
                     txtNivelServicioArticulo.setPrefColumnCount(5);
-                    TextField txtDesviacionEstandarArticulo = new TextField(String.valueOf(articuloTraido.getDesviacionEstandarArticulo()));
-                    txtDesviacionEstandarArticulo.setPrefColumnCount(5);
                     TextField txtDiasEntreRevisiones = new TextField(String.valueOf(articuloTraido.getDiasEntreRevisiones()));
                     txtDiasEntreRevisiones.setPrefColumnCount(5);
                     TextField txtDemanda = new TextField(String.valueOf(articuloTraido.getDemandaArt()));
@@ -462,12 +455,12 @@ public class MaestroArticuloPanel extends BorderPane {
                     // Agregar al gridPane
                     grid.add(new Label("Nombre:"), 0, 0);
                     grid.add(txtNombre, 1, 0);
-                    grid.add(new Label("Nivel de servicio:"), 2, 0);
-                    grid.add(txtNivelServicioArticulo, 3, 0);
+                    grid.add(new Label("Precio del artículo:"), 2, 0);
+                    grid.add(txtPrecioArticulo, 3, 0);
                     grid.add(new Label("Descripción:"), 0, 1);
                     grid.add(txtDescripcion, 1, 1);
-                    grid.add(new Label("Desviación estándar:"), 2, 1);
-                    grid.add(txtDesviacionEstandarArticulo, 3, 1);
+                    grid.add(new Label("Nivel de servicio:"), 2, 1);
+                    grid.add(txtNivelServicioArticulo, 3, 1);
                     grid.add(new Label("Stock actual:"), 0, 2);
                     grid.add(txtStockActual, 1, 2);
                     grid.add(new Label("Días entre revisiones:"), 2, 2);
@@ -476,8 +469,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     grid.add(txtCostoAlmacenamiento, 1, 3);
                     grid.add(new Label("Demanda:"), 2, 3);
                     grid.add(txtDemanda, 3, 3);
-                    grid.add(new Label("Precio del artículo:"), 0, 4);
-                    grid.add(txtPrecioArticulo, 1, 4);
                     //Botones
                     Button btnGuardar = new Button("Guardar");
                     Button btnCancelar = new Button("Cancelar");
@@ -499,7 +490,6 @@ public class MaestroArticuloPanel extends BorderPane {
                             dto.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
                             dto.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
                             dto.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
-                            dto.setDesviacionEstandarArticulo(Integer.parseInt(txtDesviacionEstandarArticulo.getText()));
                             dto.setDiasEntreRevisiones(Integer.parseInt(txtDiasEntreRevisiones.getText()));
                             dto.setDemandaArt(Integer.parseInt(txtDemanda.getText()));
 

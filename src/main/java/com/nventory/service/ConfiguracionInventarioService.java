@@ -43,7 +43,6 @@ public class ConfiguracionInventarioService {
                 articuloProveedor.getArticulo().getFechaHoraBajaArticulo(),
                 articuloProveedor.getArticulo().getStockActual(),
                 articuloProveedor.getArticulo().getDiasEntreRevisiones(),
-                articuloProveedor.getArticulo().getDesviacionEstandarArticulo(),
                 articuloProveedor.getArticulo().getArticuloProveedor() == null ? "" : articuloProveedor.getArticulo().getArticuloProveedor().getProveedor().getNombreProveedor());
 
         if (nombreModeloInventario.compareTo("Modelo Lote Fijo") == 0){
@@ -53,7 +52,6 @@ public class ConfiguracionInventarioService {
         }else {
             configuracionInventario.setStockSeguridad(calcularStockSeguridadPeriodoFijo(articuloDTO, articuloProveedor));
             configuracionInventario.setInventarioMaximo(calcularInventarioMax(articuloDTO, articuloProveedor));
-            configuracionInventario.setCantidadPedir(calcularCantidadPedir(articuloDTO, articuloProveedor));
         }
 
         configuracionInventarioRepository.guardar(configuracionInventario);
@@ -63,7 +61,6 @@ public class ConfiguracionInventarioService {
         ConfiguracionInventario config = new ConfiguracionInventario();
         TipoModeloInventario tipoModelo;
         Long idCI;
-        config.setCantidadPedir(0);
         config.setLoteOptimo(0);
         config.setPuntoPedido(0);
         config.setStockSeguridad(0);
@@ -94,7 +91,6 @@ public class ConfiguracionInventarioService {
             }else {
                 configuracionInventarioActualizada.setStockSeguridad(calcularStockSeguridadPeriodoFijo(articuloNuevo, articuloProveedor));
                 configuracionInventarioActualizada.setInventarioMaximo(calcularInventarioMax(articuloNuevo, articuloProveedor));
-                configuracionInventarioActualizada.setCantidadPedir(calcularCantidadPedir(articuloNuevo, articuloProveedor));
             }
 
             configuracionInventarioRepository.guardar(configuracionInventarioActualizada);
