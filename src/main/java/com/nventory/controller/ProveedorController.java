@@ -145,4 +145,9 @@ public class ProveedorController implements ModuloProveedores {
     public Proveedor BuscarProveedorPorId(Long idProveedor) {
         return proveedorService.buscarProveedorPorId(idProveedor);
     }
+
+    @Override
+    public Proveedor BuscarProveedorPorNombre(String nombreProveedor) {
+        return proveedorService.buscarProveedorPorNombre(nombreProveedor);
+    }
 }

@@ -32,4 +32,5 @@ public interface ModuloProveedores  {
     void EliminarArticuloProveedor(Long articuloId, Long proveedorId);
     boolean EstaEliminadoArticuloProveedor(Long articuloId, Long proveedorId);
     ConfigInvDTO BuscarConfigInventario(Long articuloId, Long proveedorId);
+    Proveedor BuscarProveedorPorNombre(String nombreProveedor);
 }

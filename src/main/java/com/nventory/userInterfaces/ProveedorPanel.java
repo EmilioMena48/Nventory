@@ -158,6 +158,15 @@ public class ProveedorPanel extends BorderPane {
                 }
                 proveedorDTO.setNombreProveedor(txtNombre.getText());
                 proveedorDTO.setDescripcionProveedor(txtDescripcion.getText());
+                Proveedor proveedorCP = controller.BuscarProveedorPorNombre(txtNombre.getText());
+                if (proveedorCP != null && !proveedorCP.getCodProveedor().equals(proveedorDTO.getCodProveedor())) {
+                    if(proveedorCP.getFechaHoraBajaProveedor()== null) {
+                        mostrarAlerta("Ya existe un proveedor con ese nombre.", 2, null);
+                    } else {
+                        mostrarAlerta("Ya existe un proveedor eliminado con ese nombre.", 2, null);
+                    }
+                    return;
+                }
 
                 if (proveedorDTO.getCodProveedor() == 0L) {
                     mostrarSeleccionArticulo();

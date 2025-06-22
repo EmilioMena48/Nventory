@@ -112,4 +112,12 @@ public class ProveedorService {
         }
         return false;
     }
+
+    public Proveedor buscarProveedorPorNombre(String nombre) {
+        List<Proveedor> proveedores = proveedorRepository.buscarTodos();
+        for (Proveedor proveedor : proveedores) {
+            if (proveedor.getNombreProveedor().equalsIgnoreCase(nombre)) return proveedor;
+        }
+        return null;
+    }
 }

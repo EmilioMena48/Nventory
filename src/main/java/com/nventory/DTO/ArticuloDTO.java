@@ -2,6 +2,7 @@ package com.nventory.DTO;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
+@Builder
 public class ArticuloDTO {
 
     private Long codArticulo;
