@@ -8,13 +8,16 @@ import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
 import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ArticuloRepository;
+import com.nventory.repository.OrdenDeCompraRepository;
 import com.nventory.repository.ProveedorRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DatosInicialesController {
     ProveedorRepository proveedorRepository;
@@ -22,6 +25,7 @@ public class DatosInicialesController {
     ProveedorController proveedorController;
     MaestroArticuloController maestroArticuloController;
     ArticuloProveedorRepository articuloProveedorRepository;
+    OrdenDeCompraController ordenDeCompraController;
 
     public DatosInicialesController() {
         proveedorRepository = new ProveedorRepository();
@@ -29,6 +33,7 @@ public class DatosInicialesController {
         proveedorController = new ProveedorController();
         maestroArticuloController = new MaestroArticuloController();
         articuloProveedorRepository = new ArticuloProveedorRepository();
+        ordenDeCompraController = new OrdenDeCompraController();
     }
 
     public void ejecutar() {
@@ -82,6 +87,15 @@ public class DatosInicialesController {
         maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(6).getCodArticuloProveedor());
 
         //* Cargar ordenes de compra con artículos y proveedores
+        Set<Long> codigosProveedoresConOrden = new HashSet<>();
+        codigosProveedoresConOrden.add(proveedores.get(0).getCodProveedor());
+        codigosProveedoresConOrden.add(proveedores.get(1).getCodProveedor());
+        codigosProveedoresConOrden.add(proveedores.get(2).getCodProveedor());
+
+        for (Long codProveedor: codigosProveedoresConOrden) {
+            Long codOrden = ordenDeCompraController.crearOrdenDeCompra(codProveedor);
+            System.out.println("Orden de compra creada para proveedor " + codProveedor + " con código de orden: " + codOrden);
+        }
 
         //* cargar venta con artículos y proveedores
 
@@ -275,4 +289,5 @@ public class DatosInicialesController {
                         .build()
         );
     }
+
 }
