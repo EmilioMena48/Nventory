@@ -418,26 +418,8 @@ public class ArticuloService {
         Articulo articulo = buscarArticuloPorId(stockMovimientoDTO.getArticuloID());
         int nuevaCantidad = stockMovimientoDTO.getCantidad();
 
-            ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
-
-            if (articuloProveedor == null) {
-                if (nuevaCantidad < 0) {
+            if (nuevaCantidad < 0) {
                     throw new IllegalArgumentException("La cantidad debe ser mayor o igual a cero");
-                }
-            } else {
-                ConfiguracionInventario config = articuloProveedor.getConfiguracionInventario();
-                Long tipoModelo = config.getTipoModeloInventario().getCodTipoModeloI();
-                Integer inventarioMaximo = config.getInventarioMaximo();
-
-                if (tipoModelo == 1L) {
-                    if (nuevaCantidad < 0) {
-                        throw new IllegalArgumentException("La cantidad debe ser mayor o igual a cero");
-                    }
-                } else if (tipoModelo == 2L) {
-                    if (nuevaCantidad < 0 || (inventarioMaximo != null && nuevaCantidad > inventarioMaximo)) {
-                        throw new IllegalArgumentException("La cantidad debe estar entre 0 y el inventario máximo (" + inventarioMaximo + ")");
-                    }
-                }
             }
 
             articulo.setStockActual(nuevaCantidad);
