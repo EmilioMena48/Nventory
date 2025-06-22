@@ -216,7 +216,7 @@ public class VentaPanel extends BorderPane {
             ventaArticuloDTOList.clear();
             cargarTablaVentas();
         });
-        btnAceptar.getStyleClass().add("btnAceptar");
+        btnAceptar.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20 10 20;");
         vbox.getChildren().add(btnAceptar);
 
         ScrollPane scrollPane = new ScrollPane(vbox);
@@ -269,6 +269,7 @@ public class VentaPanel extends BorderPane {
 
         guardarButton.getStyleClass().add("boton-guardar");
         cancelarButton.getStyleClass().add("boton-cancelar");
+        crearLineasButton.setStyle("-fx-background-color: #13c268; -fx-text-fill: white;");
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -437,8 +438,8 @@ public class VentaPanel extends BorderPane {
         Button confirmar = new Button("Confirmar");
         Button cancelar = new Button("Cancelar");
 
-        confirmar.getStyleClass().add("boton-guardar-confirmacion");
-        cancelar.getStyleClass().add("boton-cancelar-confirmacion");
+        confirmar.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20 10 20;");
+        cancelar.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20 10 20;");
 
         confirmar.setOnAction(e -> {
             try {
