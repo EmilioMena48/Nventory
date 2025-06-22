@@ -417,21 +417,11 @@ public class ArticuloService {
     public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {
         Articulo articulo = buscarArticuloPorId(stockMovimientoDTO.getArticuloID());
 
-        Integer inventarioMaximo = null;
-
-        if(articulo.getArticuloProveedor() != null) {
-            inventarioMaximo  = articulo.getArticuloProveedor()
-                    .getConfiguracionInventario()
-                    .getInventarioMaximo();
-        }
-
         int nuevaCantidad = stockMovimientoDTO.getCantidad();
 
-        if(inventarioMaximo != null) {
-            if (nuevaCantidad < 0 || nuevaCantidad > inventarioMaximo) {
-                throw new IllegalArgumentException("La cantidad debe estar entre 0 y " + inventarioMaximo);
+            if (nuevaCantidad < 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
             }
-        }
 
         articulo.setStockActual(nuevaCantidad);
         articuloRepository.guardar(articulo);

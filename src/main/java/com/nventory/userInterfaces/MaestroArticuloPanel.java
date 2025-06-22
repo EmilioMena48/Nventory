@@ -252,14 +252,6 @@ public class MaestroArticuloPanel extends BorderPane {
                 comboArticulos.getItems().add(articulo.getNombreArticulo());
             }
 
-            Label lblAdvertencia = new Label("Este artículo no tiene límite de stock porque no tiene una configuración establecida.");
-            lblAdvertencia.setStyle("-fx-text-fill: red;");
-            lblAdvertencia.setWrapText(true);
-            lblAdvertencia.setVisible(false);
-
-            lblAdvertencia.setMaxWidth(Double.MAX_VALUE);
-            lblAdvertencia.setPrefWidth(500);
-
             TextField campoCantidadActual = new TextField();
             campoCantidadActual.setPromptText("Cantidad actual");
             campoCantidadActual.setEditable(false);
@@ -276,13 +268,6 @@ public class MaestroArticuloPanel extends BorderPane {
                 if (seleccionado != null) {
                     Integer cantidadActual = controller.obtenerStockActual(seleccionado);
                     campoCantidadActual.setText(cantidadActual != null ? cantidadActual.toString() : "0");
-
-                    Articulo art = controller.buscarArticuloPorNombre(seleccionado);
-                    if (art.getArticuloProveedor() == null) {
-                        lblAdvertencia.setVisible(true);
-                    } else {
-                        lblAdvertencia.setVisible(false);
-                    }
                 }
             });
 
@@ -339,7 +324,6 @@ public class MaestroArticuloPanel extends BorderPane {
             btnCancelar.setOnAction(ev -> popup.close());
 
             VBox layout = new VBox(10,
-                    new HBox(100, lblAdvertencia),
                     new Label("Artículo:"),
                     comboArticulos,
                     new Label("Cantidad actual:"),
