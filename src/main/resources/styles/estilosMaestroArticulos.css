@@ -1,0 +1,98 @@
+.button-acciones{
+    -fx-min-width: 90px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+.button-acciones:hover{
+    -fx-background-color: #2980b9;
+}
+
+.button-agregar{
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.button-agregar:hover{
+    -fx-background-color: #219653;
+}
+
+.button-modificar{
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 5 15;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.button-modificar:hover{
+    -fx-background-color: #219653;
+}
+
+.button-cancelar {
+    -fx-min-width: 90px;
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+.button-cancelar:hover {
+    -fx-background-color: #c0392b;
+}
+
+.button-proveedorPredeterminado{
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 5 15;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.button-proveedorPredeterminado:hover{
+    -fx-background-color: #219653;
+}
+
+.dialog-pane .button-bar > .container > .button {
+    -fx-font-size: 14px;
+    -fx-pref-width: 80px;
+    -fx-pref-height: 30px;
+}
+
+.dialog-pane .button-bar > .container > .button:default {
+    -fx-min-width: 90px;
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}
+
+.dialog-pane .button-bar > .container > .button:cancel {
+    -fx-min-width: 90px;
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5px;
+    -fx-padding: 5 15;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-transition: background-color 0.3s ease;
+}

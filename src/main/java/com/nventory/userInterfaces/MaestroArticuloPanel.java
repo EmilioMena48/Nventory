@@ -57,11 +57,15 @@ public class MaestroArticuloPanel extends BorderPane {
         titulo.setPadding(new Insets(10));
         setTop(titulo);
 
-        tablaArticulos = new TableView<>();
-        tablaArticulos.setItems(listaArticulos);
+        //Contenedor para el titulo y el boton añadir
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_RIGHT);
+        header.setPadding(new Insets(10));
+        header.setSpacing(10);
 
         btnAgregar = new Button("+ AÑADIR");
-        btnAgregar.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
+        btnAgregar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+        btnAgregar.getStyleClass().add("button-agregar");
 
         //BOTON DE AÑADIR ARTICULO
         btnAgregar.setOnAction(e -> {
@@ -113,6 +117,9 @@ public class MaestroArticuloPanel extends BorderPane {
             Button btnGuardar = new Button("Guardar");
             Button btnCancelar = new Button("Cancelar");
             HBox botones = new HBox(10, btnGuardar, btnCancelar);
+            botones.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+            btnGuardar.getStyleClass().add("button-acciones");
+            btnCancelar.getStyleClass().add("button-cancelar");
             botones.setAlignment(Pos.CENTER_RIGHT);
             grid.add(botones, 3, 5);
             Scene scene = new Scene(grid);
@@ -150,7 +157,17 @@ public class MaestroArticuloPanel extends BorderPane {
 
             btnCancelar.setOnAction(event -> ventanaAlta.close());
         });
+        header.getChildren().addAll(btnAgregar);
+        // Configurar el título y el header en la parte superior
+        HBox titleContainer = new HBox(titulo);
+        titleContainer.setPadding(new Insets(10));
+        titleContainer.setAlignment(Pos.CENTER_LEFT);
 
+        VBox topContainer = new VBox(titleContainer, header);
+        setTop(topContainer);
+
+        tablaArticulos = new TableView<>();
+        tablaArticulos.setItems(listaArticulos);
 
         //Boton lista a reponer
         btnListarReponer = new Button("Articulos a reponer");
@@ -271,6 +288,10 @@ public class MaestroArticuloPanel extends BorderPane {
 
             Button btnAceptar = new Button("Aceptar");
             Button btnCancelar = new Button("Cancelar");
+            btnAceptar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+            btnCancelar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+            btnAceptar.getStyleClass().add("button-acciones");
+            btnCancelar.getStyleClass().add("button-cancelar");
 
             btnAceptar.setOnAction(ev -> {
                 String articulo = comboArticulos.getValue();
@@ -332,11 +353,10 @@ public class MaestroArticuloPanel extends BorderPane {
             layout.setPadding(new Insets(20));
             layout.setAlignment(Pos.CENTER);
 
-            Scene scene = new Scene(layout, 500, 320);
+            Scene scene = new Scene(layout, 500, 350);
             popup.setScene(scene);
             popup.showAndWait();
         });
-
 
 
         btnCalcularCGI = new Button("Calcular CGI");
@@ -372,21 +392,16 @@ public class MaestroArticuloPanel extends BorderPane {
             popup.showAndWait();
         });
 
-
-        btnListarReponer.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
-        btnProductosFaltantes.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
-        btnAjusteInventario.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
-        btnCalcularCGI.setStyle("-fx-background-color: #4ea3f1; -fx-text-fill: white;");
-
         HBox contenedorFiltros = new HBox(10, btnListarReponer, btnProductosFaltantes, btnAjusteInventario, btnCalcularCGI);
         contenedorFiltros.setPadding(new Insets(10));
 
-        HBox contenedorBoton = new HBox(btnAgregar);
-        contenedorBoton.setPadding(new Insets(10));
-        contenedorBoton.setSpacing(10);
-        contenedorBoton.setStyle("-fx-alignment: center-right;");
+        contenedorFiltros.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+        for (Button btn : List.of(btnListarReponer, btnProductosFaltantes, btnAjusteInventario, btnCalcularCGI)) {
+            btn.getStyleClass().add("button-acciones");
+        }
 
-        VBox contenidoCentro = new VBox(tablaArticulos, contenedorFiltros, contenedorBoton);
+
+        VBox contenidoCentro = new VBox(tablaArticulos, contenedorFiltros);
         contenidoCentro.setSpacing(10);
         contenidoCentro.setPadding(new Insets(10));
 
@@ -422,7 +437,14 @@ public class MaestroArticuloPanel extends BorderPane {
             private final Button btnProveedor = new Button("Seleccionar Proveedor");
 
 
-            {
+
+            {   btnEditar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                btnEditar.getStyleClass().add("button-modificar");
+                btnBorrar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                btnBorrar.getStyleClass().add("button-cancelar");
+                btnProveedor.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                btnProveedor.getStyleClass().add("button-proveedorPredeterminado");
+
                 //BOTON PARA LA MODIFICACION
                 btnEditar.setOnAction(e -> {
                     ArticuloDTO artdto = getTableView().getItems().get(getIndex());
@@ -443,8 +465,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     txtDescripcion.setPrefRowCount(2);
                     txtDescripcion.setWrapText(true);
                     txtDescripcion.setPrefColumnCount(20);
-                    TextField txtStockActual = new TextField(String.valueOf(articuloTraido.getStockActual()));
-                    txtStockActual.setPrefColumnCount(5);
                     TextField txtCostoAlmacenamiento = new TextField(String.valueOf(articuloTraido.getCostoAlmacenamiento()));
                     txtCostoAlmacenamiento.setPrefColumnCount(5);
                     TextField txtPrecioArticulo = new TextField(String.valueOf(articuloTraido.getPrecioArticulo()));
@@ -464,8 +484,6 @@ public class MaestroArticuloPanel extends BorderPane {
                     grid.add(txtDescripcion, 1, 1);
                     grid.add(new Label("Nivel de servicio:"), 2, 1);
                     grid.add(txtNivelServicioArticulo, 3, 1);
-                    grid.add(new Label("Stock actual:"), 0, 2);
-                    grid.add(txtStockActual, 1, 2);
                     grid.add(new Label("Días entre revisiones:"), 2, 2);
                     grid.add(txtDiasEntreRevisiones, 3, 2);
                     grid.add(new Label("Costo de almacenamiento:"), 0, 3);
@@ -475,6 +493,11 @@ public class MaestroArticuloPanel extends BorderPane {
                     //Botones
                     Button btnGuardar = new Button("Guardar");
                     Button btnCancelar = new Button("Cancelar");
+                    btnGuardar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                    btnCancelar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                    btnGuardar.getStyleClass().add("button-acciones");
+                    btnCancelar.getStyleClass().add("button-cancelar");
+
                     HBox botones = new HBox(10, btnGuardar, btnCancelar);
                     botones.setAlignment(Pos.CENTER_RIGHT);
                     grid.add(botones, 3, 5);
@@ -489,7 +512,7 @@ public class MaestroArticuloPanel extends BorderPane {
                             dto.setCodArticulo(artdto.getCodArticulo());
                             dto.setNombreArticulo(txtNombre.getText());
                             dto.setDescripcionArticulo(txtDescripcion.getText());
-                            dto.setStockActual(Integer.parseInt(txtStockActual.getText()));
+                            dto.setStockActual(Integer.parseInt(String.valueOf(articuloTraido.getStockActual())));
                             dto.setCostoAlmacenamiento(new BigDecimal(txtCostoAlmacenamiento.getText()));
                             dto.setPrecioArticulo(new BigDecimal(txtPrecioArticulo.getText()));
                             dto.setNivelServicioArticulo(new BigDecimal(txtNivelServicioArticulo.getText()));
@@ -518,20 +541,29 @@ public class MaestroArticuloPanel extends BorderPane {
                 btnBorrar.setOnAction(e -> {
                     ArticuloDTO articuloDTO = getTableView().getItems().get(getIndex());
 
-                    Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmacion.setTitle("Confirmar baja");
-                    confirmacion.setHeaderText("¿Seguro que querés dar de baja este artículo?");
-                    confirmacion.setContentText("Esta acción marcará el artículo como dado de baja.");
+                    // Crear un diálogo personalizado
+                    Dialog<ButtonType> dialog = new Dialog<>();
+                    dialog.setTitle("Confirmar baja");
+                    dialog.setHeaderText("¿Seguro que querés dar de baja este artículo?");
+                    dialog.setContentText("Esta acción marcará el artículo como dado de baja.");
 
-                    Optional<ButtonType> resultado = confirmacion.showAndWait();
-                    if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+                    ButtonType aceptarButtonType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+                    ButtonType cancelarButtonType = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+                    dialog.getDialogPane().getButtonTypes().addAll(aceptarButtonType, cancelarButtonType);
+
+                    dialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+
+                    // Mostrar el diálogo y esperar la respuesta del usuario
+                    Optional<ButtonType> result = dialog.showAndWait();
+
+                    if (result.isPresent() && result.get() == aceptarButtonType) {
                         ArticuloDTO dto = new ArticuloDTO();
                         dto.setCodArticulo(articuloDTO.getCodArticulo());
-                        dto.setFechaHoraBajaArticulo(LocalDateTime.now()); //Se setea la fecha actual para la baja
+                        dto.setFechaHoraBajaArticulo(LocalDateTime.now()); // Se setea la fecha actual para la baja
 
 
                         try {
-                            //Llamamos al controller pasandole el dto que contiene la fecha de baja
+                            // Llamar al controlador pasando el DTO que contiene la fecha de baja
                             controller.darDeBajaArticulo(dto);
                             cargarArticulos();
 
@@ -574,6 +606,8 @@ public class MaestroArticuloPanel extends BorderPane {
                     });
                     //UNA VEZ QUE ME TRAJE LOS PROVEEDORES, SELECCIONAR UNO
                     Button btnSeleccionar = new Button("Asignar como predeterminado");
+                    btnSeleccionar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
+                    btnSeleccionar.getStyleClass().add("button-acciones");
                     btnSeleccionar.setOnAction(ev -> {
                         ArticuloProveedorDTO Proveedorseleccionado = listView.getSelectionModel().getSelectedItem();
                         if (Proveedorseleccionado != null) {
