@@ -26,6 +26,7 @@ public interface ModuloProveedores  {
     Proveedor GuardarYRetornar(ProveedorDTO proveedorDto);
     Proveedor BuscarProveedorPorId(Long idProveedor);
     List<Articulo> ListarArticulos(Long codProveedor);
+    List<Articulo> ListarArticulos();
     ArticuloProveedorGuardadoDTO BuscarArticuloProveedor(Long articuloId, Long proveedorId);
     void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedor);
     void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto, Boolean tipoModelo);

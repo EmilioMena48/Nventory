@@ -485,7 +485,7 @@ public class ProveedorPanel extends BorderPane {
 
         tabla.setFixedCellSize(25);
         try {
-            List<Articulo> articulos = articuloController.listarArticulos();
+            List<Articulo> articulos = controller.ListarArticulos();
             if (proveedorDTO.getCodProveedor() != 0L) {
                 articulos.removeIf(articulo ->
                         ((controller.BuscarArticuloProveedor(articulo.getCodArticulo(), proveedorDTO.getCodProveedor()) != null) &&

@@ -114,19 +114,19 @@ public class DatosInicialesController {
     private List<ProveedorDTO> cargarProveedoresIniciales() {
         return List.of(
                 ProveedorDTO.builder()//0
-                        .nombreProveedor("MSI Argentina")
+                        .nombreProveedor("MSI")
                         .descripcionProveedor("Distribuidor oficial MSI: placas madre, gráficas y notebooks gamer.")
                         .build(),
                 ProveedorDTO.builder()//1
-                        .nombreProveedor("Gigabyte Argentina")
+                        .nombreProveedor("Gigabyte")
                         .descripcionProveedor("Proveedor de motherboards ys tarjetas de video Gigabyte/AORUS.")
                         .build(),
                 ProveedorDTO.builder()//2
-                        .nombreProveedor("Corsair Import")
+                        .nombreProveedor("Corsair")
                         .descripcionProveedor("Memorias RAM, SSD, fuentes y periféricos Corsair. Importación directa.")
                         .build(),
                 ProveedorDTO.builder()//3
-                        .nombreProveedor("Kingston Tech")
+                        .nombreProveedor("Kingston")
                         .descripcionProveedor("Especialistas en memorias RAM y almacenamiento SSD Kingston.")
                         .build()
         );
@@ -135,7 +135,7 @@ public class DatosInicialesController {
     private List<ArticuloDTO> cargarArticulosIniciales() {
         return List.of(
                 ArticuloDTO.builder()//0
-                        .nombreArticulo("AMD Ryzen 9 9950X")
+                        .nombreArticulo("CPU AMD")
                         .descripcionArticulo("Procesador 16 C/32 T Zen 5 con boost hasta 5.7 GHz.")
                         .costoAlmacenamiento(new BigDecimal("400.00"))
                         .nivelServicioArticulo(new BigDecimal("0.90"))
@@ -146,7 +146,7 @@ public class DatosInicialesController {
                         .build(),
 
                 ArticuloDTO.builder()//1
-                        .nombreArticulo("Intel Core i7-14700K")
+                        .nombreArticulo("CPU Intel")
                         .descripcionArticulo("Procesador 20 C/28 T Raptor Lake con boost hasta 5.6 GHz.")
                         .costoAlmacenamiento(new BigDecimal("300.00"))
                         .nivelServicioArticulo(new BigDecimal("0.92"))
@@ -157,8 +157,8 @@ public class DatosInicialesController {
                         .build(),
 
                 ArticuloDTO.builder()//2
-                        .nombreArticulo("AMD Ryzen 7 9800X3D")
-                        .descripcionArticulo("CPU 8 C/16 T Zen 5 con cache 3D.")
+                        .nombreArticulo("Disco Duro NVMe")
+                        .descripcionArticulo("SSD NVMe M.2 1TB, velocidad de lectura 3500 MB/s.")
                         .costoAlmacenamiento(new BigDecimal("250.00"))
                         .nivelServicioArticulo(new BigDecimal("0.95"))
                         .precioArticulo(new BigDecimal("479.00"))
@@ -168,7 +168,7 @@ public class DatosInicialesController {
                         .build(),
 
                 ArticuloDTO.builder()//3
-                        .nombreArticulo("MSI RTX 5070 Ti 16GB")
+                        .nombreArticulo("GPU RTX")
                         .descripcionArticulo("Tarjeta gráfica Ada Lovelace, 16 GB, DLSS 3.")
                         .costoAlmacenamiento(new BigDecimal("600.00"))
                         .nivelServicioArticulo(new BigDecimal("0.88"))
@@ -179,7 +179,7 @@ public class DatosInicialesController {
                         .build(),
 
                 ArticuloDTO.builder()//4
-                        .nombreArticulo("Gigabyte Radeon RX 9060 XT")
+                        .nombreArticulo("GPU RADEON")
                         .descripcionArticulo("GPU 1080/1440p, 8 GB VRAM, triple fan.")
                         .costoAlmacenamiento(new BigDecimal("300.00"))
                         .nivelServicioArticulo(new BigDecimal("0.90"))
@@ -190,7 +190,7 @@ public class DatosInicialesController {
                         .build(),
 
                 ArticuloDTO.builder()//5
-                        .nombreArticulo("Corsair Vengeance DDR5 32GB (2x16GB) 6000MHz")
+                        .nombreArticulo("Memoria RAM")
                         .descripcionArticulo("Kit de memoria RAM DDR5 de alta velocidad.")
                         .costoAlmacenamiento(new BigDecimal("120.00"))
                         .nivelServicioArticulo(new BigDecimal("0.94"))

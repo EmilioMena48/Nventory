@@ -17,6 +17,7 @@ import com.nventory.service.ArticuloService;
 import com.nventory.service.ConfiguracionInventarioService;
 import com.nventory.service.ProveedorService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProveedorController implements ModuloProveedores {
@@ -51,7 +52,7 @@ public class ProveedorController implements ModuloProveedores {
         List<Articulo> articulos = ListarArticulos(codProveedor);
         for (Articulo articulo : articulos) {
             if (articulo.getArticuloProveedor() != null && articulo.getArticuloProveedor().getProveedor().getCodProveedor().equals(codProveedor)) {
-                throw new IllegalStateException("Es proveedor predeterminado de "+ articulo.getNombreArticulo());
+                throw new IllegalStateException("Es proveedor predeterminado de " + articulo.getNombreArticulo());
             }
         }
         if (proveedorService.estaEnOrdenesDeCompra(codProveedor)) {
@@ -76,6 +77,15 @@ public class ProveedorController implements ModuloProveedores {
     }
 
     @Override
+    public List<Articulo> ListarArticulos() {
+        List<Articulo> articulos = new ArrayList<>();
+        for (Articulo articulo : articuloService.listarArticulos()) {
+            if (articulo.getFechaHoraBajaArticulo() == null) articulos.add(articulo);
+        }
+        return articulos;
+    }
+
+    @Override
     public void AsociarArticuloProveedor(Articulo articulo, Proveedor proveedor, ArticuloProveedorGuardadoDTO articuloProveedorDto) {
         articuloProveedorService.guardarArticuloProveedor(articulo, proveedor, articuloProveedorDto);
     }
@@ -96,7 +106,7 @@ public class ProveedorController implements ModuloProveedores {
         Proveedor proveedor = proveedorService.buscarProveedorPorId(proveedorId);
         if (articuloProveedor != null) {
             if (articulo.getArticuloProveedor() != null && articulo.getArticuloProveedor().getCodArticuloProveedor().equals(articuloProveedor.getCodArticuloProveedor())) {
-                throw new IllegalStateException("El proveedor "+proveedor.getNombreProveedor()+" es predeterminado del articulo: " + articulo.getNombreArticulo());
+                throw new IllegalStateException("El proveedor " + proveedor.getNombreProveedor() + " es predeterminado del articulo: " + articulo.getNombreArticulo());
             }
             articuloProveedorService.eliminarArticuloProveedor(articuloProveedor.getCodArticuloProveedor());
         } else {
