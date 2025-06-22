@@ -4,7 +4,9 @@ import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
 import com.nventory.DTO.ProveedorDTO;
 import com.nventory.model.Articulo;
+import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
+import com.nventory.repository.ArticuloProveedorRepository;
 import com.nventory.repository.ArticuloRepository;
 import com.nventory.repository.ProveedorRepository;
 
@@ -19,12 +21,14 @@ public class DatosInicialesController {
     ArticuloRepository articuloRepository;
     ProveedorController proveedorController;
     MaestroArticuloController maestroArticuloController;
+    ArticuloProveedorRepository articuloProveedorRepository;
 
     public DatosInicialesController() {
         proveedorRepository = new ProveedorRepository();
         articuloRepository = new ArticuloRepository();
         proveedorController = new ProveedorController();
         maestroArticuloController = new MaestroArticuloController();
+        articuloProveedorRepository = new ArticuloProveedorRepository();
     }
 
     public void ejecutar() {
@@ -67,6 +71,15 @@ public class DatosInicialesController {
         proveedorController.AsociarArticuloProveedor(articulos.get(0),proveedores.get(1), articuloProveedorGuardadoDTOs.get(9),true);
         proveedorController.AsociarArticuloProveedor(articulos.get(1),proveedores.get(2), articuloProveedorGuardadoDTOs.get(10),true);
         proveedorController.AsociarArticuloProveedor(articulos.get(1),proveedores.get(0), articuloProveedorGuardadoDTOs.get(11),false);
+
+        //* Cargar proveedores predeterminados en artículos
+        List<ArticuloProveedor> articuloProveedores = articuloProveedorRepository.buscarTodos();
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(11).getCodArticuloProveedor());
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(9).getCodArticuloProveedor());
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(5).getCodArticuloProveedor());
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(1).getCodArticuloProveedor());
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(4).getCodArticuloProveedor());
+        maestroArticuloController.asignarProveedorPredeterminado(articuloProveedores.get(6).getCodArticuloProveedor());
 
         //* Cargar ordenes de compra con artículos y proveedores
 
