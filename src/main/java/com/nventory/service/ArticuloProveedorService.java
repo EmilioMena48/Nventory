@@ -37,18 +37,21 @@ public class ArticuloProveedorService {
         ArticuloProveedor articuloProveedor = new ArticuloProveedor();
         articuloProveedor.setArticulo(articulo);
         articuloProveedor.setProveedor(proveedor);
-
         ArticuloProveedor articuloProveedorAux = buscarArticuloProveedorPorId(articulo.getCodArticulo(), proveedor.getCodProveedor());
         if (articuloProveedorAux != null) {
             articuloProveedor.setCodArticuloProveedor(articuloProveedorAux.getCodArticuloProveedor());
             articuloProveedor.setConfiguracionInventario(articuloProveedorAux.getConfiguracionInventario());
             try {
-                if (!Objects.equals(articuloProveedorAux.getCostoPedido(), articuloProveedor.getCostoPedido()) || articuloProveedorAux.getDemoraEntregaDias() != articuloProveedor.getDemoraEntregaDias()
-                        || !Objects.equals(articuloProveedorAux.getPrecioUnitario(), articuloProveedor.getPrecioUnitario()) || articuloProveedorAux.getFechaProxRevisionAP() != articuloProveedor.getFechaProxRevisionAP()) {
-                    recalcularFormulas(articuloProveedor);
+                if (!Objects.equals(articuloProveedorAux.getCostoPedido(), articuloProveedorDto.getCostoPedido()) || articuloProveedorAux.getDemoraEntregaDias() != articuloProveedorDto.getDemoraEntregaDias()
+                        || !Objects.equals(articuloProveedorAux.getPrecioUnitario(), articuloProveedorDto.getPrecioUnitario()) || articuloProveedorAux.getFechaProxRevisionAP() != articuloProveedorDto.getFechaProxRevisionAP()) {
+                    articuloProveedorAux.setCostoPedido(articuloProveedorDto.getCostoPedido());
+                    articuloProveedorAux.setDemoraEntregaDias(articuloProveedorDto.getDemoraEntregaDias());
+                    articuloProveedorAux.setPrecioUnitario(articuloProveedorDto.getPrecioUnitario());
+                    articuloProveedorAux.setFechaProxRevisionAP(articuloProveedorDto.getFechaProxRevisionAP());
+                    recalcularFormulas(articuloProveedorAux);
                 }
             } catch (Exception e) {
-                System.out.println("[!] Error al guardar articulo proveedor");
+                System.out.println("[!] Error al guardar articulo proveedor: " + e.getMessage());
             }
             articuloProveedor.getConfiguracionInventario().setFechaHoraBajaConfiguracionInventario(null);
             configuracionInventarioService.guardarConfigInventario(articuloProveedor);
