@@ -413,32 +413,50 @@ public class ArticuloService {
         return stockActual;
     }
 
-    //-----------------Metodo del service para ajuste de inventario-----------------------------
-    public void realizarAjusteInventario (StockMovimientoDTO stockMovimientoDTO) {
+    //-----------------Metodo del service para ajuste inventario-----------------------------
+    public void realizarAjusteInventario(StockMovimientoDTO stockMovimientoDTO) {
         Articulo articulo = buscarArticuloPorId(stockMovimientoDTO.getArticuloID());
-
         int nuevaCantidad = stockMovimientoDTO.getCantidad();
 
-            if (nuevaCantidad < 0) {
-                throw new IllegalArgumentException("La cantidad debe ser mayor a cero");
+            ArticuloProveedor articuloProveedor = articulo.getArticuloProveedor();
+
+            if (articuloProveedor == null) {
+                if (nuevaCantidad < 0) {
+                    throw new IllegalArgumentException("La cantidad debe ser mayor o igual a cero");
+                }
+            } else {
+                ConfiguracionInventario config = articuloProveedor.getConfiguracionInventario();
+                Long tipoModelo = config.getTipoModeloInventario().getCodTipoModeloI();
+                Integer inventarioMaximo = config.getInventarioMaximo();
+
+                if (tipoModelo == 1L) {
+                    if (nuevaCantidad < 0) {
+                        throw new IllegalArgumentException("La cantidad debe ser mayor o igual a cero");
+                    }
+                } else if (tipoModelo == 2L) {
+                    if (nuevaCantidad < 0 || (inventarioMaximo != null && nuevaCantidad > inventarioMaximo)) {
+                        throw new IllegalArgumentException("La cantidad debe estar entre 0 y el inventario máximo (" + inventarioMaximo + ")");
+                    }
+                }
             }
 
-        articulo.setStockActual(nuevaCantidad);
-        articuloRepository.guardar(articulo);
+            articulo.setStockActual(nuevaCantidad);
+            articuloRepository.guardar(articulo);
 
-        tipoStockMovimientoRepository = new TipoStockMovimientoRepository();
-        stockMovimientoRepository = new StockMovimientoRepository();
+            tipoStockMovimientoRepository = new TipoStockMovimientoRepository();
+            stockMovimientoRepository = new StockMovimientoRepository();
 
-        TipoStockMovimiento tipoStockMovimiento = tipoStockMovimientoRepository.buscarPorId(3L);
+            TipoStockMovimiento tipoStockMovimiento = tipoStockMovimientoRepository.buscarPorId(3L);
 
-        StockMovimiento stockMovimiento = new StockMovimiento();
-        stockMovimiento.setCantidad(nuevaCantidad);
-        stockMovimiento.setComentario(stockMovimientoDTO.getComentario());
-        stockMovimiento.setFechaHoraMovimiento(stockMovimientoDTO.getFechaHoraMovimiento());
-        stockMovimiento.setTipoStockMovimiento(tipoStockMovimiento);
+            StockMovimiento stockMovimiento = new StockMovimiento();
+            stockMovimiento.setCantidad(nuevaCantidad);
+            stockMovimiento.setComentario(stockMovimientoDTO.getComentario());
+            stockMovimiento.setFechaHoraMovimiento(stockMovimientoDTO.getFechaHoraMovimiento());
+            stockMovimiento.setTipoStockMovimiento(tipoStockMovimiento);
 
-        stockMovimientoRepository.guardar(stockMovimiento);
+            stockMovimientoRepository.guardar(stockMovimiento);
     }
+
 
     public int obtenerInventarioMax (Long idArticulo) {
         Articulo articulo = buscarArticuloPorId(idArticulo);

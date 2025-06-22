@@ -240,7 +240,7 @@ public class MaestroArticuloPanel extends BorderPane {
 
         btnAjusteInventario = new Button("Ajuste inventario");
         btnAjusteInventario.setOnAction(e -> {
-
+            
             Stage popup = new Stage();
             popup.setTitle("Artículos en Stock de Seguridad");
             popup.initModality(Modality.APPLICATION_MODAL);
@@ -251,6 +251,14 @@ public class MaestroArticuloPanel extends BorderPane {
             for (ArticuloDTO articulo : articulos) {
                 comboArticulos.getItems().add(articulo.getNombreArticulo());
             }
+
+            Label lblAdvertencia = new Label("Este artículo no tiene límite de stock porque no tiene una configuración establecida.");
+            lblAdvertencia.setStyle("-fx-text-fill: red;");
+            lblAdvertencia.setWrapText(true);
+            lblAdvertencia.setVisible(false);
+
+            lblAdvertencia.setMaxWidth(Double.MAX_VALUE);
+            lblAdvertencia.setPrefWidth(500);
 
             TextField campoCantidadActual = new TextField();
             campoCantidadActual.setPromptText("Cantidad actual");
@@ -268,15 +276,18 @@ public class MaestroArticuloPanel extends BorderPane {
                 if (seleccionado != null) {
                     Integer cantidadActual = controller.obtenerStockActual(seleccionado);
                     campoCantidadActual.setText(cantidadActual != null ? cantidadActual.toString() : "0");
+
+                    Articulo art = controller.buscarArticuloPorNombre(seleccionado);
+                    if (art.getArticuloProveedor() == null) {
+                        lblAdvertencia.setVisible(true);
+                    } else {
+                        lblAdvertencia.setVisible(false);
+                    }
                 }
             });
 
             Button btnAceptar = new Button("Aceptar");
             Button btnCancelar = new Button("Cancelar");
-            btnAceptar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
-            btnCancelar.getStylesheets().add(getClass().getResource("/styles/estilosMaestroArticulos.css").toExternalForm());
-            btnAceptar.getStyleClass().add("button-acciones");
-            btnCancelar.getStyleClass().add("button-cancelar");
 
             btnAceptar.setOnAction(ev -> {
                 String articulo = comboArticulos.getValue();
@@ -309,7 +320,7 @@ public class MaestroArticuloPanel extends BorderPane {
                     Alert alerta = new Alert(Alert.AlertType.WARNING);
                     alerta.setTitle("Advertencia");
                     alerta.setHeaderText(null);
-                    alerta.setContentText("La nueva cantidad debe ser un número válido.");
+                    alerta.setContentText(ex.getMessage());
                     alerta.showAndWait();
 
                 } catch (IllegalArgumentException ex) {
@@ -324,6 +335,7 @@ public class MaestroArticuloPanel extends BorderPane {
             btnCancelar.setOnAction(ev -> popup.close());
 
             VBox layout = new VBox(10,
+                    new HBox(100, lblAdvertencia),
                     new Label("Artículo:"),
                     comboArticulos,
                     new Label("Cantidad actual:"),
@@ -337,7 +349,8 @@ public class MaestroArticuloPanel extends BorderPane {
             layout.setPadding(new Insets(20));
             layout.setAlignment(Pos.CENTER);
 
-            Scene scene = new Scene(layout, 500, 350);
+
+            Scene scene = new Scene(layout, 500, 320);
             popup.setScene(scene);
             popup.showAndWait();
         });
