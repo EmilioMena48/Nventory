@@ -114,6 +114,12 @@ public class ArticuloProveedorService {
             tipoModelo.setNombreModeloInventario("Modelo Lote Fijo");
             articuloProveedor.setFechaProxRevisionAP(null);
         }
+        articuloProveedor.getConfiguracionInventario().setInventarioMaximo(0);
+        articuloProveedor.getConfiguracionInventario().setLoteOptimo(0);
+        articuloProveedor.getConfiguracionInventario().setPuntoPedido(0);
+        articuloProveedor.getConfiguracionInventario().setStockSeguridad(0);
+        configuracionInventarioService.guardarConfigInventario(articuloProveedor);
+        recalcularFormulas(articuloProveedor);
         tipoModeloInventarioRepository.guardar(tipoModelo);
         repository.guardar(articuloProveedor);
     }
