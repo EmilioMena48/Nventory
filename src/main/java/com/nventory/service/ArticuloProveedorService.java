@@ -7,6 +7,7 @@ import com.nventory.repository.ConfiguracionInventarioRepository;
 import com.nventory.repository.TipoModeloInventarioRepository;
 import lombok.NonNull;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -14,11 +15,13 @@ import java.util.stream.Collectors;
 
 public class ArticuloProveedorService {
     ArticuloProveedorRepository repository;
+    TipoModeloInventarioRepository tipoModeloInventarioRepository;
     ConfiguracionInventarioService configuracionInventarioService;
 
     public ArticuloProveedorService(ArticuloProveedorRepository repository, ConfiguracionInventarioService configuracionInventarioService) {
         this.repository = repository;
         this.configuracionInventarioService = configuracionInventarioService;
+        this.tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
     }
 
     public void eliminarArticuloProveedor(Long id) {
@@ -99,5 +102,19 @@ public class ArticuloProveedorService {
 
     public ConfiguracionInventario inicializarModelo(boolean isLoteFijo) {
         return configuracionInventarioService.crearConfiguracionInventario(isLoteFijo);
+    }
+
+    public void cambiarModeloInventario(ArticuloProveedor articuloProveedor) {
+        ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
+        TipoModeloInventario tipoModelo = configuracionInventario.getTipoModeloInventario();
+        if (tipoModelo.getNombreModeloInventario().equals("Modelo Lote Fijo")) {
+            tipoModelo.setNombreModeloInventario("Modelo Periodo Fijo");
+            articuloProveedor.setFechaProxRevisionAP(LocalDate.now());
+        } else {
+            tipoModelo.setNombreModeloInventario("Modelo Lote Fijo");
+            articuloProveedor.setFechaProxRevisionAP(null);
+        }
+        tipoModeloInventarioRepository.guardar(tipoModelo);
+        repository.guardar(articuloProveedor);
     }
 }

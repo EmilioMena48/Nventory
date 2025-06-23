@@ -687,6 +687,7 @@ public class ProveedorPanel extends BorderPane {
             areaContenido.getChildren().add(formulario);
         } else {
             VBox vbox = infoConfigInventario(articuloSeleccionado.getCodArticulo(), proveedorDTO.getCodProveedor());
+            vbox.getChildren().add(cambiarModelo(articuloSeleccionado, proveedorDTO.getCodProveedor()));
             HBox mainContainer = new HBox();
             mainContainer.getChildren().add(formulario);
             mainContainer.getChildren().add(vbox);
@@ -719,6 +720,35 @@ public class ProveedorPanel extends BorderPane {
         formulario.add(new Label("Stock de Seguridad: "), 0, 4);
         Label lblStockSeguridad = new Label(String.valueOf(configInvDTO.getStockSeguridad()));
         formulario.add(lblStockSeguridad, 1, 4);
+        animarFormulario(formulario);
+        vbox.getChildren().add(formulario);
+        return vbox;
+    }
+
+    private VBox cambiarModelo(Articulo articulo, Long codProveedor) {
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(0, 10, 0, 0));
+        ConfigInvDTO configInvDTO = controller.BuscarConfigInventario(articulo.getCodArticulo(), codProveedor);
+        GridPane formulario = new GridPane();
+        formulario.getStyleClass().add("formulario");
+        formulario.setVgap(10);
+        formulario.setHgap(10);
+        String modelo = Objects.equals(configInvDTO.getNombreModeloInventario(), "Modelo Lote Fijo") ? "Modelo Periodo Fijo" : "Modelo Lote Fijo";
+        Label lblModelo = new Label("Cambiar a " + modelo);
+        formulario.add(lblModelo, 0, 0);
+        Button btnCambiarModelo = new Button("Cambiar Modelo");
+        btnCambiarModelo.getStyleClass().add("button-seleccionar");
+        btnCambiarModelo.setOnAction(e -> {
+            try {
+                controller.cambiarModeloInventario(articulo.getCodArticulo(), codProveedor);
+                mostrarAlerta("Modelo cambiado correctamente, vuelva a configurar", 4, () -> {
+                    mostrarFormularioAsociarArticulo(articulo);
+                });
+            } catch (Exception ex) {
+                mostrarAlerta("Error al cambiar modelo: " + ex.getMessage(), 2, null);
+            }
+        });
+        formulario.add(btnCambiarModelo, 0, 1);
         animarFormulario(formulario);
         vbox.getChildren().add(formulario);
         return vbox;

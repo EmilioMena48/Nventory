@@ -160,4 +160,13 @@ public class ProveedorController implements ModuloProveedores {
     public Proveedor BuscarProveedorPorNombre(String nombreProveedor) {
         return proveedorService.buscarProveedorPorNombre(nombreProveedor);
     }
+
+    public void cambiarModeloInventario(Long codArticulo, Long codProveedor) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(codArticulo, codProveedor);
+        if (articuloProveedor != null) {
+            articuloProveedorService.cambiarModeloInventario(articuloProveedor);
+        } else {
+            throw new IllegalStateException("No existe la asociacion entre el articulo y el proveedor.");
+        }
+    }
 }
