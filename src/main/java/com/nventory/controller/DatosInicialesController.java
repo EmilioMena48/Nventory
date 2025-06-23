@@ -3,21 +3,13 @@ package com.nventory.controller;
 import com.nventory.DTO.ArticuloDTO;
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
 import com.nventory.DTO.ProveedorDTO;
-import com.nventory.model.Articulo;
-import com.nventory.model.ArticuloProveedor;
-import com.nventory.model.Proveedor;
-import com.nventory.repository.ArticuloProveedorRepository;
-import com.nventory.repository.ArticuloRepository;
-import com.nventory.repository.OrdenDeCompraRepository;
-import com.nventory.repository.ProveedorRepository;
+import com.nventory.model.*;
+import com.nventory.repository.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class DatosInicialesController {
     ProveedorRepository proveedorRepository;
@@ -88,16 +80,30 @@ public class DatosInicialesController {
 
         //* Cargar ordenes de compra con artículos y proveedores
         Set<Long> codigosProveedoresConOrden = new HashSet<>();
-        codigosProveedoresConOrden.add(proveedores.get(0).getCodProveedor());
-        codigosProveedoresConOrden.add(proveedores.get(1).getCodProveedor());
-        codigosProveedoresConOrden.add(proveedores.get(2).getCodProveedor());
+        codigosProveedoresConOrden.add(proveedores.get(0).getCodProveedor()); // MSI
+        codigosProveedoresConOrden.add(proveedores.get(1).getCodProveedor()); // Gigabyte
+        codigosProveedoresConOrden.add(proveedores.get(2).getCodProveedor()); // Corsair
 
-        for (Long codProveedor: codigosProveedoresConOrden) {
+        // Mapeo simple de proveedor → idArticuloProveedor (según asociaciones anteriores)
+        Map<Long, Long> proveedorToArticuloProveedorId = new HashMap<>();
+        proveedorToArticuloProveedorId.put(proveedores.get(0).getCodProveedor(), 1L);  // MSI
+        proveedorToArticuloProveedorId.put(proveedores.get(1).getCodProveedor(), 3L);  // Gigabyte
+        proveedorToArticuloProveedorId.put(proveedores.get(2).getCodProveedor(), 4L);  // Corsair
+
+        for (Long codProveedor : codigosProveedoresConOrden) {
             Long codOrden = ordenDeCompraController.crearOrdenDeCompra(codProveedor);
             System.out.println("Orden de compra creada para proveedor " + codProveedor + " con código de orden: " + codOrden);
+
+            // Agregar artículo asociado a esa orden
+            Long idArticuloProveedor = proveedorToArticuloProveedorId.get(codProveedor);
+            int cantidad = 10;
+            ordenDeCompraController.agregarArticuloAOrden(codOrden, idArticuloProveedor, cantidad);
+            System.out.println("Artículo-Proveedor con ID " + idArticuloProveedor + " agregado a la orden con cantidad " + cantidad);
         }
 
+
         //* cargar venta con artículos y proveedores
+        realizarVentaDeEjemplo();
 
         System.out.println("[+] Datos iniciales cargados correctamente.");
     }
@@ -142,7 +148,7 @@ public class DatosInicialesController {
                         .precioArticulo(new BigDecimal("699.00"))
                         .demandaArt(30)
                         .diasEntreRevisiones(60)
-                        .stockActual(10)
+                        .stockActual(20)
                         .build(),
 
                 ArticuloDTO.builder()//1
@@ -153,7 +159,7 @@ public class DatosInicialesController {
                         .precioArticulo(new BigDecimal("450.00"))
                         .demandaArt(45)
                         .diasEntreRevisiones(60)
-                        .stockActual(15)
+                        .stockActual(25)
                         .build(),
 
                 ArticuloDTO.builder()//2
@@ -175,7 +181,7 @@ public class DatosInicialesController {
                         .precioArticulo(new BigDecimal("799.00"))
                         .demandaArt(25)
                         .diasEntreRevisiones(60)
-                        .stockActual(5)
+                        .stockActual(25)
                         .build(),
 
                 ArticuloDTO.builder()//4
@@ -186,7 +192,7 @@ public class DatosInicialesController {
                         .precioArticulo(new BigDecimal("389.00"))
                         .demandaArt(40)
                         .diasEntreRevisiones(45)
-                        .stockActual(10)
+                        .stockActual(20)
                         .build(),
 
                 ArticuloDTO.builder()//5
@@ -289,5 +295,138 @@ public class DatosInicialesController {
                         .build()
         );
     }
+
+    public void realizarVentaDeEjemplo() {
+        // Repositorios
+        ArticuloRepository articuloRepository = new ArticuloRepository();
+        TipoStockMovimientoRepository tipoStockMovimientoRepository = new TipoStockMovimientoRepository();
+        VentaRepository ventaRepository = new VentaRepository();
+        StockMovimientoRepository stockMovimientoRepository = new StockMovimientoRepository();
+
+        // Tipo de movimiento (salida)
+        TipoStockMovimiento salida = tipoStockMovimientoRepository.buscarPorId(2L);
+
+        // === VENTA 1 ===
+        Articulo articulo1 = articuloRepository.buscarPorId(1L); // AMD Ryzen 9 9950X
+        Articulo articulo2 = articuloRepository.buscarPorId(2L); // Intel Core i7-14700K
+
+        Venta venta1 = Venta.builder()
+                .fechaHoraVenta(LocalDateTime.now())
+                .montoTotalVenta(BigDecimal.ZERO)
+                .ventaArticulo(new ArrayList<>())
+                .build();
+
+        VentaArticulo va1_1 = VentaArticulo.builder()
+                .articulo(articulo1)
+                .cantidadVendida(2)
+                .precioVenta(articulo1.getPrecioArticulo())
+                .subTotalVenta(articulo1.getPrecioArticulo().multiply(BigDecimal.valueOf(2)))
+                .build();
+
+        VentaArticulo va1_2 = VentaArticulo.builder()
+                .articulo(articulo2)
+                .cantidadVendida(1)
+                .precioVenta(articulo2.getPrecioArticulo())
+                .subTotalVenta(articulo2.getPrecioArticulo())
+                .build();
+
+        venta1.addVentaArticulo(va1_1);
+        venta1.addVentaArticulo(va1_2);
+        venta1.setMontoTotalVenta(va1_1.getSubTotalVenta().add(va1_2.getSubTotalVenta()));
+        ventaRepository.guardar(venta1);
+
+        Venta venta1Persistida = ventaRepository.buscarVentaConArticulos(1L);
+        crearMovimientosYActualizarStock(venta1Persistida, stockMovimientoRepository, articuloRepository, salida);
+
+        // === VENTA 2 ===
+        Articulo articulo3 = articuloRepository.buscarPorId(3L); // AMD Ryzen 7 9800X3D
+        Articulo articulo4 = articuloRepository.buscarPorId(4L); // MSI RTX 5070 Ti 16GB
+
+        Venta venta2 = Venta.builder()
+                .fechaHoraVenta(LocalDateTime.now())
+                .montoTotalVenta(BigDecimal.ZERO)
+                .ventaArticulo(new ArrayList<>())
+                .build();
+
+        VentaArticulo va2_1 = VentaArticulo.builder()
+                .articulo(articulo3)
+                .cantidadVendida(3)
+                .precioVenta(articulo3.getPrecioArticulo())
+                .subTotalVenta(articulo3.getPrecioArticulo().multiply(BigDecimal.valueOf(3)))
+                .build();
+
+        VentaArticulo va2_2 = VentaArticulo.builder()
+                .articulo(articulo4)
+                .cantidadVendida(2)
+                .precioVenta(articulo4.getPrecioArticulo())
+                .subTotalVenta(articulo4.getPrecioArticulo().multiply(BigDecimal.valueOf(2)))
+                .build();
+
+        venta2.addVentaArticulo(va2_1);
+        venta2.addVentaArticulo(va2_2);
+        venta2.setMontoTotalVenta(va2_1.getSubTotalVenta().add(va2_2.getSubTotalVenta()));
+        ventaRepository.guardar(venta2);
+
+        Venta venta2Persistida = ventaRepository.buscarVentaConArticulos(2L);
+        crearMovimientosYActualizarStock(venta2Persistida, stockMovimientoRepository, articuloRepository, salida);
+
+        // === VENTA 3 ===
+        Articulo articulo5 = articuloRepository.buscarPorId(5L); // Gigabyte Radeon RX 9060 XT
+        Articulo articulo6 = articuloRepository.buscarPorId(6L); // Corsair Vengeance DDR5
+
+        Venta venta3 = Venta.builder()
+                .fechaHoraVenta(LocalDateTime.now())
+                .montoTotalVenta(BigDecimal.ZERO)
+                .ventaArticulo(new ArrayList<>())
+                .build();
+
+        VentaArticulo va3_1 = VentaArticulo.builder()
+                .articulo(articulo5)
+                .cantidadVendida(1)
+                .precioVenta(articulo5.getPrecioArticulo())
+                .subTotalVenta(articulo5.getPrecioArticulo())
+                .build();
+
+        VentaArticulo va3_2 = VentaArticulo.builder()
+                .articulo(articulo6)
+                .cantidadVendida(4)
+                .precioVenta(articulo6.getPrecioArticulo())
+                .subTotalVenta(articulo6.getPrecioArticulo().multiply(BigDecimal.valueOf(4)))
+                .build();
+
+        venta3.addVentaArticulo(va3_1);
+        venta3.addVentaArticulo(va3_2);
+        venta3.setMontoTotalVenta(va3_1.getSubTotalVenta().add(va3_2.getSubTotalVenta()));
+        ventaRepository.guardar(venta3);
+
+        Venta venta3Persistida = ventaRepository.buscarVentaConArticulos(3L);
+        crearMovimientosYActualizarStock(venta3Persistida, stockMovimientoRepository, articuloRepository, salida);
+
+        System.out.println("[+] Ventas creadas exitosamente.");
+    }
+
+    private void crearMovimientosYActualizarStock(Venta venta, StockMovimientoRepository stockRepo, ArticuloRepository articuloRepo, TipoStockMovimiento salida) {
+        for (VentaArticulo va : venta.getVentaArticulo()) {
+            StockMovimiento sm = StockMovimiento.builder()
+                    .articulo(va.getArticulo())
+                    .cantidad(va.getCantidadVendida())
+                    .comentario("Venta de artículo")
+                    .fechaHoraMovimiento(LocalDateTime.now())
+                    .tipoStockMovimiento(salida)
+                    .ordenDeCompraArticulo(null)
+                    .ventaArticulo(va)
+                    .build();
+
+            stockRepo.guardar(sm);
+
+            Articulo articulo = va.getArticulo();
+            articulo.setStockActual(articulo.getStockActual() - va.getCantidadVendida());
+            articuloRepo.guardar(articulo);
+        }
+    }
+
+
+
+
 
 }

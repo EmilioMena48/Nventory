@@ -471,6 +471,16 @@ public class ArticuloService {
         if (articuloDTO.getFechaHoraBajaArticulo() != null) {
             throw new IllegalStateException("Este Artículo no debe tener fecha de baja para la acción que intenta realizar.");
         }
+
+        BigDecimal costoAlmacenamiento = articuloDTO.getCostoAlmacenamiento();
+        if (costoAlmacenamiento == null || costoAlmacenamiento.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El costo de almacenamiento debe ser mayor a 0.");
+        }
+
+        int demandaArt = articuloDTO.getDemandaArt();
+        if (demandaArt < 0) {
+            throw new IllegalArgumentException("La demanda debe ser mayor a 0.");
+        }
     }
 
 }

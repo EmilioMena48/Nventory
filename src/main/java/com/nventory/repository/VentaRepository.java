@@ -34,5 +34,18 @@ public class VentaRepository extends BaseRepositoryImpl <Venta, Long> {
         return ventaPersistida;
     }
 
+    public Venta buscarVentaConArticulos(Long id) {
+        EntityManager em = getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT v FROM Venta v LEFT JOIN FETCH v.ventaArticulo WHERE v.numeroVenta = :id", Venta.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+
 
 }
