@@ -15,7 +15,7 @@ public class VentaArticuloRepositori extends HardDeletableRepositoryImpl<VentaAr
     public List<VentaArticulo> buscarVentasArticuloPorId(Long id) {
         EntityManager em = getEntityManager();
         try {
-            String sql = "SELECT * FROM ventaArticulo WHERE numeroVenta = :idVenta";
+            String sql = "SELECT * FROM VentaArticulo WHERE numeroVenta = :idVenta";
             TypedQuery<VentaArticulo> query = (TypedQuery<VentaArticulo>) em.createNativeQuery(sql, VentaArticulo.class);
             query.setParameter("idVenta", id);
             return query.getResultList();
