@@ -570,14 +570,14 @@ public class ProveedorPanel extends BorderPane {
             asignarModelo = true;
         }
 
-        Button btnCancelar = new Button("Cancelar");
+        Button btnCancelar = new Button(asignarModelo ? "Cancelar" : "Salir");
         btnCancelar.getStyleClass().add("button-cancelar");
         btnCancelar.setOnAction(e -> {
             proveedorDTO = null;
             cargarTablaProveedoresActivos();
         });
 
-        Button btnGuardar = new Button("Guardar Asociación");
+        Button btnGuardar = new Button(asignarModelo ? "Guardar y Asociar Artículo" : "Actualizar Asociación");
         btnGuardar.getStyleClass().add("button-guardar");
 
         toggleSwitch.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
@@ -637,11 +637,16 @@ public class ProveedorPanel extends BorderPane {
                         controller.AsociarArticuloProveedor(articuloSeleccionado, proveedor, ap);
                     }
                 }
-                mostrarAlerta("Artículo asociado correctamente", 4, () -> {
+                mostrarAlerta(asignarModelo ? "Artículo asociado correctamente" : "Artículo actualizado correctamente", 4, () -> {
                     txtDemoraEntrega.clear();
                     txtPrecioUnitario.clear();
                     txtCostoPedido.clear();
-                    cargarTablaProveedoresActivos();
+                    if (asignarModelo) {
+                        proveedorDTO = null;
+                        cargarTablaProveedoresActivos();
+                    } else {
+                        mostrarFormularioAsociarArticulo(articuloSeleccionado);
+                    }
                 });
             } catch (Exception ex) {
                 mostrarAlerta("Error guardando asociación: " + ex.getMessage(), 2, null);

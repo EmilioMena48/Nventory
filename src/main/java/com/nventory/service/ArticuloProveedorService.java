@@ -3,7 +3,6 @@ package com.nventory.service;
 import com.nventory.DTO.ArticuloProveedorGuardadoDTO;
 import com.nventory.model.*;
 import com.nventory.repository.ArticuloProveedorRepository;
-import com.nventory.repository.ConfiguracionInventarioRepository;
 import com.nventory.repository.TipoModeloInventarioRepository;
 import lombok.NonNull;
 
@@ -18,10 +17,12 @@ public class ArticuloProveedorService {
     TipoModeloInventarioRepository tipoModeloInventarioRepository;
     ConfiguracionInventarioService configuracionInventarioService;
 
-    public ArticuloProveedorService(ArticuloProveedorRepository repository, ConfiguracionInventarioService configuracionInventarioService) {
+    public ArticuloProveedorService(ArticuloProveedorRepository repository,
+                                    ConfiguracionInventarioService configuracionInventarioService,
+                                    TipoModeloInventarioRepository tipoModeloInventarioRepository) {
         this.repository = repository;
+        this.tipoModeloInventarioRepository = tipoModeloInventarioRepository;
         this.configuracionInventarioService = configuracionInventarioService;
-        this.tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
     }
 
     public void eliminarArticuloProveedor(Long id) {
@@ -108,10 +109,10 @@ public class ArticuloProveedorService {
         ConfiguracionInventario configuracionInventario = articuloProveedor.getConfiguracionInventario();
         TipoModeloInventario tipoModelo = configuracionInventario.getTipoModeloInventario();
         if (tipoModelo.getNombreModeloInventario().equals("Modelo Lote Fijo")) {
-            tipoModelo.setNombreModeloInventario("Modelo Periodo Fijo");
+            configuracionInventario.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorNombre("Modelo Periodo Fijo"));
             articuloProveedor.setFechaProxRevisionAP(LocalDate.now());
         } else {
-            tipoModelo.setNombreModeloInventario("Modelo Lote Fijo");
+            configuracionInventario.setTipoModeloInventario(tipoModeloInventarioRepository.buscarPorNombre("Modelo Lote Fijo"));
             articuloProveedor.setFechaProxRevisionAP(null);
         }
         articuloProveedor.getConfiguracionInventario().setInventarioMaximo(0);
@@ -120,7 +121,6 @@ public class ArticuloProveedorService {
         articuloProveedor.getConfiguracionInventario().setStockSeguridad(0);
         configuracionInventarioService.guardarConfigInventario(articuloProveedor);
         recalcularFormulas(articuloProveedor);
-        tipoModeloInventarioRepository.guardar(tipoModelo);
         repository.guardar(articuloProveedor);
     }
 }
