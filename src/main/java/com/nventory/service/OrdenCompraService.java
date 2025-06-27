@@ -118,7 +118,7 @@ public class OrdenCompraService {
                 if (tipoModelo != null && "Modelo Lote Fijo".equals(tipoModelo.getNombreModeloInventario())) {
                     int stockPendiente = ordenDeCompraArticuloRepo.buscarStockPendiente(art.getCodArticulo());
                     int stockPendienteReal = stockPendiente - stockReposicion;
-                    int stockTotalEsperado = stockActual + stockPendienteReal;
+                    int stockTotalEsperado = stockActual + stockReposicion + stockPendienteReal;
 
                     if (stockTotalEsperado <= configInv.getPuntoPedido()) {
                         avisosArticulos.add("Artículo: " + art.getNombreArticulo()
