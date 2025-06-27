@@ -8,10 +8,7 @@ import com.nventory.interfaces.ModuloProveedores;
 import com.nventory.model.Articulo;
 import com.nventory.model.ArticuloProveedor;
 import com.nventory.model.Proveedor;
-import com.nventory.repository.ArticuloProveedorRepository;
-import com.nventory.repository.ArticuloRepository;
-import com.nventory.repository.OrdenDeCompraRepository;
-import com.nventory.repository.ProveedorRepository;
+import com.nventory.repository.*;
 import com.nventory.service.ArticuloProveedorService;
 import com.nventory.service.ArticuloService;
 import com.nventory.service.ConfiguracionInventarioService;
@@ -30,14 +27,16 @@ public class ProveedorController implements ModuloProveedores {
     ArticuloProveedorRepository articuloProveedorRepository;
     ProveedorRepository proveedorRepository;
     OrdenDeCompraRepository ordenDeCompraRepository;
+    TipoModeloInventarioRepository tipoModeloInventarioRepository;
 
     public ProveedorController() {
         this.configuracionInventarioService = new ConfiguracionInventarioService();
         this.articuloProveedorRepository = new ArticuloProveedorRepository();
         this.articuloRepository = new ArticuloRepository();
         this.proveedorRepository = new ProveedorRepository();
+        this.tipoModeloInventarioRepository = new TipoModeloInventarioRepository();
         this.ordenDeCompraRepository = new OrdenDeCompraRepository();
-        this.articuloProveedorService = new ArticuloProveedorService(articuloProveedorRepository, configuracionInventarioService);
+        this.articuloProveedorService = new ArticuloProveedorService(articuloProveedorRepository, configuracionInventarioService, tipoModeloInventarioRepository);
         this.articuloService = new ArticuloService(articuloRepository);
         this.proveedorService = new ProveedorService(proveedorRepository, ordenDeCompraRepository, articuloProveedorService, configuracionInventarioService);
     }
@@ -159,5 +158,14 @@ public class ProveedorController implements ModuloProveedores {
     @Override
     public Proveedor BuscarProveedorPorNombre(String nombreProveedor) {
         return proveedorService.buscarProveedorPorNombre(nombreProveedor);
+    }
+
+    public void cambiarModeloInventario(Long codArticulo, Long codProveedor) {
+        ArticuloProveedor articuloProveedor = articuloProveedorService.buscarArticuloProveedorPorId(codArticulo, codProveedor);
+        if (articuloProveedor != null) {
+            articuloProveedorService.cambiarModeloInventario(articuloProveedor);
+        } else {
+            throw new IllegalStateException("No existe la asociacion entre el articulo y el proveedor.");
+        }
     }
 }
